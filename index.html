@@ -482,6 +482,10 @@ div.f { display: grid; gap: 5px; min-width: 0; }
 /* поделиться: превью картинки */
 .sh-prev { display: grid; place-items: center; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--r); padding: 10px; }
 .sh-prev img { width: 100%; max-width: 340px; height: auto; border-radius: 10px; box-shadow: 0 6px 24px rgba(0, 0, 0, .18); transition: opacity .15s; }
+/* «Путь» без плана: пошаговая подсказка, откуда взять файл */
+.path-empty { text-align: left; justify-items: start; }
+.path-empty p { margin: 0; }
+.path-empty ol { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
 
 .gate { position: fixed; inset: 0; z-index: 80; background: var(--bg); display: flex; align-items: center; justify-content: center; padding: 24px max(16px, env(safe-area-inset-right, 0px)) 24px max(16px, env(safe-area-inset-left, 0px)); }
 .gate-card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 32px 28px; max-width: 420px; width: 100%; text-align: center; display: grid; gap: 14px; justify-items: center; box-shadow: var(--shadow); }
@@ -1880,8 +1884,8 @@ function renderSync() {
 function vWelcome() {
   return `<div class="card empty">
     <h3>Здесь будет вся картина ваших денег</h3>
-    <p>Цель — взнос за квартиру, счета и вклады, каждый месяц: сколько заработали, потратили и отложили. Начните с настроек по умолчанию: цель 18 млн ₸, взнос 20%. Потом добавьте первый счёт.</p>
-    <div class="row"><button class="btn pri" data-act="init-defaults">Начать</button><button class="btn" data-act="import">Загрузить резервную копию</button></div>
+    <p>Цель — взнос за квартиру, счета и вклады, каждый месяц: сколько заработали, потратили и отложили. Есть файл <b>moi-finansy-vse.json</b> — загрузите его: подтянутся план по месяцам, стартовый счёт и Excel-модель. Или начните с чистого листа.</p>
+    <div class="row"><button class="btn pri" data-act="import">Загрузить мои данные</button><button class="btn" data-act="init-defaults">Начать с нуля</button></div>
   </div>`;
 }
 function vBroken() {
@@ -2064,9 +2068,15 @@ function stepAction(pm, date, cls) {
 }
 function vPath() {
   const s = settings();
-  if (!(s.plan.months || []).length) return `<div class="card empty"><h3>Путь строится из плана Excel-модели</h3>
-    <p class="muted">Здесь будут шаги по месяцам: что сделать, сколько и куда отложить. Загрузите стартовые данные с планом: «Настройки» → «Загрузить резервную копию» → файл moi-finansy-start.json.</p>
-    ${Store.canWrite ? '<button class="btn" data-act="import">Загрузить резервную копию</button>' : ''}</div>`;
+  // план — личные цифры, поэтому в открытый сайт он не встроен: его один раз загружают из файла, дальше он в базе
+  if (!(s.plan.months || []).length) return `<div class="card empty path-empty"><h3>План по месяцам ещё не загружен</h3>
+    <p>«Путь» строится из вашего плана из Excel-модели. План лежит в файле <b>moi-finansy-vse.json</b> — на компьютере, в папке «Мои финансы - файлы» на рабочем столе. В сам сайт он не встроен специально: там ваши личные цифры.</p>
+    <ol class="small ink2">
+      <li>Нажмите кнопку ниже и выберите этот файл. С телефона: перешлите файл себе в Telegram или WhatsApp и выберите его оттуда.</li>
+      <li>${Store.data.accounts.length ? 'Счета вы уже завели — нажмите <b>«Взять только план»</b>: счета и записи не изменятся.' : 'Нажмите <b>«Добавить новое к моим данным»</b> — подтянутся план, стартовый счёт на 800 000 ₸ и Excel-модель.'}</li>
+    </ol>
+    <p class="small muted">Загрузить нужно один раз: всё сохранится в вашей базе и появится на всех устройствах.</p>
+    ${Store.canWrite ? '<button class="btn pri" data-act="import">Загрузить мои данные</button>' : ''}</div>`;
   const P0 = pathData(), cur = P0.steps[P0.cur], ch = P0.chapters[P0.curCh];
   const G = FC.goalInfo(s), prog = G.target > 0 ? Math.max(0, Math.min(1, comp.tot.avail / G.target)) : 0;
   const open = new Set(UI.pathOpen || []), chOpen = new Set(UI.pathCh || []);
@@ -3770,31 +3780,56 @@ async function offerFile(filename, text, title) {
     toast(ok ? 'Скопировано' : 'Текст выделен — нажмите Ctrl+C (на телефоне: удерживайте и выберите «Копировать»)', null, null, 6000);
   };
 }
-function importFlow() {
+// Excel-модель внутри файла: отдельный excel-model.json или поле excel в общем файле «всё сразу»
+const isXlModel = o => !!o && o.app === 'moi-finansy-excel' && Array.isArray(o.sheets) && typeof o.xlsx === 'string';
+function importFlow(opts = {}) {
   if (!Store.canWrite) return;
-  openModal('Загрузить из файла', `<p class="small">Выберите файл резервной копии (.json), скачанный из «Моих финансов». Сначала покажу, что в нём, — ничего не изменится без подтверждения.</p>
-    <input type="file" id="imp-file" accept=".json,application/json" class="in"><div id="imp-out"></div>`, `<span class="spacer"></span><button class="btn" data-act="modal-close">Отмена</button>`);
-  $('#imp-file').onchange = e => {
-    const file = e.target.files[0]; if (!file) return;
-    if (file.size > 20 * 1024 * 1024) { $('#imp-out').innerHTML = '<p class="err">Файл больше 20 МБ — это не похоже на резервную копию.</p>'; return; }
-    const rd = new FileReader();
-    rd.onload = () => {
-      let obj;
-      try { obj = JSON.parse(String(rd.result)); } catch (err) { $('#imp-out').innerHTML = '<p class="err">Это не JSON: файл повреждён или другого формата.</p>'; return; }
+  openModal('Загрузить из файла', `<p class="small">Выберите файл <b>moi-finansy-vse.json</b> — в нём всё сразу: план, стартовый счёт и Excel-модель. Подойдут и резервная копия, и excel-model.json, можно несколько файлов. Сначала покажу, что в них, — ничего не изменится без подтверждения.</p>
+    <input type="file" id="imp-file" accept=".json,application/json" class="in" multiple><div id="imp-out"></div>`, `<span class="spacer"></span><button class="btn" data-act="modal-close">Отмена</button>`);
+  $('#imp-file').onchange = async e => {
+    const files = [...e.target.files]; if (!files.length) return;
+    if (files.some(f => f.size > 40 * 1024 * 1024)) { $('#imp-out').innerHTML = '<p class="err">Файл больше 40 МБ — это не похоже на файл «Моих финансов».</p>'; return; }
+    $('#imp-out').innerHTML = '<p class="hint">Читаю…</p>';
+    let obj = null, xl = null;
+    for (const f of files) {
+      let o;
+      try { o = JSON.parse(await f.text()); } catch (err) { $('#imp-out').innerHTML = `<p class="err">«${esc(f.name)}» — не JSON: файл повреждён или другого формата.</p>`; return; }
+      if (isXlModel(o)) xl = o;
+      else { if (isXlModel(o && o.excel)) { xl = o.excel; delete o.excel; } obj = o; }
+    }
+    // только Excel-модель — сразу её загрузка, как кнопкой «Excel»
+    if (!obj) { xlSaveFlow(xl, files[0]); return; }
+    {
       const v = FC.validateImport(obj);
       if (!v.ok) { $('#imp-out').innerHTML = `<div class="note warn small"><b>Файл не подходит:</b><ul style="margin:6px 0 0 18px;padding:0">${v.errors.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>`; return; }
       const mp = FC.mergePlan(Store.data, obj);
+      const fileMonths = FC.normalizeSettings(obj.settings || {}).plan.months, planN = obj.settings ? fileMonths.length : 0;
+      const planOnly = !!(planN && Store.data.settings);   // настройки уже есть — можно взять из файла один план
+      const dupRisk = Store.data.accounts.length > 0 && mp.addAcc.length > 0;
       $('#imp-out').innerHTML = `<div class="note small">В файле: счетов ${v.counts.accounts}, операций ${v.counts.ops}, месяцев ${v.counts.months}${v.counts.story ? `, отметок пути за ${v.counts.story} мес.` : ''}${v.counts.settings ? ', настройки' : ''}.${v.warnings.map(w => ' ' + esc(w)).join('')}</div>
         <div class="kv"><div><span>Новых счетов</span><b>${mp.addAcc.length}</b></div><div><span>Новых операций</span><b>${mp.addOps.length}</b></div><div><span>Уже есть (пропущу)</span><b>${mp.dup.length}</b></div><div><span>Новых месяцев</span><b>${mp.addMonths.length}</b></div>${mp.addStory.length ? `<div><span>Новых месяцев с отметками пути</span><b>${mp.addStory.length}</b></div>` : ''}</div>
-        ${obj.settings && Store.data.settings ? `<label class="check"><input type="checkbox" id="imp-cfg" ${!(settings().plan.months || []).length && ((obj.settings.plan || {}).months || []).length ? 'checked' : ''}> Взять из файла настройки и план по месяцам (заменят текущие настройки)</label>` : ''}
-        <div class="row"><button class="btn pri" id="imp-merge">Добавить новое к моим данным</button><button class="btn danger" id="imp-replace">Заменить все мои данные…</button></div><div id="imp-confirm"></div><div id="imp-prog" class="hint"></div>`;
+        ${xl ? `<div class="note small">И Excel-модель: ${xl.sheets.length} ${plural(xl.sheets.length, 'лист', 'листа', 'листов')} — загружу её тоже, она откроется кнопкой «Excel».</div>` : ''}
+        ${planOnly ? `<div class="note small">Есть план по месяцам: ${planN} мес., с ${esc(FC.mkLong(fileMonths[0].m))} по ${esc(FC.mkLong(fileMonths[planN - 1].m))}. «Взять только план» подставит его в «Путь» и прогноз — счета, записи и месяцы не изменятся.</div>` : ''}
+        ${dupRisk ? `<div class="note warn small">У вас уже есть свои счета. «Добавить новое» добавит из файла ещё ${mp.addAcc.map(a => `«${esc(a.name)}»`).join(', ')} — если эти деньги вы уже завели сами, они посчитаются дважды. Тогда берите только план.</div>` : ''}
+        ${obj.settings && Store.data.settings ? `<label class="check"><input type="checkbox" id="imp-cfg" ${!(settings().plan.months || []).length && planN ? 'checked' : ''}> Взять из файла настройки и план по месяцам (заменят текущие настройки)</label>` : ''}
+        <div class="row">${planOnly ? `<button class="btn ${dupRisk ? 'pri' : ''}" id="imp-plan">Взять только план</button>` : ''}<button class="btn ${planOnly && dupRisk ? '' : 'pri'}" id="imp-merge">Добавить новое к моим данным</button><button class="btn danger" id="imp-replace">Заменить все мои данные…</button></div><div id="imp-confirm"></div><div id="imp-prog" class="hint"></div>`;
+      // только план: подставляем план модели в настройки, ничего больше не трогая
+      if (planOnly) $('#imp-plan').onclick = async () => {
+        const fp = FC.normalizeSettings(obj.settings).plan, btn = $('#imp-plan');
+        btn.disabled = true; modalBusy = true;
+        const ok = await saveSettings(s => { s.plan = fp; s.planMode = 'model'; });
+        modalBusy = false;
+        if (!ok) { btn.disabled = false; return; }
+        if (xl) await runBulk([], `План загружен: ${fp.months.length} мес.`, say => xlSave(xl, say));
+        else { closeModal(true); toast(`План загружен: ${fp.months.length} мес. — откройте «Путь»`); }
+      };
       $('#imp-merge').onclick = async () => {
         const items = [...mp.addAcc.map(a => ({ kind: 'acc', id: a.id, body: a })), ...mp.addOps.map(o => ({ kind: 'ops', id: o.id, body: o })), ...mp.addMonths.map(mk => ({ kind: 'mon', id: mk, body: obj.months[mk] })),
           ...mp.addStory.map(mk => ({ kind: 'sty', id: mk, body: obj.story[mk] }))];
         if (obj.settings && Store.data.settings && $('#imp-cfg') && $('#imp-cfg').checked) items.unshift({ kind: 'cfg', id: 'main', body: FC.normalizeSettings(obj.settings) });
         if (!Store.data.settings && obj.settings && (await Store.ensureSettings(FC.normalizeSettings(obj.settings))) === 'exists') toast('Настройки уже были — оставил их');
-        if (!items.length) { closeModal(); toast('Нового в файле нет'); return; }
-        await runBulk(items, 'Добавлено');
+        if (!items.length && !xl) { closeModal(); toast('Нового в файле нет'); return; }
+        await runBulk(items, items.length ? 'Добавлено' : 'Excel-модель загружена', xl ? say => xlSave(xl, say) : null);
       };
       $('#imp-replace').onclick = () => {
         $('#imp-confirm').innerHTML = `<div class="note warn small"><p style="margin:0 0 6px">Все текущие счета (${Store.data.accounts.length}), операции (${Store.data.ops.length}) и месяцы заменятся данными из файла. Сначала запишутся новые данные, потом удалятся старые — при сбое ничего не потеряется. Напишите <b>заменить</b>, чтобы подтвердить.</p><div class="row"><input class="in" id="imp-word" style="width:160px" autocomplete="off"><button class="btn danger solid" id="imp-go" disabled>Заменить</button></div></div>`;
@@ -3811,25 +3846,35 @@ function importFlow() {
             // в старой копии нет отметок пути — свои отметки не трогаем: они привязаны к тексту плана, а не к копии
             ...(obj.story && typeof obj.story === 'object' ? Object.keys(Store.data.story).filter(mk => !newSty.has(mk)).map(mk => ({ kind: 'sty', id: mk, body: null })) : []),
           ];
-          await runBulk(items, 'Данные заменены');
+          await runBulk(items, 'Данные заменены', xl ? say => xlSave(xl, say) : null);
         };
       };
-    };
-    rd.onerror = () => { $('#imp-out').innerHTML = '<p class="err">Файл не прочитался.</p>'; };
-    rd.readAsText(file);
+    }
   };
 }
-async function runBulk(items, okMsg) {
+async function runBulk(items, okMsg, after) {
   const prog = $('#imp-prog');
   let finished = false;
   modalBusy = true;   // окно не закрывается, пока идёт запись
   $$('#modal-root button, #modal-root input').forEach(b => { b.disabled = true; });
-  try { await Store.bulk(items, (d, n) => { if (prog && !finished) prog.textContent = `Обработано ${d} из ${n}`; }); finished = true; modalBusy = false; closeModal(); toast(okMsg); }
+  try { if (items.length) await Store.bulk(items, (d, n) => { if (prog && !finished) prog.textContent = `Обработано ${d} из ${n}`; }); finished = true; }
   catch (e) {
     finished = true; modalBusy = false;
     if (prog) prog.textContent = `${failText(e)} Обработано ${num(e && e.done)} из ${items.length} — проверьте данные и повторите.`;
     $$('#modal-root button, #modal-root input').forEach(b => { b.disabled = false; });
+    return;
   }
+  // следом — Excel-модель из того же файла; если она не сохранилась, данные уже на месте: говорим, как догрузить модель
+  if (after) {
+    try { await after(text => { if (prog) prog.textContent = text; }); }
+    catch (e) {
+      modalBusy = false;
+      if (prog) { prog.className = 'err'; prog.textContent = `Данные загружены, а Excel-модель — нет: ${failText(e)} Загрузите её ещё раз кнопкой «Excel».`; }
+      $$('#modal-root [data-act="modal-close"]').forEach(b => { b.disabled = false; });
+      return;
+    }
+  }
+  modalBusy = false; closeModal(true); toast(okMsg);
 }
 function clearFlow() {
   if (!Store.canWrite) return;
@@ -3918,7 +3963,7 @@ function xlRenderShell() {
   if (!m) {
     $('#xl-sheets').innerHTML = ''; $('#xl-bar').hidden = true;
     $('#xl-grid').innerHTML = `<div class="empty"><h3>Excel-модель ещё не загружена</h3>
-      <p>Здесь будет вся модель: план по месяцам, сценарии, реинвест, идеи — с формулами. Загрузите файл <b>excel-model.json</b> — он хранится в вашей базе и виден только вам.</p>
+      <p>Здесь будет вся модель: план по месяцам, сценарии, реинвест, идеи — с формулами. Загрузите файл <b>moi-finansy-vse.json</b> (или excel-model.json) — модель хранится в вашей базе и видна только вам.</p>
       ${Store.canWrite ? '<button class="btn pri" data-xl="upload">Загрузить модель…</button>' : ''}</div>`;
     return;
   }
@@ -4024,34 +4069,44 @@ function xlPick() {
   inp.click();
 }
 async function xlUpload(file) {
+  let obj = null;
+  try { obj = JSON.parse(await file.text()); } catch (e) { obj = null; }
+  if (obj && !isXlModel(obj) && isXlModel(obj.excel)) obj = obj.excel;   // общий файл «всё сразу» тоже подходит
+  xlSaveFlow(obj, file);
+}
+// Окно с ходом сохранения модели; obj — уже прочитанный файл (или null, если файл не тот)
+async function xlSaveFlow(obj, file) {
   openModal('Загрузка Excel-модели', `<p class="small">Файл: <b>${esc(file.name)}</b>, ${(file.size / 1048576).toFixed(1).replace('.', ',')} МБ.</p><div id="imp-prog" class="hint">Читаю файл…</div>`, `<span class="spacer"></span><button class="btn" data-act="modal-close">Закрыть</button>`, { noFocus: true });
   const prog = $('#imp-prog');
-  let obj;
-  try { obj = JSON.parse(await file.text()); } catch (e) { prog.textContent = 'Это не JSON — выберите файл excel-model.json.'; prog.className = 'err'; return; }
-  if (!obj || obj.app !== 'moi-finansy-excel' || !Array.isArray(obj.sheets) || typeof obj.xlsx !== 'string') { prog.textContent = 'Это не Excel-модель «Моих финансов». Нужен файл excel-model.json.'; prog.className = 'err'; return; }
-  const meta = { file: obj.file, size: obj.size, created: obj.created, uploaded: new Date().toISOString(), styles: obj.styles,
-    sheets: obj.sheets.map(s => ({ name: s.name, tab: s.tab, rows: s.rows, ncols: s.cols.length })) };
-  const total = obj.sheets.length + 2;
-  let step = 0;
+  if (!isXlModel(obj)) { prog.textContent = 'Это не Excel-модель «Моих финансов». Нужен файл moi-finansy-vse.json или excel-model.json.'; prog.className = 'err'; return; }
   modalBusy = true;
   $$('#modal-root button').forEach(b => { b.disabled = true; });
   try {
-    prog.textContent = 'Сохраняю файл .xlsx…';
+    await xlSave(obj, text => { prog.textContent = text; });
+    modalBusy = false; closeModal(true);
+    toast(Store.mode === 'db' ? 'Модель загружена в базу' : 'Модель загружена (только до перезагрузки — облако не подключено)');
+  } catch (e) {
+    modalBusy = false; $$('#modal-root button').forEach(b => { b.disabled = false; });
+    prog.textContent = `${failText(e)} ${e && e.xlStep != null ? `Сохранено ${e.xlStep} из ${obj.sheets.length + 2} частей — ` : ''}попробуйте ещё раз.`; prog.className = 'err';
+  }
+}
+// Запись модели в базу: файл .xlsx, листы по одному, «оглавление» последним — недописанная версия не читается
+async function xlSave(obj, say) {
+  const meta = { file: obj.file, size: obj.size, created: obj.created, uploaded: new Date().toISOString(), styles: obj.styles,
+    sheets: obj.sheets.map(s => ({ name: s.name, tab: s.tab, rows: s.rows, ncols: s.cols.length })) };
+  let step = 0;
+  try {
+    say('Сохраняю Excel-модель: файл .xlsx…');
     await Store.putBlob('xl-file', obj.xlsx); step++;
     for (let i = 0; i < obj.sheets.length; i++) {
-      prog.textContent = `Сохраняю листы: ${i + 1} из ${obj.sheets.length} — ${obj.sheets[i].name}`;
+      say(`Сохраняю Excel-модель: лист ${i + 1} из ${obj.sheets.length} — ${obj.sheets[i].name}`);
       await Store.putBlob('xl-s' + i, JSON.stringify(obj.sheets[i])); step++;
     }
     await Store.putBlob('xl-meta', JSON.stringify(meta)); step++;
-    XL.meta = null; XL.sheets.clear(); XL.cur = 0;
-    modalBusy = false; closeModal();
-    toast(Store.mode === 'db' ? 'Модель загружена в базу' : 'Модель загружена (только до перезагрузки — облако не подключено)');
-    if ($('#xl') && !$('#xl').hidden) xlLoadMeta(true);
-    if (UI.tab === 'nastroiki') schedule();
-  } catch (e) {
-    modalBusy = false; $$('#modal-root button').forEach(b => { b.disabled = false; });
-    prog.textContent = `${failText(e)} Сохранено ${step} из ${total} частей — попробуйте ещё раз.`; prog.className = 'err';
-  }
+  } catch (e) { if (e && typeof e === 'object') e.xlStep = step; throw e; }
+  XL.meta = null; XL.sheets.clear(); XL.cur = 0; xlInfoCache.at = 0;
+  if ($('#xl') && !$('#xl').hidden) xlLoadMeta(true);
+  if (UI.tab === 'nastroiki') schedule();
 }
 let xlInfoCache = { at: 0, v: undefined };
 function xlSettingsCard() {
@@ -4147,7 +4202,7 @@ document.addEventListener('click', e => {
     case 'export-json': offerFile(`moi-finansy-${today()}.json`, JSON.stringify(exportData(), null, 1), 'Резервная копия'); break;
     case 'export-ops': offerFile(`operacii-${today()}.csv`, FC.opsCSV(st()), 'Операции в CSV'); break;
     case 'export-months': offerFile(`mesyacy-${today()}.csv`, FC.monthsCSV(st(), comp, monthsList()), 'Месяцы в CSV'); break;
-    case 'import': importFlow(); break;
+    case 'import': importFlow({ only: d.only }); break;
     case 'clear': clearFlow(); break;
     case 'broken-dl': offerFile(`moi-finansy-povrezhdeno-${today()}.txt`, Store.broken || '', 'Сохранённый текст'); break;
     case 'broken-reset': Store.clearBroken(); render(); break;
