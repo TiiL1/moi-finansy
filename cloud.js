@@ -36,6 +36,9 @@ const mapErr = e => ({ code: ({ 'permission-denied': 'invalid_argument', 'unauth
   'unavailable': 'unavailable', 'deadline-exceeded': 'unavailable', 'invalid-argument': 'invalid_argument', 'cancelled': 'unavailable' })[e && e.code] || 'unavailable',
   message: String((e && e.message) || e) });
 
+// Снимок «из копии на устройстве» и ответ сервера с теми же данными различаются только метаданными.
+// Без этого флага ответ сервера для пустой коллекции не приходит, и страница ждала бы его вечно.
+const META = { includeMetadataChanges: true };
 function makeStore(fs, db, uid) {
   const base = `users/${uid}`;
   const wrap = s => ({ id: s.id, exists: s.exists(), data: () => s.data(), metadata: s.metadata });
@@ -53,14 +56,14 @@ function makeStore(fs, db, uid) {
       get: async () => { try { return wrap(await fs.getDoc(ref)); } catch (e) { throw mapErr(e); } },
       set: data => settle(fs.setDoc(ref, data)),
       delete: () => settle(fs.deleteDoc(ref)),
-      onSnapshot: (next, err) => fs.onSnapshot(ref, s => next(wrap(s)), e => err && err(mapErr(e))),
+      onSnapshot: (next, err) => fs.onSnapshot(ref, META, s => next(wrap(s)), e => err && err(mapErr(e))),
     };
   };
   const collection = p => {
     const ref = fs.collection(db, `${base}/${p}`);
     return {
       path: p, doc: id => doc(`${p}/${id}`),
-      onSnapshot: (next, err) => fs.onSnapshot(ref, q => next({ docs: q.docs.map(wrap), size: q.size, empty: q.empty, metadata: q.metadata }), e => err && err(mapErr(e))),
+      onSnapshot: (next, err) => fs.onSnapshot(ref, META, q => next({ docs: q.docs.map(wrap), size: q.size, empty: q.empty, metadata: q.metadata }), e => err && err(mapErr(e))),
     };
   };
   return { doc, collection };

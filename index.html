@@ -67,6 +67,8 @@ h1, h2, h3 { text-wrap: balance; margin: 0; }
 .tabs::-webkit-scrollbar { display: none; }
 .tab { appearance: none; border: 0; background: none; padding: 9px 12px 11px; color: var(--ink-2); font-weight: 500; font-size: 14.5px; cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; }
 .tab:hover { color: var(--ink); }
+.tab .t-short { display: none; }
+@media (max-width: 560px) { .tab .t-long { display: none; } .tab .t-short { display: inline; } }
 .tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
 
 main { padding-block: 20px 110px; display: grid; gap: 16px; }
@@ -351,12 +353,12 @@ table.t td.wrap { white-space: normal; min-width: 220px; }
 .toast button { padding: 8px 4px; min-height: 32px; }
 .m-only { display: none; }
 .op .x { gap: 8px; }
-/* телефон: вкладки внизу, как в приложении — все шесть видны сразу */
+/* телефон: вкладки внизу, как в приложении — все семь видны сразу */
 @media (max-width: 560px) {
   .tabs-nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 25; background: var(--surface); border-top: 1px solid var(--line); padding: 0 env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px); }
   .tabs-nav::after { display: none; }
-  .tabs { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); overflow: visible; gap: 0; }
-  .tab { padding: 12px 1px 13px; font-size: 11.5px; text-align: center; border-bottom: 0; border-top: 2px solid transparent; overflow: hidden; text-overflow: ellipsis; }
+  .tabs { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); overflow: visible; gap: 0; }
+  .tab { padding: 12px 0 13px; font-size: 10.5px; letter-spacing: -.02em; text-align: center; border-bottom: 0; border-top: 2px solid transparent; overflow: hidden; text-overflow: ellipsis; }
   .tab[aria-selected="true"] { border-top-color: var(--accent); color: var(--accent); }
   main { padding-bottom: calc(150px + env(safe-area-inset-bottom, 0px)); }
   .fab { bottom: calc(64px + env(safe-area-inset-bottom, 0px)); }
@@ -383,6 +385,103 @@ table.t td.wrap { white-space: normal; min-width: 220px; }
 .explain { font-size: 13px; color: var(--ink-2); display: grid; gap: 8px; }
 .explain p { margin: 0; }
 @media (prefers-reduced-motion: no-preference) { .bar > b { transition: width .4s ease; } }
+
+/* быстрая запись: частые типы крупно, повтор последней записи, подсказки суммы, даты «сегодня / вчера» */
+.row.sp { justify-content: space-between; }
+.link { appearance: none; background: none; border: 0; padding: 0; color: var(--accent); cursor: pointer; font: inherit; text-decoration: underline; text-underline-offset: 2px; }
+.types.quick { margin-bottom: 4px; }
+.type.big { border-color: var(--accent); background: var(--wash); padding: 14px; }
+.type.big b { font-size: 15.5px; }
+.chip.repeat { width: 100%; justify-content: flex-start; margin-bottom: 10px; padding: 9px 14px; font-size: 13.5px; text-align: left; white-space: normal; border-style: dashed; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.chips .chip { font-size: 13px; }
+div.f { display: grid; gap: 5px; min-width: 0; }
+.f-h { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; font-size: 13px; color: var(--ink-2); }
+.dchips { display: inline-flex; gap: 10px; font-size: 13px; }
+.eq { font-size: 13px; color: var(--accent); font-weight: 500; font-variant-numeric: tabular-nums; }
+.eq:empty { display: none; }
+.discard { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; flex-basis: 100%; }
+.discard span { flex: 1 1 160px; }
+
+/* «Этот месяц» на обзоре */
+.now .card-h h2 .small { font-weight: 400; }
+.now-save { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 16px; margin-bottom: 12px; }
+.now-save > div:not(.bar) { display: grid; gap: 2px; }
+.now-save b { font-size: 20px; font-variant-numeric: tabular-nums; }
+.now-save .bar, .now-save > .small { grid-column: 1 / -1; }
+.bar.sm { height: 8px; margin: 4px 0 2px; }
+.now-next { margin: 0 0 12px; }
+.now-next p { margin: 4px 0 0; font-size: 15px; line-height: 1.5; }
+.fc-tog { justify-self: start; }
+@media (max-width: 560px) {
+  .fc-x:not(.on) { display: none !important; }
+  .now .row .btn { flex: 1 1 auto; }
+}
+
+/* путь: главы, шаги, пункты с отметками */
+.path-hero { display: grid; gap: 10px; background: linear-gradient(160deg, var(--wash), var(--surface) 70%); }
+.path-title { font-family: var(--f-display); font-weight: 600; font-size: 22px; letter-spacing: -.01em; line-height: 1.25; }
+.path-intro { margin: 0; }
+.chap-line { display: flex; gap: 4px; margin-top: 4px; }
+.chap-line span { flex: 1; height: 8px; border-radius: 4px; background: var(--line); }
+.chap-line span.done { background: var(--good); }
+.chap-line span.cur { background: var(--accent); }
+.path-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 4px; }
+.path-stats > div { display: grid; gap: 2px; padding: 10px 12px; border-radius: var(--r-sm); background: var(--surface); border: 1px solid var(--line); min-width: 0; }
+.path-stats b { font-family: var(--f-display); font-weight: 600; font-size: 20px; }
+.path-stats span { font-size: 12.5px; color: var(--ink-2); }
+.step.main { display: grid; gap: 14px; border-color: var(--accent); }
+.step.main .step-h { padding: 0; }
+.step-h { appearance: none; width: 100%; border: 0; background: none; text-align: left; display: flex; gap: 12px; align-items: center; padding: 12px 14px; cursor: pointer; color: var(--ink); font: inherit; }
+.step-n, .chap-n { flex: none; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-weight: 600; font-size: 14px; background: var(--surface-2); border: 1px solid var(--line-2); color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.step.cur .step-n, .chap.cur .chap-n { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.step.complete .step-n, .chap.done .chap-n { background: var(--good-bg); border-color: transparent; color: var(--good); }
+.chap.past .chap-n { border-color: var(--warn); color: var(--warn); }
+.fab { transition: opacity .2s, transform .2s; }
+.fab.away { opacity: 0; transform: translateY(14px); pointer-events: none; }
+.step.past:not(.complete) .step-n { border-color: var(--warn); color: var(--warn); }
+.step-t, .chap-t { display: grid; gap: 1px; flex: 1; min-width: 0; }
+.step-t b, .chap-t b { font-weight: 600; font-size: 15px; }
+.chev { flex: none; width: 26px; text-align: center; color: var(--muted); font-size: 18px; }
+.chaps { display: grid; gap: 10px; }
+.chap { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
+.chap.cur { border-color: var(--accent); }
+.chap-h { appearance: none; width: 100%; border: 0; background: none; text-align: left; display: flex; gap: 12px; align-items: center; padding: 14px 16px; cursor: pointer; color: var(--ink); font: inherit; }
+.chap.next .chap-t b { color: var(--ink-2); }
+.chap-intro { margin: -4px 16px 10px 62px; }
+.steps { display: grid; border-top: 1px solid var(--line); }
+.steps .step { border-bottom: 1px solid var(--line); }
+.steps .step:last-child { border-bottom: 0; }
+.steps .step > :not(.step-h) { margin: 0 14px 14px 60px; }
+.steps .step.cur { background: var(--wash); }
+.items { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.item { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; align-items: start; padding: 8px 0; border-bottom: 1px dashed var(--line); }
+.item:last-child { border-bottom: 0; }
+.tick { appearance: none; width: 30px; height: 30px; border-radius: 8px; border: 2px solid var(--line-2); background: var(--surface); color: var(--accent-ink); font-weight: 700; cursor: pointer; display: grid; place-items: center; font-size: 15px; margin-top: 1px; }
+.tick[aria-pressed="true"] { background: var(--good); border-color: var(--good); }
+.tick:disabled { cursor: default; }
+.it-t { display: grid; gap: 2px; font-size: 14.5px; line-height: 1.45; padding-top: 4px; }
+.item.done .it-t > span:first-child { color: var(--ink-2); }
+.item.skip .it-t > span:first-child { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--line-2); }
+.skipb { appearance: none; border: 1px solid transparent; background: none; color: var(--muted); font-size: 12.5px; padding: 6px 8px; border-radius: 7px; cursor: pointer; white-space: nowrap; }
+.skipb:hover { border-color: var(--line-2); color: var(--ink-2); }
+.skipb[aria-pressed="true"] { color: var(--warn); }
+.step-money { display: grid; gap: 6px; }
+.step-money .kv > div { font-size: 13.5px; }
+.step-fact { display: grid; gap: 2px; margin-top: 4px; }
+.path-note { margin: 4px 2px 0; }
+@media (max-width: 560px) {
+  .path-title { font-size: 19px; }
+  .path-stats b { font-size: 17px; }
+  .steps .step > :not(.step-h) { margin-left: 14px; }
+  .chap-intro { margin-left: 16px; }
+  .tick { width: 34px; height: 34px; }
+  .skipb { min-height: 34px; }
+}
+
+/* поделиться: превью картинки */
+.sh-prev { display: grid; place-items: center; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--r); padding: 10px; }
+.sh-prev img { width: 100%; max-width: 340px; height: auto; border-radius: 10px; box-shadow: 0 6px 24px rgba(0, 0, 0, .18); transition: opacity .15s; }
 
 .gate { position: fixed; inset: 0; z-index: 80; background: var(--bg); display: flex; align-items: center; justify-content: center; padding: 24px max(16px, env(safe-area-inset-right, 0px)) 24px max(16px, env(safe-area-inset-left, 0px)); }
 .gate-card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 32px 28px; max-width: 420px; width: 100%; text-align: center; display: grid; gap: 14px; justify-items: center; box-shadow: var(--shadow); }
@@ -480,6 +579,29 @@ function parseNum(s) {
   if (!/^-?\d*\.?\d+$|^-?\d+\.?\d*$/.test(t)) return NaN;
   return parseFloat(t);
 }
+// Сумма в поле формы: «45к», «1,5 млн», «12 000+8 500», «100 тыс − 5 000». Без eval: только числа, суффиксы, + и −.
+const AMT_MUL = { 'к': 1e3, 'k': 1e3, 'т': 1e3, 'тыс': 1e3, 'тыс.': 1e3, 'м': 1e6, 'млн': 1e6, 'млн.': 1e6 };
+function parseAmt(s) {
+  if (isNum(s)) return s;
+  if (s == null) return NaN;
+  // пробел между цифрами — только разделитель разрядов (за ним ровно три цифры): «12 000 8 500» — ошибка, а не 120 008 500
+  for (const g of String(s).matchAll(/\d[\s  ]+(?=(\d+))/g)) if (g[1].length !== 3) return NaN;
+  const t = String(s).toLowerCase().replace(/[\s  ]/g, '').replace(/₸|\$|тг/g, '').replace(/[−–]/g, '-').replace(/(\d)[.,]$/, '$1');   // «5000.» — это 5000
+  if (!t) return NaN;
+  const re = /([+-]?)(\d+(?:[.,]\d+)?|[.,]\d+)(тыс\.?|млн\.?|к|k|т|м)?/y;
+  let pos = 0, sum = 0, n = 0, mul = false, m;
+  while (pos < t.length) {
+    re.lastIndex = pos;
+    if (!(m = re.exec(t)) || m[0] === '') return NaN;
+    if (n > 0 && !m[1]) return NaN;   // «12 000 8 500» без знака между числами — не сумма
+    if (m[3]) mul = true;
+    const v = parseFloat(m[2].replace(',', '.')) * (m[3] ? AMT_MUL[m[3]] : 1);
+    sum += m[1] === '-' ? -v : v; pos = re.lastIndex; n++;
+  }
+  return n > 1 || mul ? +sum.toPrecision(15) : sum;   // убираем только хвост сложения (0,1+0,2; 1,1к), а не знаки: 0,00012345 BTC остаётся точным
+}
+// В поле не просто число (есть суффикс или + и −) — под полем стоит показать итог
+const amtIsExpr = s => isNum(parseAmt(s)) && !isNum(parseNum(s));
 const pad2 = n => String(n).padStart(2, '0');
 const mkOf = d => String(d).slice(0, 7);
 function validDate(s) {
@@ -976,8 +1098,10 @@ function monthRow(state, comp, mk) {
   let hasInc = false;
   for (const [k, v] of Object.entries(rec.inc || {})) if (isNum(v)) { incomes[k] = v; hasInc = true; }
   const incomeTotal = hasInc ? sumVals(incomes) : null;
+  // «Всего потратил» — главное число, статьи только расписывают его часть. Статьи больше «Всего» — значит, «Всего» устарело
   const expBreak = rec.expBy && Object.values(rec.expBy).some(isNum) ? sumVals(rec.expBy) : null;
-  const expenses = expBreak != null ? expBreak : (isNum(rec.exp) ? rec.exp : null);
+  const expTyped = isNum(rec.exp) ? rec.exp : null;
+  const expenses = expTyped != null ? (expBreak != null ? Math.max(expTyped, expBreak) : expTyped) : expBreak;
   const expPlanM = monthPlanExpenses(settings, mk);
   const loan = M.payK;
   const free = incomeTotal != null ? incomeTotal - (expenses ?? expPlanM) - loan : null;
@@ -1304,11 +1428,13 @@ function validateImport(obj) {
     if (!validMk(mk)) errors.push(`Месяц «${mk}»: неверный формат, нужен ГГГГ-ММ.`);
     else if (!isObj(v)) errors.push(`Месяц ${mk}: не объект.`);
   }
+  if (obj.story != null && !isObj(obj.story)) errors.push('Отметки пути (story) — не объект.');
+  else for (const [mk, v] of Object.entries(obj.story || {})) if (!validMk(mk) || !isObj(v)) errors.push(`Отметки пути за «${mk}»: неверный формат.`);
   const rates = isObj(obj.settings) && Array.isArray(obj.settings.rates) ? obj.settings.rates : null;
   if (rates) for (const c of new Set(accounts.filter(a => isObj(a) && a.ccy && a.ccy !== 'KZT').map(a => a.ccy)))
     if (!rates.some(r => isObj(r) && isNum(r[c]))) warnings.push(`Нет курса ${c} — добавьте его в «Настройках» после загрузки.`);
   if (errors.length > 12) { const n = errors.length; errors.length = 12; errors.push(`…и ещё ${n - 12} ошибок.`); }
-  return { ok: errors.length === 0, errors, warnings, counts: { accounts: accounts.length, ops: ops.length, months: Object.keys(months).length, settings: !!obj.settings } };
+  return { ok: errors.length === 0, errors, warnings, counts: { accounts: accounts.length, ops: ops.length, months: Object.keys(months).length, settings: !!obj.settings, story: isObj(obj.story) ? Object.keys(obj.story).length : 0 } };
 }
 // Подпись операции для поиска дублей: все поля, которые меняют смысл записи
 const opSig = o => [o.date, o.type, o.acc, o.acc2 || '', r2(num(o.amt)), num(o.qty), o.kind || '', isNum(o.value) ? r2(o.value) : '', isNum(o.price) ? o.price : '',
@@ -1322,7 +1448,8 @@ function mergePlan(cur, inc) {
   // дубли ищем только среди уже сохранённых: одинаковые записи внутри файла — это разные операции с разными id
   for (const o of inc.ops || []) { if (opIds.has(o.id) || sigs.has(opSig(o))) dup.push(o); else addOps.push(o); }
   const addMonthsList = Object.keys(inc.months || {}).filter(mk => !(cur.months || {})[mk]);
-  return { addAcc, addOps, dup, addMonths: addMonthsList };
+  const addStory = Object.keys(isObj(inc.story) ? inc.story : {}).filter(mk => !(cur.story || {})[mk]);
+  return { addAcc, addOps, dup, addMonths: addMonthsList, addStory };
 }
 
 // ---------- CSV (Excel в русской раскладке: «;» и запятая в дробях) ----------
@@ -1349,6 +1476,62 @@ function monthsCSV(state, comp, mks) {
   return toCSV([head, ...rows], [7]);
 }
 
+// ---------- путь: план модели как пошаговый сюжет ----------
+// Главы узнаются по словам в тексте плана; каждая открывается один раз. Первый месяц плана — всегда «Старт».
+const W = s => new RegExp(`(^|[^а-яёa-z])${s}`, 'i');   // начало слова: \b в JS не работает с кириллицей
+const CHAPTERS = [
+  { re: W('автошкол'), title: 'Автошкола', intro: 'Пока учитесь водить — понемногу откладываете из зарплаты. Вклад не трогаете.' },
+  { re: W('(экзамен|права|купить nexia|купить машин)'), title: 'Права и машина', intro: 'Сдаёте на права и покупаете машину — по плану на ней подрабатываете в доставке.' },
+  { re: W('доставк'), title: 'Доставка', intro: 'Вечера доставки по плану: возвращаете резерв и гасите автокредит.' },
+  { re: W('кредит закрыт'), title: 'Разгон', intro: 'Долгов нет — откладываете больше. Деньги копятся на вкладе, раз в квартал часть уходит в облигации и фонды.' },
+  { re: W('за год до покупки'), title: 'Финишная прямая', intro: 'Год до покупки: снижаете риск — фонды акций продаёте, облигации держите до погашения, новые деньги — только на вклад.' },
+  { re: W('подбор'), title: 'Выбор квартиры', intro: 'Ищете сданную новостройку и готовите документы о доходе.' },
+  { re: W('заявк'), title: 'Заявка на ипотеку', intro: 'Когда взнос собран — подаёте заявку и ждёте решения банка. Он смотрит на официальный доход и другие кредиты.' },
+  { re: /^\s*покупка:/i, title: 'Покупка квартиры', intro: 'Взнос и оформление — из накоплений. Дальше — платёж по ипотеке.' },
+  { re: W('после покупки'), title: 'Подушка безопасности', intro: 'Квартира куплена. Теперь — запас на 6 месяцев расходов.' },
+];
+const START = { title: 'Старт', intro: 'Раскладываете стартовые деньги по местам: резерв, автошкола, остальное — работать на вкладе.' };
+// Текст плана → пункты: режем по концу предложения перед заглавной буквой («73 тыс. ₸ на вклад» не режется)
+const splitTodo = text => String(text || '').replace(/([.!?])\s+(?=[А-ЯЁA-Z«(])/g, '$1\n').split('\n').map(x => x.trim()).filter(Boolean);
+// Ключ пункта не зависит от его места: отметки переживают новую версию плана, если текст пункта не поменялся
+function hashKey(s) { let h = 5381; for (const ch of String(s).replace(/\s+/g, ' ').trim().toLowerCase()) h = ((h * 33) ^ ch.charCodeAt(0)) >>> 0; return 'i' + h.toString(36); }
+// marks: { 'ГГГГ-ММ': { m: { ключ: 'd' | 's' } } }; rowOf(mk) → { saved, plan, resInc, incomeTotal, expenses, hasRec } из monthRow
+// (resInc — проценты на резервных счетах за месяц: по плану модели они входят в «отложить»)
+function story(settings, curMk, marks, rowOf) {
+  const plan = ((settings || {}).plan || {}).months || [];
+  const used = new Set(), chapters = [], steps = [];
+  plan.forEach((pm, i) => {
+    let ch = null;
+    if (i === 0) ch = START;
+    else for (const c of CHAPTERS) if (!used.has(c) && c.re.test(pm.todo || '')) { ch = c; break; }
+    if (ch) { used.add(ch); chapters.push({ title: ch.title, intro: ch.intro, steps: [] }); }
+    if (!chapters.length) chapters.push({ title: 'Путь', intro: 'Шаги из вашего плана по месяцам.', steps: [] });
+    const chi = chapters.length - 1;
+    const row = rowOf ? rowOf(pm.m) || {} : {};
+    const mm = ((marks || {})[pm.m] || {}).m || {};
+    const items = splitTodo(pm.todo).map(text => ({ key: hashKey(text), text, auto: num(pm.save) > 0 && /отложить/i.test(text) ? 'save' : null }));
+    // в плане есть сумма «отложить», а в тексте месяца о ней ни слова — добавляем пункт, чтобы шаг сверялся с делом
+    if (num(pm.save) > 0.5 && !items.some(x => x.auto === 'save')) items.push({ key: 'save', text: `Отложить ${grp(pm.save)}${NB}₸ по плану`, auto: 'save' });
+    items.push({ key: 'month', text: 'Внести доходы и расходы за месяц', auto: 'month' });
+    for (const it of items) {
+      it.mark = mm[it.key] === 'd' || mm[it.key] === 's' ? mm[it.key] : null;
+      // «отложено» считается с процентами по резерву: по плану модели они тоже идут на вклад
+      it.autoDone = it.auto === 'save' ? row.plan > 0 && num(row.saved) + num(row.resInc) >= row.plan * 0.995
+        : it.auto === 'month' ? row.incomeTotal != null || row.expenses != null : false;
+      it.done = it.mark === 'd' || (it.mark == null && it.autoDone);
+      it.skip = it.mark === 's';
+    }
+    const nDone = items.filter(x => x.done).length, nSkip = items.filter(x => x.skip).length;
+    const step = { mk: pm.m, n: i + 1, ch: chi, chTitle: chapters[chi].title, items, nDone, nSkip, nItems: items.length, complete: nDone + nSkip === items.length,
+      state: pm.m < curMk ? 'past' : pm.m === curMk ? 'cur' : 'next', row, plan: pm };
+    steps.push(step); chapters[chi].steps.push(step);
+  });
+  let cur = steps.findIndex(s => s.state === 'cur');
+  if (cur < 0) cur = steps.length && steps[0].mk > curMk ? 0 : steps.length - 1;   // план ещё не начался или уже закончился
+  const items = steps.reduce((a, s) => a + s.nItems, 0), done = steps.reduce((a, s) => a + s.nDone, 0);
+  return { chapters, steps, cur, curCh: cur >= 0 ? steps[cur].ch : -1, total: steps.length, completed: steps.filter(s => s.complete).length, items, done };
+}
+
 // Сколько штук было на счёте на дату (для проверки продажи задним числом)
 function unitsAt(state, accId, date, excludeId) {
   const s2 = { ...state, ops: (state.ops || []).filter(o => o.id !== excludeId && o.date <= date) };
@@ -1358,7 +1541,7 @@ function unitsAt(state, accId, date, excludeId) {
 
 return {
   CATS, CAT_ORDER, OPS, INC_KINDS, OUT_PURPOSE,
-  isNum, num, r2, parseNum, validDate, validMk, addMonths, monthDiff, monthEnd, mkOf, todayStr, daysIn,
+  isNum, num, r2, parseNum, parseAmt, amtIsExpr, story, splitTodo, hashKey, validDate, validMk, addMonths, monthDiff, monthEnd, mkOf, todayStr, daysIn,
   mkShort, mkLong, mkDat, mkPrep, dateLong, money, compact, signed, pct, grp, SYM,
   rateAt, currencies, isLiab, inPort, unitsOn, goalOn, cutOf, retOf, loanInterest,
   compute, monthRow, planSave, monthPlanIncome, monthPlanExpenses, planMonth, goalInfo, annuity, forecast, valueAt, requiredSave,
@@ -1379,6 +1562,7 @@ const { CATS, CAT_ORDER, OPS, INC_KINDS, OUT_PURPOSE } = FC;
 const M = (n, c) => FC.money(n, c), C = (n, c) => FC.compact(n, c), P = (x, d) => FC.pct(x, d);
 const sp = x => (x >= 0.0005 ? '+' : '') + FC.pct(x); // доля со знаком: +2,4%
 const num = FC.num, isNum = FC.isNum;
+const amt = FC.parseAmt;   // суммы в формах: понимает «45к», «1,5 млн», «12 000+8 500»
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 const clean = o => JSON.parse(JSON.stringify(o, (k, v) => (typeof v === 'number' && !isFinite(v) ? null : v)));
 const catColor = cat => `var(--s${(CATS[cat] || {}).slot || 8})`;
@@ -1390,17 +1574,18 @@ const ICON = {
   edit: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M4 13.5V16h2.5L15 7.5 12.5 5 4 13.5z"/></svg>',
   del: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M5 6h10M8 6V4.5h4V6M6.5 6l.7 9.5h5.6l.7-9.5"/></svg>',
   close: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15"/></svg>',
+  share: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3v10M6.5 6.5L10 3l3.5 3.5M5 10.5V16h10v-5.5"/></svg>',
 };
 
 // ================= хранилище =================
-// Данные — в db этой страницы (cfg/main, acc/<id>, ops/<id>, mon/<ГГГГ-ММ>); без db — в localStorage этого браузера.
+// Данные — в db этой страницы (cfg/main, acc/<id>, ops/<id>, mon/<ГГГГ-ММ>, sty/<ГГГГ-ММ> — отметки пути); без db — в localStorage этого браузера.
 const Store = (() => {
   const LS = 'moi-finansy-v1';
   let db = null, mode = 'init', pending = 0, lastAt = null, loadedAt = null, canKnown = null, revoked = false;
   const errs = new Map();          // путь документа → текст ошибки; очищается следующей успешной записью
   const dead = new Map();          // подписка → текст, если она оборвалась
-  const data = { settings: null, accounts: [], ops: [], months: {} };
-  const got = { cfg: false, acc: false, ops: false, mon: false };
+  const data = { settings: null, accounts: [], ops: [], months: {}, story: {} };
+  const got = { cfg: false, acc: false, ops: false, mon: false, sty: false };
   const queues = new Map();
   let onChange = () => {};
   const emit = kind => onChange(kind);
@@ -1413,7 +1598,7 @@ const Store = (() => {
     let raw = null;
     try { raw = localStorage.getItem(LS); } catch (e) { errs.set('local', 'Браузер не даёт читать сохранённые данные.'); return; }
     if (!raw) return;
-    try { const d = JSON.parse(raw); Object.assign(data, { settings: d.settings || null, accounts: d.accounts || [], ops: d.ops || [], months: d.months || {} }); }
+    try { const d = JSON.parse(raw); Object.assign(data, { settings: d.settings || null, accounts: d.accounts || [], ops: d.ops || [], months: d.months || {}, story: d.story || {} }); }
     catch (e) {
       broken = raw;   // не перезаписываем испорченные данные: сохраняем копию рядом
       try { localStorage.setItem(`${LS}.broken-${Date.now()}`, raw); } catch (e2) { /* место кончилось — копия только в памяти */ }
@@ -1430,13 +1615,17 @@ const Store = (() => {
         if (u && typeof u.can === 'function') { const w = await u.can('data.write'); canKnown = w; if (w === false) mode = 'readonly'; }
       } catch (e) { /* платформа не сказала — решит отказ при записи */ }
       subscribe();
-      setTimeout(() => { acceptCache = true; ready(); }, 4000);   // без сети — показываем то, что есть в копии на устройстве
+      // без сети через 4 с показываем то, что есть в копии на устройстве: пустые коллекции из копии тоже считаем ответом.
+      // Настройки (cfg) так не принимаем: пустая копия настроек открыла бы «Начать» и могла бы затереть настоящие.
+      setTimeout(() => { acceptCache = true; for (const k of skipped) if (k !== 'cfg' && !got[k]) got[k] = true; ready(); }, 4000);
     } else {
       mode = 'local'; loadLocal(); loadedAt = new Date(); emit('data');
-      window.addEventListener('storage', e => { if (e.key === LS && e.newValue) { try { const d = JSON.parse(e.newValue); Object.assign(data, d); emit('data'); } catch (err) { /* чужая запись */ } } });
+      window.addEventListener('storage', e => { if (e.key === LS && e.newValue) { try { const d = JSON.parse(e.newValue); Object.assign(data, d, { story: d.story || {} }); emit('data'); } catch (err) { /* чужая запись */ } } });
     }
   }
   let acceptCache = false;
+  const skipped = new Set();   // коллекции, чей пустой снимок из копии отложен до ответа сервера
+  // отметки пути (sty) необязательны: без них страница открывается, они подтянутся следом
   function ready() { if (got.cfg && got.acc && got.ops && got.mon) { if (!loadedAt) loadedAt = new Date(); emit('data'); } }
   const subs = {};
   // Пустой снимок «из кэша» — ещё не ответ сервера: не считаем его загрузкой, иначе пустая форма затрёт сохранённое
@@ -1454,11 +1643,13 @@ const Store = (() => {
       if (!s.exists && early(s)) return;   // ждём ответа сервера, прежде чем решить, что настроек нет
       data.settings = s.exists ? s.data() : null; got.cfg = true; ok();
     }, onErr);
-    if (key === 'acc') subs.acc = db.collection('acc').onSnapshot(q => { if (q.empty && early(q)) return; data.accounts = q.docs.map(d => d.data()); got.acc = true; ok(); }, onErr);
-    if (key === 'ops') subs.ops = db.collection('ops').onSnapshot(q => { if (q.empty && early(q)) return; data.ops = q.docs.map(d => d.data()); got.ops = true; ok(); }, onErr);
-    if (key === 'mon') subs.mon = db.collection('mon').onSnapshot(q => { if (q.empty && early(q)) return; data.months = Object.fromEntries(q.docs.map(d => [d.id, d.data()])); got.mon = true; ok(); }, onErr);
+    const wait = q => { if (q.empty && early(q)) { skipped.add(key); return true; } return false; };
+    if (key === 'acc') subs.acc = db.collection('acc').onSnapshot(q => { if (wait(q)) return; data.accounts = q.docs.map(d => d.data()); got.acc = true; ok(); }, onErr);
+    if (key === 'ops') subs.ops = db.collection('ops').onSnapshot(q => { if (wait(q)) return; data.ops = q.docs.map(d => d.data()); got.ops = true; ok(); }, onErr);
+    if (key === 'mon') subs.mon = db.collection('mon').onSnapshot(q => { if (wait(q)) return; data.months = Object.fromEntries(q.docs.map(d => [d.id, d.data()])); got.mon = true; ok(); }, onErr);
+    if (key === 'sty') subs.sty = db.collection('sty').onSnapshot(q => { if (wait(q)) return; data.story = Object.fromEntries(q.docs.map(d => [d.id, d.data()])); got.sty = true; ok(); }, onErr);
   }
-  function subscribe() { ['cfg', 'acc', 'ops', 'mon'].forEach(k => { try { subs[k] && subs[k](); } catch (e) { /* уже отписан */ } listen(k); }); }
+  function subscribe() { ['cfg', 'acc', 'ops', 'mon', 'sty'].forEach(k => { try { subs[k] && subs[k](); } catch (e) { /* уже отписан */ } listen(k); }); }
   function enqueue(path, fn) {
     const prev = queues.get(path) || Promise.resolve();
     const p = prev.then(fn, fn);
@@ -1488,8 +1679,10 @@ const Store = (() => {
     if (kind === 'acc') { data.accounts = data.accounts.filter(a => a.id !== id); if (body) data.accounts.push(body); }
     if (kind === 'ops') { data.ops = data.ops.filter(o => o.id !== id); if (body) data.ops.push(body); }
     if (kind === 'mon') { const m = { ...data.months }; if (body) m[id] = body; else delete m[id]; data.months = m; }
+    if (kind === 'sty') { const m = { ...data.story }; if (body) m[id] = body; else delete m[id]; data.story = m; }
   }
-  const current = (kind, id) => kind === 'cfg' ? data.settings : kind === 'acc' ? data.accounts.find(a => a.id === id) || null : kind === 'ops' ? data.ops.find(o => o.id === id) || null : data.months[id] || null;
+  const current = (kind, id) => kind === 'cfg' ? data.settings : kind === 'acc' ? data.accounts.find(a => a.id === id) || null : kind === 'ops' ? data.ops.find(o => o.id === id) || null
+    : kind === 'sty' ? data.story[id] || null : data.months[id] || null;
   async function put(kind, id, body) {
     if (mode === 'readonly') { const e = new Error('readonly'); e.code = 'readonly'; throw e; }
     const prev = current(kind, id);
@@ -1568,7 +1761,8 @@ const Store = (() => {
 })();
 
 // ================= состояние интерфейса =================
-const TABS = [['obzor', 'Обзор'], ['mesyacy', 'Месяцы'], ['scheta', 'Счета'], ['operacii', 'Операции'], ['prognoz', 'Прогноз'], ['nastroiki', 'Настройки']];
+// третье — короткое имя для нижней панели телефона, где на вкладку ~50 px
+const TABS = [['obzor', 'Обзор'], ['put', 'Путь'], ['mesyacy', 'Месяцы'], ['scheta', 'Счета'], ['operacii', 'Операции'], ['prognoz', 'Прогноз'], ['nastroiki', 'Настройки', 'Настр.']];
 const UIKEY = 'moi-finansy-ui';
 const UI = (() => {
   const d = { tab: 'obzor', chart: 'path', alloc: 'cat', af: { cat: 'all', ccy: 'all', plat: 'all', arch: false }, of: { q: '', type: 'all', acc: 'all', per: 'all' },
@@ -1644,16 +1838,27 @@ function render() {
   }
   if (!Store.data.settings) { v.innerHTML = Store.canWrite ? vWelcome() : '<div class="card empty"><h3>Здесь пока нет данных</h3><p class="muted">Заполнять страницу может только её владелец.</p></div>'; return; }
   try { comp = FC.compute(st()); } catch (e) { v.innerHTML = `<div class="card note warn">Ошибка расчёта: ${esc(e.message)}. Данные целы — сделайте резервную копию в «Настройках».</div>${vData()}`; console.error(e); return; }
-  const view = { obzor: vOverview, mesyacy: vMonths, scheta: vAccounts, operacii: vOps, prognoz: vForecast, nastroiki: vSettings }[UI.tab] || vOverview;
+  const view = { obzor: vOverview, put: vPath, mesyacy: vMonths, scheta: vAccounts, operacii: vOps, prognoz: vForecast, nastroiki: vSettings }[UI.tab] || vOverview;
   try { v.innerHTML = view(); }
   catch (e) { console.error(e); v.innerHTML = `<div class="card note warn">Раздел не открылся: ${esc(e.message)}. Данные целы.</div>${vData()}`; return; }
   mountCharts();
+  fabWatch();
   if (UI.tab === 'prognoz') updateCalc();
   if (fk) { const el = document.querySelector(fk); if (el) { el.focus({ preventScroll: true }); if (sel && typeof el.setSelectionRange === 'function') try { el.setSelectionRange(sel[0], sel[1]); } catch (e) { /* поле без выделения */ } } }
 }
+// Плавающая «Запись» уходит, пока на экране кнопки карточки «Этот месяц», — иначе закрывает «Отложил деньги»
+let fabObs = null;
+function fabWatch() {
+  if (fabObs) { fabObs.disconnect(); fabObs = null; }
+  const fab = $('#fab'), t = $('.now-act');
+  fab.classList.remove('away');
+  if (!t || typeof IntersectionObserver !== 'function') return;
+  fabObs = new IntersectionObserver(es => { fab.classList.toggle('away', es.some(x => x.isIntersecting)); });
+  fabObs.observe(t);
+}
 function renderTabs() {
   const box = $('#tabs');
-  box.innerHTML = TABS.map(([k, n]) => `<button class="tab" role="tab" id="tab-${k}" aria-selected="${UI.tab === k}" data-act="tab" data-tab="${k}">${n}</button>`).join('');
+  box.innerHTML = TABS.map(([k, n, sh]) => `<button class="tab" role="tab" id="tab-${k}" aria-selected="${UI.tab === k}" data-act="tab" data-tab="${k}"${sh ? ` aria-label="${n}"` : ''}>${sh ? `<span class="t-long">${n}</span><span class="t-short" aria-hidden="true">${sh}</span>` : n}</button>`).join('');
   const act = $('#tab-' + UI.tab);
   if (act && (act.offsetLeft + act.offsetWidth > box.scrollLeft + box.clientWidth || act.offsetLeft < box.scrollLeft)) box.scrollLeft = Math.max(0, act.offsetLeft - 16);
 }
@@ -1746,6 +1951,7 @@ function vOverview() {
   const marker = planAcc != null && G.target > 0 ? `<i style="left:calc(${Math.max(0, Math.min(100, planAcc / G.target * 100))}% - 1px)" title="План на этот месяц"></i>` : '';
   const reserve = t.byLiq.reserve;
   const row = FC.monthRow(S, comp, comp.curMk);
+  const X = UI.fcMore ? 'fc-x on' : 'fc-x';   // на телефоне второстепенные строки прогноза свёрнуты
   CHARTS.ov = overviewChart(S, F, G);
   const warns = [];
   if (comp.missingRates.length) warns.push(`Нет курса ${comp.missingRates.join(', ')} — такие счета считаются по последнему курсу из операций или как 0. Добавьте курс в «Настройках».`);
@@ -1764,24 +1970,27 @@ function vOverview() {
   <section class="card">
     <div class="goal">
       <div>
-        <div class="eyebrow">Деньги на взнос</div>
+        <div class="row sp"><div class="eyebrow">Деньги на взнос</div><button class="btn sm ghost" data-act="share" data-k="save">${ICON.share} Поделиться</button></div>
         <div class="hero-n">${M(t.avail)}</div>
         <div class="hero-sub">из ${M(G.target)} · <b>${P(prog, 0)}</b> · осталось ${M(Math.max(0, G.target - t.avail))}</div>
         <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(prog * 100)}" aria-label="Собрано на взнос"><b style="width:${(prog * 100).toFixed(1)}%"></b>${marker}</div>
         <div class="bar-legend"><span>${planAcc != null ? `План на ${esc(FC.mkLong(comp.curMk))}: ${C(planAcc)} ${diffPill}` : ''}</span>
         <span>${t.availMkt - t.avail > 1 ? `по рынку ${C(t.availMkt)}` : ''}${reserve > 0 ? `${t.availMkt - t.avail > 1 ? ' · ' : ''}резерв ${C(reserve)} не считается` : ''}</span></div>
-        <p class="small muted" style="margin:12px 0 0">Цель = взнос ${P(G.dpPct, 0)} от ${C(G.price)} (${C(G.down)}) + оформление ${C(G.costs)}${G.extra ? ` + запас ${C(G.extra)}` : ''}. Акции, крипта и доллары считаются с дисконтом — на случай падения перед покупкой.</p>
+        <p class="small muted ${X}" style="margin:12px 0 0">Цель = взнос ${P(G.dpPct, 0)} от ${C(G.price)} (${C(G.down)}) + оформление ${C(G.costs)}${G.extra ? ` + запас ${C(G.extra)}` : ''}. Акции, крипта и доллары считаются с дисконтом — на случай падения перед покупкой.</p>
       </div>
       <div class="fc-list">
         <div class="fc-row fc-main"><span>Базовый прогноз</span><span class="r"><b>${reachTxt(F.base)}</b><br><span class="small muted">${inTxt(F.base)}</span></span></div>
-        <div class="fc-row"><span class="ink2">Если хуже<br><span class="small muted">взносы на 20% меньше, доходность ${rateTxt(Math.max(0, F.rate - 3))}</span></span><b>${reachTxt(F.pess)}</b></div>
-        <div class="fc-row"><span class="ink2">Если лучше<br><span class="small muted">взносы на 10% больше, доходность ${rateTxt(F.rate + 2)}</span></span><b>${reachTxt(F.opt)}</b></div>
-        <div class="fc-row"><span class="ink2">Чтобы успеть к ${esc(FC.mkDat(tMk))}<br><span class="small muted">откладывать в месяц${reqExtras.length ? ', с учётом плановых снятий' : ''}</span></span><b>${req == null ? 'срок уже прошёл' : req === 0 ? 'уже хватает' : C(req)}</b></div>
-        <div class="fc-row"><span class="ink2">Платёж по ипотеке<br><span class="small muted">${C(mc.loanAmt)}, ${FC.grp(G.mortRate, 1)}%, ${G.mortYears} лет${mc.other > 0.5 ? ` · плюс другие кредиты ${C(mc.other)}` : ''}</span></span><span class="r"><b>${M(mc.mpay)}</b><br>${mortPill}</span></div>
+        <div class="fc-row ${X}"><span class="ink2">Если хуже<br><span class="small muted">взносы на 20% меньше, доходность ${rateTxt(Math.max(0, F.rate - 3))}</span></span><b>${reachTxt(F.pess)}</b></div>
+        <div class="fc-row ${X}"><span class="ink2">Если лучше<br><span class="small muted">взносы на 10% больше, доходность ${rateTxt(F.rate + 2)}</span></span><b>${reachTxt(F.opt)}</b></div>
+        <div class="fc-row ${X}"><span class="ink2">Чтобы успеть к ${esc(FC.mkDat(tMk))}<br><span class="small muted">откладывать в месяц${reqExtras.length ? ', с учётом плановых снятий' : ''}</span></span><b>${req == null ? 'срок уже прошёл' : req === 0 ? 'уже хватает' : C(req)}</b></div>
+        <div class="fc-row ${X}"><span class="ink2">Платёж по ипотеке<br><span class="small muted">${C(mc.loanAmt)}, ${FC.grp(G.mortRate, 1)}%, ${G.mortYears} лет${mc.other > 0.5 ? ` · плюс другие кредиты ${C(mc.other)}` : ''}</span></span><span class="r"><b>${M(mc.mpay)}</b><br>${mortPill}</span></div>
+        <button class="btn sm ghost m-only fc-tog" data-act="fc-more" aria-expanded="${!!UI.fcMore}">${UI.fcMore ? 'Свернуть' : 'Подробнее о прогнозе и ипотеке'}</button>
       </div>
     </div>
-    <p class="small muted" style="margin:14px 0 0">Собрать взнос и получить одобрение — разные вещи. Банк смотрит на официальный доход${mc.names ? ` (${esc(mc.names)})` : ''}: все платежи по кредитам должны быть не больше 50% от него.${mortT} Прогноз — оценка по допущениям: доходность ${rateTxt(F.rate)} годовых${fcOpts().rateOv ? ' (ваша поправка)' : ' взвешена по вашим счетам'}, взносы — ${fcModeTxt()}.</p>
+    <p class="small muted ${X}" style="margin:14px 0 0">Собрать взнос и получить одобрение — разные вещи. Банк смотрит на официальный доход${mc.names ? ` (${esc(mc.names)})` : ''}: все платежи по кредитам должны быть не больше 50% от него.${mortT} Прогноз — оценка по допущениям: доходность ${rateTxt(F.rate)} годовых${fcOpts().rateOv ? ' (ваша поправка)' : ' взвешена по вашим счетам'}, взносы — ${fcModeTxt()}.</p>
   </section>
+
+  ${nowCard(row)}
 
   <section class="tiles">
     ${tile('Чистый капитал', M(t.netWorth), `активы ${C(t.assets)} − долги ${C(t.debt)}`)}
@@ -1798,14 +2007,343 @@ function vOverview() {
       ${CHARTS.ov ? `<div class="chart" id="chart-ov" data-chart="ov" tabindex="0" aria-label="График, стрелки — по месяцам"></div>${legendHtml(CHARTS.ov)}` : `<div class="empty"><p class="muted">${UI.chart === 'debt' ? 'Долгов нет — нечего показывать.' : 'График появится, когда наберётся история хотя бы за два месяца.'}</p></div>`}
     </div>
     <div class="card">
-      <div class="card-h"><h2>${esc(cap(FC.mkLong(comp.curMk)))}</h2>${Store.canWrite ? `<button class="btn sm" data-act="month" data-mk="${comp.curMk}">Внести месяц</button>` : ''}</div>
+      <div class="card-h"><h2>${esc(cap(FC.mkLong(comp.curMk)))} в цифрах</h2>${Store.canWrite ? `<button class="btn sm" data-act="month" data-mk="${comp.curMk}">Внести месяц</button>` : ''}</div>
       ${monthKv(row)}
-      ${pm && pm.todo ? `<div style="margin-top:14px"><div class="eyebrow">По плану в этом месяце</div><div class="todo" style="margin-top:6px">${esc(pm.todo)}</div></div>` : ''}
     </div>
   </section>
 
   ${allocCard(t, 'Где лежат деньги')}`;
 }
+// Карточка «Этот месяц»: план и факт месяца, следующий шаг пути и главное действие — на первом экране
+function nowCard(row) {
+  const mk = comp.curMk, P0 = pathData();
+  const stp = P0.steps.find(x => x.mk === mk) || null;
+  const next = stp ? stp.items.find(x => !x.done && !x.skip) : null;
+  const res = stp ? num(stp.row.resInc) : 0, got = row.saved + res;   // проценты по резерву по плану тоже идут в «отложить»
+  const plan = row.plan > 0 ? row.plan : 0, left = Math.max(0, plan - got);
+  const pc = plan ? Math.max(0, Math.min(1, got / plan)) : 0;
+  return `<section class="card now">
+    <div class="card-h"><h2>${esc(cap(FC.mkLong(mk)))}${stp ? ` <span class="muted small">· шаг ${stp.n} из ${P0.total}</span>` : ''}</h2>${stp ? '<button class="btn sm ghost" data-act="tab" data-tab="put">Весь путь ›</button>' : ''}</div>
+    ${plan ? `<div class="now-save"><div><span class="muted small">Отложить по плану</span><b>${M(plan)}</b></div><div><span class="muted small">Отложено${res > 0.5 ? ' с процентами резерва' : ''}</span><b>${M(got)}</b></div>
+      <div class="bar sm" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(pc * 100)}" aria-label="Отложено от плана месяца"><b style="width:${(pc * 100).toFixed(1)}%"></b></div>
+      <div class="small ${left > 0.5 ? 'ink2' : 'pos'}">${left > 0.5 ? `Осталось отложить ${M(left)}` : 'План месяца выполнен ✓'}</div></div>` : ''}
+    ${next ? `<div class="now-next"><div class="eyebrow">Следующий шаг вашего плана</div><p>${esc(next.text)}</p></div>` : stp && stp.complete ? '<p class="now-next pos">Все шаги месяца отмечены ✓</p>' : ''}
+    ${Store.canWrite ? `<div class="row now-act">${stepAction(stp && stp.plan, null, '')}<button class="btn" data-act="month" data-mk="${mk}">${row.incomeTotal != null || row.expenses != null ? 'Доходы и расходы' : 'Внести доходы и расходы'}</button></div>` : ''}
+  </section>`;
+}
+
+// ---------- путь ----------
+// План модели по месяцам как пошаговый сюжет: главы, пункты с отметками «сделал» / «не сделал», деньги по плану
+function pathData() {
+  const S = st(), resInc = reserveIncome();
+  return FC.story(S.settings, comp.curMk, Store.data.story, mk => {
+    const r = FC.monthRow(S, comp, mk);
+    return { saved: r.saved, plan: r.plan, resInc: resInc[mk] || 0, incomeTotal: r.incomeTotal, expenses: r.expenses, hasRec: r.hasRec };
+  });
+}
+// Проценты на резервных счетах по месяцам, ₸: по плану модели они тоже идут в «отложить» («из них ≈3 тыс. — проценты по резерву»)
+function reserveIncome() {
+  const out = {};
+  for (const o of Store.data.ops) {
+    if (o.type !== 'inc') continue;
+    const A = accById(o.acc); if (!A || !A.reserve) continue;
+    const r = A.ccy && A.ccy !== 'KZT' ? num(o.fx) || num(FC.rateAt(settings().rates, A.ccy, o.date)) : 1;
+    const mk = FC.mkOf(o.date);
+    out[mk] = num(out[mk]) + (num(o.amt) - num(o.tax) - num(o.fee)) * r;
+  }
+  return out;
+}
+const stepTxt = x => x.complete ? (x.nSkip ? `не сделано ${x.nSkip}` : 'всё сделано') : `сделано ${x.nDone} из ${x.nItems}`;
+// В месяце по плану снимают деньги (покупка машины, взнос) — главная кнопка шага «Снял деньги», а не «Отложил»
+function stepAction(pm, date, cls) {
+  const out = num(pm && pm.save) < -0.5 || /(^|[^а-яё])(купить|покупка:)/i.test((pm && pm.todo) || '');
+  const purpose = /квартир|взнос|покупка:/i.test((pm && pm.todo) || '') && !/nexia|машин/i.test((pm && pm.todo) || '') ? 'goal' : /nexia|машин|авто/i.test((pm && pm.todo) || '') ? 'car' : '';
+  const save = `<button class="btn ${out ? '' : 'pri'} ${cls}" data-act="op-new" data-type="in"${date ? ` data-date="${date}"` : ''}>${ICON.plus} Отложил деньги</button>`;
+  const take = `<button class="btn pri ${cls}" data-act="op-new" data-type="out"${purpose ? ` data-purpose="${purpose}"` : ''}${date ? ` data-date="${date}"` : ''}>Снял деньги</button>`;
+  return out ? take + save : save;
+}
+function vPath() {
+  const s = settings();
+  if (!(s.plan.months || []).length) return `<div class="card empty"><h3>Путь строится из плана Excel-модели</h3>
+    <p class="muted">Здесь будут шаги по месяцам: что сделать, сколько и куда отложить. Загрузите стартовые данные с планом: «Настройки» → «Загрузить резервную копию» → файл moi-finansy-start.json.</p>
+    ${Store.canWrite ? '<button class="btn" data-act="import">Загрузить резервную копию</button>' : ''}</div>`;
+  const P0 = pathData(), cur = P0.steps[P0.cur], ch = P0.chapters[P0.curCh];
+  const G = FC.goalInfo(s), prog = G.target > 0 ? Math.max(0, Math.min(1, comp.tot.avail / G.target)) : 0;
+  const open = new Set(UI.pathOpen || []), chOpen = new Set(UI.pathCh || []);
+  return `
+  <section class="card path-hero">
+    <div class="row sp"><div class="eyebrow">Ваш путь к квартире</div><button class="btn sm ghost" data-act="share" data-k="path">${ICON.share} Поделиться</button></div>
+    <h2 class="path-title">Глава ${P0.curCh + 1} из ${P0.chapters.length}: ${esc(ch.title)}</h2>
+    <p class="ink2 path-intro">${esc(ch.intro)}</p>
+    <div class="chap-line" role="img" aria-label="Пройдено глав: ${P0.curCh} из ${P0.chapters.length}">${P0.chapters.map((c, i) => `<span class="${i < P0.curCh ? 'done' : i === P0.curCh ? 'cur' : ''}" title="${esc(c.title)}"></span>`).join('')}</div>
+    <div class="path-stats"><div><b>${cur.n}</b><span>шаг из ${P0.total}</span></div><div><b>${P0.completed}</b><span>${plural(P0.completed, 'шаг закрыт', 'шага закрыто', 'шагов закрыто')}</span></div><div><b>${P(prog, 0)}</b><span>взноса собрано</span></div></div>
+  </section>
+  ${stepCard(cur, true, true)}
+  <p class="small muted path-note">Это ваш план из Excel-модели, а не совет банка. Ставки и доходность меняются — перед каждым шагом сверяйтесь с условиями банка.</p>
+  <div class="sec-h"><h2>Все главы</h2></div>
+  <div class="chaps">${P0.chapters.map((c, i) => chapBlock(c, i, P0, open, chOpen)).join('')}</div>
+  <p class="small muted path-note">Шаги — из плана вашей Excel-модели (лист «План по месяцам»): это ваш собственный расчёт, а не совет банка или финансового консультанта. Ставки вкладов, доходность облигаций и фондов могут измениться — перед каждым шагом сверяйтесь с условиями банка. Как модель сравнивала другие варианты — вендинг, крипту, такси, акции, — смотрите на листе «Сценарии». <button class="link" data-act="xl-open" data-sheet="Сценарии">Открыть сравнение</button></p>`;
+}
+function chapBlock(c, i, P0, open, chOpen) {
+  const first = c.steps[0], last = c.steps[c.steps.length - 1], closed = c.steps.filter(x => x.complete).length;
+  // «пройдена» — только если закрыты все шаги главы; прошедшая по календарю, но не закрытая глава — отдельно
+  const state = i === P0.curCh ? 'cur' : closed === c.steps.length ? 'done' : i < P0.curCh ? 'past' : 'next';
+  const isOpen = state === 'cur' ? !(UI.pathChClosed || []).includes(i) : chOpen.has(i);
+  return `<section class="chap ${state}">
+    <button class="chap-h" data-act="chap-open" data-i="${i}" data-cur="${state === 'cur' ? 1 : 0}" aria-expanded="${isOpen}"><span class="chap-n">${closed === c.steps.length ? '✓' : i + 1}</span>
+      <span class="chap-t"><b>${esc(c.title)}</b><span class="muted small">${esc(FC.mkShort(first.mk))}${c.steps.length > 1 ? ' — ' + esc(FC.mkShort(last.mk)) : ''} · закрыто ${closed} из ${c.steps.length}</span></span><span class="chev" aria-hidden="true">${isOpen ? '−' : '+'}</span></button>
+    ${isOpen ? `<p class="small ink2 chap-intro">${esc(c.intro)}</p><div class="steps">${c.steps.map(x => stepCard(x, open.has(x.mk), false)).join('')}</div>` : ''}
+  </section>`;
+}
+function stepCard(x, expanded, main) {
+  const status = x.state === 'cur' ? 'сейчас' : x.state === 'past' ? (x.complete ? 'закрыт' : 'не закрыт') : 'впереди';
+  const title = `<span class="step-n" aria-hidden="true">${x.complete ? '✓' : x.n}</span><span class="step-t"><b>${main ? `Шаг ${x.n} · ` : ''}${esc(cap(FC.mkLong(x.mk)))}</b><span class="muted small">${status} · ${stepTxt(x)}</span></span>`;
+  const cls = `step ${x.state}${x.complete ? ' complete' : ''}${main ? ' main card' : ''}`;
+  const head = main ? `<div class="step-h">${title}</div>` : `<button class="step-h" data-act="step-open" data-mk="${x.mk}" aria-expanded="${expanded}">${title}<span class="chev" aria-hidden="true">${expanded ? '−' : '+'}</span></button>`;
+  if (!expanded) return `<article class="${cls}">${head}</article>`;
+  const date = x.state === 'cur' ? today() : FC.monthEnd(x.mk);
+  return `<article class="${cls}" id="step-${x.mk}">${head}
+    <ul class="items">${x.items.map(it => itemRow(x, it)).join('')}</ul>
+    ${moneyBlock(x)}
+    ${Store.canWrite && x.state !== 'next' ? `<div class="row">${stepAction(x.plan, date, 'sm')}<button class="btn sm" data-act="month" data-mk="${x.mk}">${x.row.incomeTotal != null || x.row.expenses != null ? 'Доходы и расходы' : 'Внести месяц'}</button></div>` : ''}
+  </article>`;
+}
+function itemRow(x, it) {
+  const auto = it.auto && it.mark == null ? (it.auto === 'save'
+    ? (it.autoDone ? 'отмечено само — отложено по плану' : x.row.plan > 0 ? `отметится само, когда отложите ${M(x.row.plan)} (проценты по резерву тоже считаются)` : 'свой план на этот месяц — 0 ₸: отметьте сами')
+    : (it.autoDone ? 'отмечено само — доходы и расходы внесены' : 'отметится само, когда внесёте доходы и расходы')) : '';
+  const can = Store.canWrite;
+  return `<li class="item${it.done ? ' done' : ''}${it.skip ? ' skip' : ''}">
+    <button class="tick" data-act="item-tick" data-mk="${x.mk}" data-k="${it.key}" aria-pressed="${it.done}" aria-label="${it.done ? 'Сделано — снять отметку' : 'Отметить: сделал'}" ${can ? '' : 'disabled'}>${it.done ? '✓' : ''}</button>
+    <div class="it-t"><span>${esc(it.text)}</span>${auto ? `<span class="hint">${auto}</span>` : ''}${it.skip ? '<span class="hint">отмечено: не сделал</span>' : ''}</div>
+    ${can ? `<button class="skipb" data-act="item-skip" data-mk="${x.mk}" data-k="${it.key}" aria-pressed="${it.skip}">${it.skip ? 'вернуть' : 'не сделал'}</button>` : ''}
+  </li>`;
+}
+function moneyBlock(x) {
+  const pm = x.plan, r = x.row, rows = [];
+  const line = (l, v, cls = '') => `<div class="${cls}"><span>${l}</span><b>${v}</b></div>`;
+  const inc = num(pm.sal) + num(pm.dlv);
+  if (inc > 0) rows.push(line('Доход по плану', `${M(inc)}${num(pm.dlv) > 0 ? ` <span class="muted small">зарплата ${C(pm.sal)} + доставка ${C(pm.dlv)}</span>` : ''}`));
+  if (num(pm.exp) > 0) rows.push(line('Расходы по плану', M(pm.exp)));
+  if (num(pm.loan) > 0) rows.push(line('Платёж по кредиту', M(pm.loan)));
+  if (Math.abs(num(pm.res)) > 0.5) rows.push(line(pm.res > 0 ? 'Пополнить резерв' : 'Взять из резерва', M(Math.abs(pm.res))));
+  // после покупки квартиры откладывают уже не на взнос, а в подушку
+  const after = x.chTitle === 'Покупка квартиры' || x.chTitle === 'Подушка безопасности';
+  if (num(pm.save) > 0.5) rows.push(line(after ? 'Отложить' : 'Отложить на взнос', M(pm.save), 'total'));
+  else if (num(pm.save) < -0.5) rows.push(line(`Накопления за месяц уменьшатся на <span class="muted small">с учётом отложенного</span>`, M(-pm.save), 'total'));
+  if (num(pm.acc) > 0) rows.push(line('Накоплено по плану к концу месяца, без резерва', `${M(pm.acc)}${num(pm.earn) > 0 ? ` <span class="muted small">из них проценты за месяц ≈${C(pm.earn)}</span>` : ''}`));
+  const got = num(r.saved) + num(r.resInc), d = r.plan > 0 ? Math.max(0, Math.min(1, got / r.plan)) : 0;
+  const fact = x.state !== 'next' && r.plan > 0 ? `<div class="step-fact"><div class="row sp small"><span>Отложено ${M(got)} из ${M(r.plan)}${num(r.resInc) > 0.5 ? ' (с процентами резерва)' : ''}</span><b>${P(Math.max(0, got / r.plan), 0)}</b></div><div class="bar sm"><b style="width:${(d * 100).toFixed(1)}%"></b></div></div>` : '';
+  return rows.length || fact ? `<div class="step-money"><div class="eyebrow">Деньги по плану</div><div class="kv">${rows.join('')}</div>${fact}</div>` : '';
+}
+// Отметка пункта: «сделал» и «не сделал» переключаются; пункт, отмеченный сам по данным месяца, повторно отмечать не нужно
+async function storyMark(mk, key, kind) {
+  if (!Store.canWrite) return;
+  fresh(); if (!comp) return;
+  const before = pathData();
+  const stp = before.steps.find(x => x.mk === mk), it = stp && stp.items.find(x => x.key === key);
+  if (!it) return;
+  const prev = Store.data.story[mk] || null, m = { ...((prev || {}).m || {}) };
+  if (kind === 'd') {
+    if (m[key] === 'd') delete m[key];
+    else if (it.autoDone && m[key] == null) { toast('Уже отмечено само — по данным месяца'); return; }
+    else m[key] = 'd';
+  } else if (m[key] === 's') delete m[key]; else m[key] = 's';
+  const ok = await safePut('sty', mk, Object.keys(m).length ? { m } : null);
+  if (!ok) return;
+  fresh();
+  const now = comp ? pathData().steps.find(x => x.mk === mk) : null;
+  if (now && now.complete && !stp.complete) toast(`Шаг ${now.n} закрыт ✓`);
+}
+
+// ---------- поделиться картинкой ----------
+// Картинка 1080×1350 рисуется на устройстве и никуда сама не уходит: человек сам выбирает, кому её отправить.
+// Палитра своя (тёмная, как карточка в мессенджере) и не зависит от темы телефона.
+const SHARE_KINDS = [['save', 'Накопления'], ['inv', 'Вложения'], ['path', 'Путь']];
+const IMG = { ink: '#ffffff', ink2: 'rgba(255,255,255,.76)', muted: 'rgba(255,255,255,.52)', track: 'rgba(255,255,255,.13)', tile: 'rgba(255,255,255,.07)',
+  accent: '#5cc6e0', good: '#45c475', warn: '#e2ab40',
+  cats: { dep: '#3987e5', bond: '#d95926', stock: '#199e70', cash: '#c98500', otb: '#d55181', prop: '#2f9e2f', crypto: '#9085e9', other: '#e66767' } };
+const FD = '"Unbounded", "IBM Plex Sans", system-ui, sans-serif', FB = '"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif';
+function rr(g, x, y, w, h, r) { r = Math.min(r, w / 2, h / 2); g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
+// Текст в одну строку: шрифт уменьшается, пока не влезет в ширину
+function fitText(g, text, x, y, maxW, weight, px, family, color) {
+  let s = px; g.font = `${weight} ${s}px ${family}`;
+  while (s > 14 && g.measureText(text).width > maxW) { s -= 2; g.font = `${weight} ${s}px ${family}`; }
+  g.fillStyle = color; g.fillText(text, x, y); return s;
+}
+// Перенос по словам, не больше maxLines строк; последняя обрезается многоточием
+function wrapText(g, text, x, y, maxW, lh, maxLines) {
+  const words = String(text).split(/\s+/); let line = '', n = 0;
+  for (let i = 0; i < words.length; i++) {
+    const tryL = line ? line + ' ' + words[i] : words[i];
+    if (g.measureText(tryL).width <= maxW || !line) { line = tryL; continue; }
+    if (n === maxLines - 1) { while (line && g.measureText(line + '…').width > maxW) line = line.slice(0, -1); g.fillText(line + '…', x, y + n * lh); return y + (n + 1) * lh; }
+    g.fillText(line, x, y + n * lh); n++; line = words[i];
+  }
+  if (line) { g.fillText(line, x, y + n * lh); n++; }
+  return y + n * lh;
+}
+function imgBar(g, x, y, w, h, part, marker) {
+  rr(g, x, y, w, h, h / 2); g.fillStyle = IMG.track; g.fill();
+  if (part > 0.002) { const gr = g.createLinearGradient(x, 0, x + w, 0); gr.addColorStop(0, IMG.accent); gr.addColorStop(1, IMG.good); rr(g, x, y, Math.max(h, w * Math.min(1, part)), h, h / 2); g.fillStyle = gr; g.fill(); }
+  if (marker != null && marker > 0 && marker <= 1) { g.fillStyle = IMG.warn; rr(g, x + w * marker - 3, y - 10, 6, h + 20, 3); g.fill(); }
+}
+function imgTile(g, x, y, w, h, label, value, sub, color) {
+  rr(g, x, y, w, h, 22); g.fillStyle = IMG.tile; g.fill();
+  g.font = `400 26px ${FB}`; g.fillStyle = IMG.muted; g.fillText(label, x + 28, y + 50);
+  fitText(g, value, x + 28, y + 112, w - 56, 600, 46, FD, color || IMG.ink);
+  if (sub) { g.font = `400 24px ${FB}`; g.fillStyle = IMG.ink2; wrapText(g, sub, x + 28, y + 150, w - 56, 30, 1); }
+}
+async function shareCanvas(kind, hide) {
+  try { await Promise.all(['600 120px Unbounded', '600 46px Unbounded', '400 30px "IBM Plex Sans"', '600 30px "IBM Plex Sans"'].map(f => document.fonts.load(f))); } catch (e) { /* без веб-шрифтов — системные */ }
+  fresh();
+  const W = 1080, H = 1350, X = 84, c = document.createElement('canvas'); c.width = W; c.height = H;
+  const g = c.getContext('2d');
+  const bg = g.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, '#0b4257'); bg.addColorStop(0.55, '#0e2731'); bg.addColorStop(1, '#0c1113');
+  g.fillStyle = bg; g.fillRect(0, 0, W, H);
+  const glow = g.createRadialGradient(W * 0.86, 110, 0, W * 0.86, 110, 560); glow.addColorStop(0, 'rgba(92,198,224,.26)'); glow.addColorStop(1, 'rgba(92,198,224,0)');
+  g.fillStyle = glow; g.fillRect(0, 0, W, H);
+  rr(g, X, 70, 64, 64, 16); g.fillStyle = '#0b6b8a'; g.fill();
+  g.textBaseline = 'middle'; g.textAlign = 'center'; g.fillStyle = '#fff'; g.font = `600 36px ${FB}`; g.fillText('₸', X + 32, 103);
+  g.textAlign = 'left'; g.font = `600 32px ${FB}`; g.fillText('Мои финансы', X + 84, 103);
+  g.textAlign = 'right'; g.font = `400 28px ${FB}`; g.fillStyle = IMG.muted; g.fillText(cap(FC.mkLong(comp.curMk)), W - X, 103);
+  g.textAlign = 'left'; g.textBaseline = 'alphabetic';
+  (kind === 'inv' ? drawInv : kind === 'path' ? drawPath : drawSave)(g, hide, W, H, X);
+  return c;
+}
+function drawHead(g, X, W, title, sub) {
+  fitText(g, title, X, 238, W - 2 * X, 600, 50, FD, IMG.ink);
+  if (sub) { g.font = `400 30px ${FB}`; g.fillStyle = IMG.ink2; wrapText(g, sub, X, 292, W - 2 * X, 38, 1); }
+}
+function drawSave(g, hide, W, H, X) {
+  const S = st(), s = S.settings, t = comp.tot, G = FC.goalInfo(s), F = forecastsFor(S);
+  const prog = G.target > 0 ? Math.max(0, t.avail / G.target) : 0;
+  const pm = FC.planMonth(s, comp.curMk), planAcc = pm && isNum(pm.acc) && s.planMode === 'model' ? pm.acc : null;
+  const row = FC.monthRow(S, comp, comp.curMk), diff = planAcc != null ? t.avail - planAcc : null;
+  drawHead(g, X, W, 'Коплю на взнос за квартиру', hide ? `Цель — первый взнос ${P(G.dpPct, 0)} и оформление` : `Цель — ${M(G.target)}`);
+  fitText(g, P(Math.min(prog, 9.99), hide && planAcc != null ? 1 : 0), X, 488, W - 2 * X, 600, 168, FD, IMG.ink);   // без сумм — с десятыми, чтобы «отстаю» сходилось с цифрами
+  g.font = `400 36px ${FB}`; g.fillStyle = IMG.ink2; g.fillText(hide ? 'взноса уже собрано' : `собрано ${M(t.avail)}`, X, 552);
+  imgBar(g, X, 600, W - 2 * X, 30, prog, planAcc != null && G.target > 0 ? planAcc / G.target : null);
+  if (planAcc != null) { g.fillStyle = IMG.warn; rr(g, X, 662, 18, 18, 4); g.fill(); g.font = `400 26px ${FB}`; g.fillStyle = IMG.ink2; g.fillText(`план к концу месяца: ${hide ? P(planAcc / G.target, 1) : C(planAcc)}`, X + 30, 680); }
+  const tw = (W - 2 * X - 32) / 2, th = 178, y0 = 730;
+  const reach = F.base.reach ? (F.base.months === 0 ? 'уже собран' : cap(FC.mkLong(F.base.reach))) : 'не скоро';
+  imgTile(g, X, y0, tw, th, 'Взнос будет собран', reach, F.base.reach && F.base.months ? `через ${F.base.months} мес. по прогнозу` : '');
+  imgTile(g, X + tw + 32, y0, tw, th, 'По плану', diff == null ? '—' : diff >= 0 ? 'Впереди' : 'Отстаю', diff == null ? '' : hide ? `на ${P(Math.abs(diff) / G.target, 1)} цели` : `на ${C(Math.abs(diff))}`, diff == null ? null : diff >= 0 ? IMG.good : IMG.warn);
+  const P0 = pathData();
+  // без сумм и без плана на месяц «отложено» показать нечем — тогда показываем закрытые шаги пути
+  if (hide && !(row.plan > 0) && P0.total) imgTile(g, X, y0 + th + 28, tw, th, 'Шаги плана', `${P0.completed} из ${P0.total}`, 'месяцев закрыто');
+  else imgTile(g, X, y0 + th + 28, tw, th, 'Отложено в этом месяце', hide ? (row.plan > 0 ? P(Math.max(0, num(row.done)), 0) : '—') : C(row.saved), row.plan > 0 ? (hide ? 'от плана месяца' : `из ${C(row.plan)} по плану`) : '');
+  const xr = comp.xirr.rate;
+  imgTile(g, X + tw + 32, y0 + th + 28, tw, th, 'Заработали вложения', hide ? (xr != null ? sp(xr) : '—') : FC.signed(t.result, C), hide ? (xr != null ? 'в год, с учётом дат взносов' : '') : 'проценты, купоны и рост', t.result >= 0 ? IMG.good : IMG.warn);
+  if (P0.total) { const stp = P0.steps[P0.cur]; g.font = `500 28px ${FB}`; g.fillStyle = IMG.ink2; wrapText(g, `Шаг ${stp.n} из ${P0.total} · ${P0.chapters[P0.curCh].title}`, X, 1180, W - 2 * X, 36, 1); }
+  g.font = `400 24px ${FB}`; g.fillStyle = IMG.muted; g.fillText('Прогноз — оценка по моему плану, а не гарантия', X, H - 72);
+}
+function drawInv(g, hide, W, H, X) {
+  const t = comp.tot, xr = comp.xirr.rate, own = t.netIn - t.borrowed;
+  const cats = CAT_ORDER.filter(k => CATS[k].port && !CATS[k].liability && num(t.byCat[k]) > 0.5);
+  const sum = cats.reduce((a, k) => a + t.byCat[k], 0);
+  drawHead(g, X, W, 'Мои вложения', cats.length ? cats.map(k => CATS[k].name.toLowerCase()).join(', ') : 'пока нет вложений');
+  const big = xr != null ? sp(xr) : t.gross > 0 ? sp(t.result / t.gross) : '—';
+  fitText(g, big, X, 470, W - 2 * X, 600, 150, FD, t.result >= 0 ? IMG.ink : IMG.warn);
+  g.font = `400 34px ${FB}`; g.fillStyle = IMG.ink2;
+  g.fillText(xr != null ? 'годовых с учётом дат взносов' : 'к сумме пополнений', X, 530);
+  if (!hide) { g.font = `500 34px ${FB}`; g.fillStyle = t.result >= 0 ? IMG.good : IMG.warn; g.fillText(`заработано ${FC.signed(t.result)}`, X, 580); }
+  let y = 640;
+  if (sum > 0) {
+    let x = X; const w = W - 2 * X, gap = 6, usable = w - gap * (cats.length - 1);
+    cats.forEach((k, i) => { const ww = Math.max(6, usable * t.byCat[k] / sum); rr(g, x, y, Math.min(ww, X + w - x), 40, i === 0 || i === cats.length - 1 ? 12 : 4); g.fillStyle = IMG.cats[k]; g.fill(); x += ww + gap; });
+    y += 96;
+    for (const k of cats.slice(0, 6)) {
+      rr(g, X, y - 22, 24, 24, 6); g.fillStyle = IMG.cats[k]; g.fill();
+      g.font = `400 32px ${FB}`; g.fillStyle = IMG.ink; g.fillText(CATS[k].name, X + 44, y);
+      g.textAlign = 'right'; g.font = `600 32px ${FB}`; g.fillText(hide ? P(t.byCat[k] / sum, 0) : `${C(t.byCat[k])} · ${P(t.byCat[k] / sum, 0)}`, W - X, y); g.textAlign = 'left';
+      y += 62;
+    }
+  }
+  const tw = (W - 2 * X - 32) / 2, th = 178, y0 = Math.max(y + 10, 1000);
+  const pct = v => (own > 0 ? sp(v / own) : '—');
+  imgTile(g, X, y0, tw, th, 'Проценты и купоны', hide ? pct(t.income) : FC.signed(t.income, C), hide ? 'за всё время, от своих вложений' : 'пришло на счета за всё время');
+  imgTile(g, X + tw + 32, y0, tw, th, hide ? 'Видов вложений' : 'Вложено своих', hide ? String(cats.length) : C(own), hide ? '' : 'без заёмных денег');
+  g.font = `400 24px ${FB}`; g.fillStyle = IMG.muted; g.fillText('Прошлая доходность не гарантирует будущую', X, H - 72);
+}
+function drawPath(g, hide, W, H, X) {
+  const P0 = pathData(), s = settings(), G = FC.goalInfo(s);
+  if (!P0.total) { drawHead(g, X, W, 'Мой путь к квартире', 'План по месяцам ещё не загружен'); return; }
+  const cur = P0.steps[P0.cur], ch = P0.chapters[P0.curCh];
+  const prog = G.target > 0 ? Math.max(0, Math.min(1, comp.tot.avail / G.target)) : 0;
+  drawHead(g, X, W, 'Мой путь к квартире', `Глава ${P0.curCh + 1} из ${P0.chapters.length}: ${ch.title}`);
+  g.font = `600 130px ${FD}`; g.fillStyle = IMG.ink; const lbl = `Шаг ${cur.n}`; g.fillText(lbl, X, 450);
+  const lw = g.measureText(lbl).width; g.font = `400 40px ${FB}`; g.fillStyle = IMG.ink2; g.fillText(`из ${P0.total}`, X + lw + 20, 450);
+  // полоса и галочки — по закрытым шагам, а не по календарю: картинка не приписывает несделанного
+  imgBar(g, X, 490, W - 2 * X, 24, P0.completed / P0.total, null);
+  g.font = `400 28px ${FB}`; g.fillStyle = IMG.ink2; g.fillText(`закрыто шагов: ${P0.completed} из ${P0.total} · взнос собран на ${P(prog, 0)}`, X, 560);
+  const n = P0.chapters.length, top = 630, rowH = Math.min(58, (1150 - top) / n);
+  g.strokeStyle = IMG.track; g.lineWidth = 4; g.beginPath(); g.moveTo(X + 18, top); g.lineTo(X + 18, top + rowH * (n - 1)); g.stroke();
+  P0.chapters.forEach((c, i) => {
+    const y = top + i * rowH, st0 = i === P0.curCh ? 'cur' : c.steps.every(s => s.complete) ? 'done' : i < P0.curCh ? 'past' : 'next';
+    g.beginPath(); g.arc(X + 18, y, st0 === 'cur' ? 17 : 13, 0, Math.PI * 2);
+    if (st0 === 'next' || st0 === 'past') { g.fillStyle = '#0e2731'; g.fill(); g.strokeStyle = st0 === 'past' ? IMG.warn : IMG.muted; g.lineWidth = 3; g.stroke(); }
+    else { g.fillStyle = st0 === 'done' ? IMG.good : IMG.accent; g.fill(); }
+    if (st0 === 'done') { g.strokeStyle = '#0e2731'; g.lineWidth = 4; g.beginPath(); g.moveTo(X + 11, y); g.lineTo(X + 16, y + 6); g.lineTo(X + 26, y - 6); g.stroke(); }
+    g.textBaseline = 'middle';
+    g.font = `${st0 === 'cur' ? 600 : 400} ${st0 === 'cur' ? 34 : 30}px ${FB}`; g.fillStyle = st0 === 'next' ? IMG.muted : IMG.ink; g.fillText(c.title, X + 56, y);
+    g.textAlign = 'right'; g.font = `400 26px ${FB}`; g.fillStyle = IMG.muted; g.fillText(FC.mkShort(c.steps[0].mk), W - X, y); g.textAlign = 'left';
+    g.textBaseline = 'alphabetic';
+  });
+  if (!hide) {
+    const next = cur.items.find(x => !x.done && !x.skip);
+    if (next) { g.font = `400 26px ${FB}`; g.fillStyle = IMG.ink2; wrapText(g, 'Следующий шаг: ' + next.text.replace(/^\s*сейчас:\s*/i, ''), X, 1200, W - 2 * X, 34, 2); }
+  }
+  g.font = `400 24px ${FB}`; g.fillStyle = IMG.muted; g.fillText('Шаги — из моего плана по месяцам', X, H - 60);
+}
+const shareName = k => `moi-finansy-${k}-${today()}.png`;
+async function saveImage(blob, name) {
+  let dl = null;
+  try { dl = window.claude && window.claude.use ? await window.claude.use('downloads') : null; } catch (e) { dl = null; }
+  if (dl) {
+    try { await dl.save({ filename: name, data: blob }); toast('Картинка сохранена'); return; }
+    catch (e) { if (e && e.code === 'declined') { toast('Сохранение отменено'); return; } }
+  }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+  toast('Картинка скачана');
+}
+async function shareOut(cv, name) {
+  const blob = await new Promise(r => cv.toBlob(r, 'image/png'));
+  if (!blob) { toast('Картинка не получилась — попробуйте ещё раз'); return; }
+  const file = typeof File === 'function' ? new File([blob], name, { type: 'image/png' }) : null;
+  if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { await navigator.share({ files: [file], title: 'Мои финансы' }); return; }
+    catch (e) { if (e && e.name === 'AbortError') return; }   // человек закрыл окно «Поделиться» — это не ошибка
+  }
+  await saveImage(blob, name);
+}
+function shareFlow(kind) {
+  fresh(); if (!ready()) return;
+  const sh = UI.share = { kind: kind || (UI.share && UI.share.kind) || 'save', sums: !(UI.share && UI.share.sums === false) };
+  if (kind) saveUI();
+  openModal('Поделиться', `<div class="seg" role="group" aria-label="Что показать" id="sh-kind">${SHARE_KINDS.map(([k, n]) => `<button type="button" data-k="${k}" aria-pressed="${sh.kind === k}">${n}</button>`).join('')}</div>
+    <label class="check"><input type="checkbox" id="sh-sums" ${sh.sums ? 'checked' : ''}> Показывать суммы в тенге</label>
+    <div class="sh-prev"><img id="sh-img" alt="Картинка для отправки" width="1080" height="1350"></div>
+    <p class="hint">Картинка собирается на этом устройстве и никуда не уходит сама — вы выбираете, кому её отправить. Без сумм останутся только проценты и даты. Если кнопки не сработали, нажмите на картинку и удерживайте — телефон предложит её сохранить.</p>`,
+    `<span class="spacer"></span><button class="btn" id="sh-save" disabled>Сохранить</button><button class="btn pri" id="sh-go" disabled>${ICON.share} Поделиться</button>`);
+  let cv = null, gen = 0;
+  const redraw = async () => {
+    const g0 = ++gen, img = $('#sh-img'); if (!img) return;
+    img.style.opacity = 0.45;
+    let c = null;
+    try { c = await shareCanvas(sh.kind, !sh.sums); } catch (e) { console.error(e); if (g0 === gen) toast('Картинка не получилась: ' + e.message); return; }
+    if (g0 !== gen || !$('#sh-img')) return;
+    cv = c; $('#sh-img').src = c.toDataURL('image/png'); $('#sh-img').style.opacity = 1;
+    $('#sh-go').disabled = false; $('#sh-save').disabled = false;
+  };
+  $('#sh-kind').onclick = e => { const b = e.target.closest('button[data-k]'); if (!b) return; sh.kind = b.dataset.k; saveUI(); $$('#sh-kind button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); redraw(); };
+  $('#sh-sums').onchange = e => { sh.sums = e.target.checked; saveUI(); modalDirty = false; redraw(); };
+  $('#sh-go').onclick = () => { if (cv) shareOut(cv, shareName(sh.kind)); };
+  $('#sh-save').onclick = async () => { if (!cv) return; const blob = await new Promise(r => cv.toBlob(r, 'image/png')); if (blob) saveImage(blob, shareName(sh.kind)); };
+  redraw();
+}
+
 const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
 function tile(lbl, val, sub, helpText) {
   return `<div class="tile"><div class="lbl">${esc(lbl)}${helpText ? ' ' + help(helpText) : ''}</div><div class="val">${val}</div><div class="sub">${sub}</div></div>`;
@@ -2574,10 +3112,16 @@ function bindChart(el) {
 
 // ================= модальные окна =================
 let modalClose = null, lastFocus = null, modalGen = 0, modalBusy = false;
+// modalDirty — в окне что-то ввели; modalHist — окно добавило запись в историю, чтобы «Назад» на телефоне закрывало его, а не страницу
+let modalDirty = false, modalHist = false, popSkip = false;
 function openModal(title, body, foot, opts = {}) {
   const root = $('#modal-root');
   modalGen++; modalBusy = false;
-  if (!root.innerHTML) lastFocus = document.activeElement;
+  const te = $('#toast'); if (te && !te.hidden && !te.querySelector('#toast-act')) te.hidden = true;   // подсказка не закрывает поля нового окна
+  if (!root.innerHTML) {
+    lastFocus = document.activeElement; modalDirty = false;
+    if (!modalHist) { try { history.pushState({ modal: 1 }, ''); modalHist = true; } catch (e) { modalHist = false; } }
+  }
   for (const el of [$('header.top'), $('#view'), $('#fab')]) if (el) el.inert = true;   // фон недоступен, пока открыто окно
   root.innerHTML = ''; root._flow = null; root._month = null;
   root.innerHTML = `<div class="modal-bg" data-act="modal-bg"><div class="modal ${opts.wide ? 'wide' : ''}" role="dialog" aria-modal="true" aria-labelledby="modal-title" tabindex="-1">
@@ -2588,16 +3132,46 @@ function openModal(title, body, foot, opts = {}) {
   if (!opts.noFocus) { const first = root.querySelector('.modal-b input:not([type=hidden]):not([readonly]):not([type=date]), .modal-b select, .modal-b textarea, .modal-b button.type'); setTimeout(() => (first || root.querySelector('.modal-h .icon-btn')).focus(), 30); }
   else setTimeout(() => { const m = root.querySelector('.modal'); if (m && !m.contains(document.activeElement)) m.focus({ preventScroll: true }); }, 30);
 }
-function closeModal(force) {
+// soft — закрытие «случайным» жестом (Esc, тап мимо окна, «Назад»): если что-то введено, сначала спрашиваем
+function closeModal(force, soft) {
   const root = $('#modal-root');
   if (!root.innerHTML) return;
   if (modalBusy && !force) { toast('Подождите — идёт сохранение'); return; }
-  modalGen++; modalBusy = false;
+  if (soft && modalDirty && !force) { askDiscard(); return; }
+  modalGen++; modalBusy = false; modalDirty = false;
   for (const el of [$('header.top'), $('#view'), $('#fab')]) if (el) el.inert = false;
   root.innerHTML = ''; root._flow = null; root._month = null; document.body.style.overflow = '';
   const f = modalClose; modalClose = null;
   if (f) f(); else if (lastFocus && document.contains(lastFocus)) try { lastFocus.focus({ preventScroll: true }); } catch (e) { /* фокус не важен */ }
+  // окно закрыли кнопкой — убираем его запись из истории, если следом не открылось другое окно
+  setTimeout(() => { if (modalHist && !$('#modal-root').innerHTML) { modalHist = false; popSkip = true; try { history.back(); } catch (e) { popSkip = false; } } }, 0);
 }
+function askDiscard() {
+  if ($('#discard')) return;
+  const box = $('#modal-f') || $('#modal-b');
+  box.insertAdjacentHTML('afterbegin', '<div class="note warn small discard" id="discard" role="alert"><span>Введённое не сохранено.</span><button class="btn sm danger" id="discard-yes" type="button">Закрыть без сохранения</button><button class="btn sm" id="discard-no" type="button">Остаться</button></div>');
+  $('#discard-yes').onclick = () => closeModal(true);
+  $('#discard-no').onclick = () => { $('#discard').remove(); };
+  $('#discard-no').focus();
+}
+window.addEventListener('popstate', () => {
+  if (popSkip) { popSkip = false; return; }
+  if ($('#modal-root').innerHTML) {
+    modalHist = false;
+    if (modalBusy || modalDirty) {   // окно остаётся — возвращаем его запись в историю
+      try { history.pushState({ modal: 1 }, ''); modalHist = true; } catch (e) { /* без истории */ }
+      if (modalBusy) toast('Подождите — идёт сохранение'); else askDiscard();
+      return;
+    }
+    closeModal(true);
+    return;
+  }
+  if ($('#xl') && !$('#xl').hidden) { xlHist = false; closeExcel(true); }
+});
+// что-то введено в окне — закрытие жестом спросит подтверждение
+const markDirty = e => { const el = e.target; if (el.closest && el.closest('#modal-root') && el.matches('input:not([type=file]), select, textarea')) modalDirty = true; };
+document.addEventListener('input', markDirty, true);
+document.addEventListener('change', markDirty, true);
 let toastT = 0;
 function toast(msg, action, fn, ms) {
   const el = $('#toast');
@@ -2627,22 +3201,76 @@ async function commitFrom(btn, fn) {
 
 // ---------- форма операции ----------
 const TYPE_CARDS = [
-  ['in', 'Отложил деньги', 'Пополнение счёта из зарплаты или подработки'],
+  ['in', 'Отложил деньги', 'Положил на вклад или счёт из зарплаты, доставки, подработки'],
+  ['xfer', 'Перевёл между своими счетами', 'С карты на депозит, с вклада на брокерский. Это не «отложил»: денег не прибавилось'],
+  ['inc', 'Получил проценты или доход', 'Проценты по вкладу, купон, дивиденды, премия Отбасы'],
+  ['pay', 'Заплатил по кредиту', 'Платёж по автокредиту или досрочное погашение'],
   ['out', 'Снял деньги', 'На расходы, машину или взнос за квартиру'],
-  ['xfer', 'Перевёл между счетами', 'С вклада на брокерский, покупка или продажа актива за деньги с другого счёта'],
-  ['inc', 'Получил доход', 'Проценты по вкладу, дивиденды, купон, премия Отбасы'],
-  ['val', 'Обновил стоимость', 'Цена акций или крипты, остаток на счёте по данным банка'],
-  ['pay', 'Заплатил по кредиту', 'Ежемесячный платёж или досрочное погашение'],
+  ['val', 'Обновил стоимость', 'Сколько сейчас стоят акции или крипта, остаток по данным банка'],
   ['cost', 'Комиссия или налог', 'Плата брокеру, налог на дивиденды, если не учли в доходе'],
   ['trade', 'Купил или продал на счёте', 'За деньги, которые уже лежат на этом брокерском счёте'],
   ['open', 'Начальный остаток', 'Сколько было на счёте или в долге до начала учёта'],
   ['borrow', 'Взял кредит', 'Долг вырос, деньги пришли на счёт или сразу в покупку'],
 ];
+// Частые записи — крупно сверху, остальные под «Другие записи»
+const quickTypes = () => ['in', 'xfer', 'inc', loanAccs().length ? 'pay' : 'out'];
+const REPEAT_TYPES = ['in', 'xfer', 'inc', 'pay', 'out'];
+// Последняя обычная запись по открытым счетам — её можно повторить одним нажатием
+function lastRepeatable() {
+  let best = null;
+  for (const o of Store.data.ops) {
+    if (!REPEAT_TYPES.includes(o.type) || !(o.amt > 0)) continue;
+    const A = accById(o.acc), B = o.acc2 ? accById(o.acc2) : null;
+    if (!A || A.archived || (o.acc2 && (!B || B.archived))) continue;
+    if (!best || num(o.ts) > num(best.ts)) best = o;
+  }
+  return best;
+}
+function repeatTxt(o) {
+  const A = accById(o.acc) || {}, B = accById(o.acc2) || {};
+  const a = M(o.amt, A.ccy);
+  return o.type === 'xfer' ? `${a}: ${A.name} → ${B.name}` : o.type === 'pay' ? `платёж ${a} — ${A.name}` : o.type === 'out' ? `снял ${a} — ${A.name}`
+    : o.type === 'inc' ? `доход ${a} — ${A.name}` : `+${a} → ${A.name}`;
+}
+function typePicker() {
+  const quick = quickTypes(), last = lastRepeatable();
+  const card = ([k, t, d]) => `<button class="type${quick.includes(k) ? ' big' : ''}" data-act="op-type" data-type="${k}"><b>${t}</b><span>${d}</span></button>`;
+  return `${last ? `<button class="chip repeat" data-act="op-repeat" data-id="${esc(last.id)}">↻ Повторить: ${esc(repeatTxt(last))}</button>` : ''}
+    <div class="types quick">${quick.map(k => card(TYPE_CARDS.find(x => x[0] === k))).join('')}</div>
+    <details class="more"><summary>Другие записи</summary><div class="types" style="margin-top:8px">${TYPE_CARDS.filter(x => !quick.includes(x[0])).map(card).join('')}</div></details>`;
+}
+// Подсказки суммы под полем: сколько осталось отложить по плану, платёж по графику, оценка процентов
+function amtSuggest(f) {
+  const A = accById(f.acc); if (!A || !FC.validDate(f.date)) return [];
+  const out = [], ccy = A.ccy || 'KZT';
+  if (f.type === 'in') {
+    const mk = FC.mkOf(f.date), r = FC.monthRow(st(), comp, mk);
+    const left = r.plan > 0 ? r.plan - r.saved - num(reserveIncome()[mk]) : 0;   // план — в тенге
+    if (left > 0.5) {
+      if (ccy === 'KZT') out.push([left, `по плану осталось ${M(left)}`]);
+      else { const rt = FC.rateAt(settings().rates, ccy, f.date); if (rt > 0) out.push([Math.round(left / rt * 100) / 100, `по плану осталось ${M(left)} ≈ ${M(left / rt, ccy)}`]); }
+    }
+  }
+  if (f.type === 'pay' && num(+A.payment) > 0) out.push([+A.payment, `платёж по графику ${M(+A.payment)}`]);
+  if (f.type === 'inc' && !FC.isLiab(A)) {
+    const o = comp.accs[A.id] || {}, rate = FC.retOf(A, settings());
+    const est = num(o.value) * num(rate) / 1200;   // стоимость счёта — в его валюте
+    if (est >= 1 && A.cat === 'dep') out.push([Math.round(est), `≈ ${M(Math.round(est), ccy)} — оценка процентов за месяц, сверьте с выпиской`]);
+  }
+  return out;
+}
 function opForm(pre = {}, editId = null, flow = {}) {
   fresh();
   if (!ready() || !Store.canWrite) return;
   const f = { date: today(), ...pre };
   f._id = editId || pre._id || uid();   // один id на все попытки сохранить эту форму: повтор после сбоя не создаёт дубль
+  // новая запись без выбранного счёта — тот, куда записывали такой тип в прошлый раз
+  if (!editId && f.type && !f.acc) {
+    const last = (UI.lastAcc || {})[f.type], L = last && accById(last);
+    if (L && !L.archived) f.acc = last;
+    const lx = f.type === 'xfer' && UI.lastXfer && accById(UI.lastXfer.acc2);
+    if (lx && !lx.archived && !f.acc2) f.acc2 = UI.lastXfer.acc2;
+  }
   const onClose = flow.after || null;
   if (!assetAccs().length && !loanAccs().length) {
     openModal('Сначала нужен счёт', '<p>Операция записывается на счёт: вклад, карту, брокерский счёт или кошелёк. Добавьте хотя бы один.</p>', `<span class="spacer"></span><button class="btn" data-act="modal-close">Закрыть</button><button class="btn pri" data-act="acc-new">Добавить счёт</button>`, { onClose });
@@ -2650,7 +3278,7 @@ function opForm(pre = {}, editId = null, flow = {}) {
     return;
   }
   if (!f.type) {
-    openModal('Новая запись', `<div class="types">${TYPE_CARDS.map(([k, t, d]) => `<button class="type" data-act="op-type" data-type="${k}"><b>${t}</b><span>${d}</span></button>`).join('')}</div>`, null, { onClose });
+    openModal('Новая запись', typePicker(), null, { onClose });
     $('#modal-root')._flow = { ...flow, pre: { date: f.date, acc: f.acc, _id: f._id } };
     return;
   }
@@ -2658,20 +3286,23 @@ function opForm(pre = {}, editId = null, flow = {}) {
     const body = opBody(f, editId);
     openModal((editId ? 'Изменить: ' : '') + ((TYPE_CARDS.find(x => x[0] === f.type) || [])[1] || OPS[f.type]), body.html,
       `${editId ? '' : '<button class="btn ghost" data-act="op-back">← Другой тип</button>'}<span class="spacer"></span><button class="btn" data-act="modal-close">Отмена</button>${body.ok ? `<button class="btn pri" id="op-save">${editId ? 'Сохранить' : 'Записать'}</button>` : ''}`, { noFocus: !!focusId, onClose });
-    $('#modal-root')._flow = { ...flow, pre: { date: f.date, acc: f.acc, _id: f._id } };
+    // «← Другой тип» несёт только счёт, заданный снаружи (кнопка счёта, повтор), — иначе новый тип возьмёт свой запомненный счёт
+    $('#modal-root')._flow = { ...flow, pre: { date: f.date, acc: pre.acc, _id: f._id } };
     const b = $('#modal-b');
     b.addEventListener('input', e => { const k = e.target.dataset.f; if (k) { f[k] = e.target.value; opPreview(f, editId); } });
     b.addEventListener('change', e => {
       const k = e.target.dataset.f; if (!k) return; f[k] = e.target.value;
       if (['acc', 'acc2', 'side', 'kind', 'date'].includes(k)) {
         if (k === 'acc' || k === 'acc2') { delete f.fx; delete f.amt2; const A = accById(f.acc), B = accById(f.acc2); if (!A || !FC.unitsOn(A)) { delete f.qty; delete f.price; } if (!B || !FC.unitsOn(B)) delete f.qty2; }
-        if (k !== 'date') draw(e.target.id);
+        // подсказки суммы зависят от месяца даты — при смене даты пересчитываем их
+        if (k !== 'date' || (!editId && ['in', 'pay', 'inc'].includes(f.type) && FC.validDate(f.date))) draw(e.target.id);
       }
     });
     if (body.ok) $('#op-save').onclick = () => saveOp(f, editId);
     opPreview(f, editId);
     if (focusId) { const el = document.getElementById(focusId); if (el) el.focus(); }
-    else { const el = b.querySelector('input:not([readonly]):not([type=date]), select'); if (el) setTimeout(() => el.focus(), 30); }
+    // сразу в поле суммы: счёт обычно уже верный, а на телефоне откроется цифровая клавиатура
+    else { const el = b.querySelector('#op-amt, #op-value, #op-price') || b.querySelector('input:not([readonly]):not([type=date]), select'); if (el) setTimeout(() => el.focus(), 30); }
   };
   draw();
 }
@@ -2683,7 +3314,7 @@ function accOptions(list, sel, emptyLabel) {
   }).join('');
 }
 function fieldNum(id, key, label, val, hint = '', attrs = '') {
-  return `<label class="f"><span>${label}</span><input class="in" id="${id}" data-f="${key}" inputmode="decimal" autocomplete="off" value="${esc(val ?? '')}" ${attrs}><span class="err" data-err="${key}"></span>${hint ? `<span class="hint">${hint}</span>` : ''}</label>`;
+  return `<label class="f"><span>${label}</span><input class="in" id="${id}" data-f="${key}" inputmode="decimal" autocomplete="off" value="${esc(val ?? '')}" ${attrs}><span class="eq" aria-live="polite"></span><span class="err" data-err="${key}"></span>${hint ? `<span class="hint">${hint}</span>` : ''}</label>`;
 }
 function opBody(f, editId) {
   const assets = assetAccs(false), loans = loanAccs(false);
@@ -2703,7 +3334,7 @@ function opBody(f, editId) {
   const parts = [];
   const accLabel = { in: 'Куда положили', out: 'Откуда сняли', xfer: 'Откуда', inc: 'Куда пришли деньги', cost: 'Со счёта', val: 'Счёт', pay: 'Кредит', borrow: 'Кредит', trade: 'Счёт', open: 'Счёт или кредит' }[t];
   parts.push(`<label class="f"><span>${accLabel}</span><select class="in" id="op-acc" data-f="acc" ${editId && t === 'open' && A && FC.isLiab(A) ? 'disabled' : ''}>${accOptions(accList, f.acc)}</select></label>`);
-  parts.push(`<label class="f"><span>Дата</span><input class="in" id="op-date" type="date" data-f="date" value="${esc(f.date)}"><span class="err" data-err="date"></span></label>`);
+  parts.push(`<div class="f"><span class="f-h"><label for="op-date">Дата</label><span class="dchips"><button type="button" class="link" data-act="op-day" data-d="0">сегодня</button><button type="button" class="link" data-act="op-day" data-d="-1">вчера</button></span></span><input class="in" id="op-date" type="date" data-f="date" value="${esc(f.date)}"><span class="err" data-err="date"></span></div>`);
   if (t === 'xfer') {
     const to = assets.filter(a => a.id !== f.acc);
     const own2 = editId ? accById(f.acc2) : null;
@@ -2726,6 +3357,8 @@ function opBody(f, editId) {
   } else {
     const amtLabel = { in: `Сумма, ${sym}`, out: `Сумма, ${sym}`, xfer: `Списано, ${sym}`, inc: `Сумма до налога, ${sym}`, cost: `Сумма, ${sym}`, pay: 'Заплатили, ₸', borrow: 'Сумма кредита, ₸', trade: `Сумма сделки, ${sym}`, open: A && FC.isLiab(A) ? 'Долг, ₸' : `Остаток, ${sym}` }[t];
     parts.push(fieldNum('op-amt', 'amt', amtLabel, f.amt));
+    const sg = editId ? [] : amtSuggest(f);
+    if (sg.length) parts.push(`<div class="chips full" aria-label="Подставить сумму">${sg.map(([v, t]) => `<button type="button" class="chip" data-act="op-sugg" data-v="${Math.round(v * 100) / 100}">${esc(t)}</button>`).join('')}</div>`);
   }
   if (units && ['in', 'open', 'out', 'trade'].includes(t)) parts.push(fieldNum('op-qty', 'qty', t === 'out' ? 'Продано, шт.' : t === 'trade' ? 'Количество, шт.' : 'Куплено, шт.', f.qty, t === 'out' ? `На счёте ${qtyTxt(o.units || 0)} шт. Оставьте пустым, если снимаете деньги со счёта, а не продаёте.` : t === 'trade' ? '' : 'Оставьте пустым, если деньги просто лежат на счёте.'));
   if (t === 'xfer') {
@@ -2733,7 +3366,7 @@ function opBody(f, editId) {
     if (units) parts.push(fieldNum('op-qty', 'qty', 'Продано, шт.', f.qty, 'Если продали актив и перевели деньги. Пусто — перевод денег со счёта.'));
     if (B && (B.ccy || 'KZT') !== ccy) {
       const rs = settings().rates;
-      const est = FC.parseNum(f.amt) * FC.rateAt(rs, ccy, f.date) / FC.rateAt(rs, B.ccy || 'KZT', f.date);
+      const est = amt(f.amt) * FC.rateAt(rs, ccy, f.date) / FC.rateAt(rs, B.ccy || 'KZT', f.date);
       parts.push(fieldNum('op-amt2', 'amt2', `Зачислено, ${FC.SYM[B.ccy] || B.ccy}`, f.amt2, isNum(est) ? `По курсу ≈ ${FC.grp(est, 2)}. Впишите, сколько пришло на самом деле.` : 'Впишите, сколько пришло на самом деле.'));
     }
     if (B && FC.unitsOn(B)) parts.push(fieldNum('op-qty2', 'qty2', 'Куплено, шт.', f.qty2, 'Если на эти деньги купили актив.'));
@@ -2758,15 +3391,15 @@ function opPreview(f, editId) {
   const A = accById(f.acc); if (!A) { el.innerHTML = ''; return; }
   const ccy = A.ccy || 'KZT';
   let html = '';
-  if (f.type === 'inc') { const net = num(FC.parseNum(f.amt)) - num(FC.parseNum(f.tax)) - num(FC.parseNum(f.fee)); html = `<div class="note small">На руки: <b>${M(net, ccy)}</b></div>`; }
-  if (['in', 'open'].includes(f.type) && FC.unitsOn(A)) { const a = FC.parseNum(f.amt), q = FC.parseNum(f.qty); if (a > 0 && q > 0) html = `<div class="note small">Цена покупки: <b>${M(a / q, ccy)}</b> за 1 шт.</div>`; }
+  if (f.type === 'inc') { const net = num(amt(f.amt)) - num(amt(f.tax)) - num(amt(f.fee)); html = `<div class="note small">На руки: <b>${M(net, ccy)}</b></div>`; }
+  if (['in', 'open'].includes(f.type) && FC.unitsOn(A)) { const a = amt(f.amt), q = amt(f.qty); if (a > 0 && q > 0) html = `<div class="note small">Цена покупки: <b>${M(a / q, ccy)}</b> за 1 шт.</div>`; }
   if (f.type === 'val' && !FC.isLiab(A)) {
-    const o = comp.accs[A.id] || {}; let v = FC.parseNum(f.value);
-    if (!isNum(v) && isNum(FC.parseNum(f.price))) v = o.units * FC.parseNum(f.price) + o.cash;
+    const o = comp.accs[A.id] || {}; let v = amt(f.value);
+    if (!isNum(v) && isNum(amt(f.price))) v = o.units * amt(f.price) + o.cash;
     if (isNum(v)) html = `<div class="note small">Изменение стоимости: <b class="${v - o.value >= 0 ? 'pos' : 'neg'}">${FC.signed(v - o.value, n => M(n, ccy))}</b></div>`;
   }
   if (f.type === 'pay') {
-    const L = comp.accs[A.id] || {}; const a = FC.parseNum(f.amt);
+    const L = comp.accs[A.id] || {}; const a = amt(f.amt);
     const i = FC.loanInterest(num(L.debt), +A.rate, lastLoanDate(A.id, f.date, editId), f.date);
     if (a > 0) html = `<div class="note small">Из платежа примерно ${M(Math.min(a, i))} — проценты, ${M(Math.max(0, a - i))} — долг.</div>`;
   }
@@ -2779,7 +3412,7 @@ function readOp(f, editId) {
   if (!FC.validDate(f.date)) errs.date = 'Неверная дата';
   const prevOp = editId ? Store.data.ops.find(x => x.id === editId) : null;
   const o = { id: f._id || editId || uid(), ts: prevOp ? num(prevOp.ts) || Date.now() : (f._ts = f._ts || Date.now()), date: f.date, type: f.type, acc: f.acc };
-  const n = k => { const v = FC.parseNum(f[k]); return isNum(v) ? v : null; };
+  const n = k => { const v = amt(f[k]); return isNum(v) ? v : null; };
   const filled = k => String(f[k] ?? '').trim() !== '';
   const pos = (k, req = true) => {
     if (!filled(k)) { if (req) errs[k] = 'Введите число'; return null; }
@@ -2860,6 +3493,11 @@ async function saveOp(f, editId, force) {
   const gen = modalGen;
   const ok = await commitFrom(btn, () => Store.put('ops', o.id, o));
   if (!ok) return;
+  if (!editId) {   // в следующий раз такой тип записи откроется с этим же счётом
+    UI.lastAcc = { ...(UI.lastAcc || {}), [o.type]: o.acc };
+    if (o.type === 'xfer') UI.lastXfer = { acc: o.acc, acc2: o.acc2 };
+    saveUI();
+  }
   if (gen === modalGen) closeModal();   // окно могли закрыть, пока шло сохранение, — тогда чужое окно не трогаем
   const msg = editId ? 'Изменено' : (o.date > today() ? 'Записано на будущую дату — посчитается в тот день' : 'Записано');
   toast(msg, 'Отменить', () => (before ? Store.put('ops', o.id, before) : Store.put('ops', o.id, null)).catch(e => toast(failText(e))));
@@ -2880,6 +3518,7 @@ function accForm(a = null, preCat = null, flow = {}) {
     const nOps = a ? Store.data.ops.filter(o => o.acc === a.id || o.acc2 === a.id).length : 0;
     const ccys = [...new Set(['KZT', 'USD', 'EUR', 'RUB', ...FC.currencies(s.rates), f.ccy || 'KZT'])];
     const o = a ? comp.accs[a.id] || {} : {};
+    const srcAccs = isNew && !liab ? fromAccs(f.ccy) : [];
     const body = `<div class="fgrid">
       <label class="f full"><span>Название</span><input class="in" id="a-name" data-f="name" value="${esc(f.name || '')}" maxlength="60" placeholder="${liab ? 'Автокредит Kaspi' : 'Kaspi Депозит'}"><span class="err" data-err="name"></span></label>
       <label class="f"><span>Вид</span><select class="in" id="a-cat" data-f="cat" ${a && nOps && (FC.isLiab(a) !== liab || true) && FC.isLiab(a) ? 'disabled' : ''}>${CAT_ORDER.filter(k => !a || !nOps || (k === 'loan') === FC.isLiab(a)).map(k => `<option value="${k}" ${f.cat === k ? 'selected' : ''}>${CATS[k].name}</option>`).join('')}</select></label>
@@ -2895,8 +3534,9 @@ function accForm(a = null, preCat = null, flow = {}) {
         ${fieldNum('a-ret', 'ret', f.cat === 'dep' ? 'Ставка вклада, % годовых' : 'Ожидаемая доходность, % годовых', f.ret != null && f.ret !== '' ? inVal(f.ret) : '', `Пусто — по умолчанию ${FC.grp(num((s.rets || {})[f.cat] ?? CATS[f.cat].ret), 1)}%`)}
         ${fieldNum('a-cut', 'cut', 'Дисконт для взноса, %', f.cut != null && f.cut !== '' ? inVal(f.cut) : '', `Пусто — ${FC.grp(num((s.cuts || {})[f.cat] ?? CATS[f.cat].cut), 0)}%`)}
         <label class="check full"><input type="checkbox" id="a-units" data-f="units" ${(f.units != null ? f.units : unitsDef) ? 'checked' : ''}> Учитывать количество (штуки акций, монеты) — для средней цены и прибыли с продаж</label>
-        ${isNew ? `${fieldNum('a-open', 'open', `Сколько на счёте сейчас, ${FC.SYM[f.ccy] || f.ccy}`, f.open, 'Станет начальным остатком. Можно оставить пустым.')}
+        ${isNew ? `${fieldNum('a-open', 'open', `Сколько на счёте сейчас, ${FC.SYM[f.ccy] || f.ccy}`, f.open, srcAccs.length ? 'Можно оставить пустым.' : 'Станет начальным остатком. Можно оставить пустым.')}
           <label class="f"><span>На дату</span><input class="in" id="a-open-d" type="date" data-f="openD" value="${esc(f.openD || today())}"></label>
+          ${srcAccs.length ? `<label class="f full"><span>Откуда эти деньги</span><select class="in" id="a-from" data-f="from"><option value="" ${!f.from ? 'selected' : ''}>— выберите —</option><option value="in" ${f.from === 'in' ? 'selected' : ''}>Отложил сейчас — из зарплаты или дохода</option><option value="new" ${f.from === 'new' ? 'selected' : ''}>Уже лежали там до начала учёта</option>${srcAccs.map(x => { const so = comp.accs[x.id] || {}; return `<option value="${x.id}" ${f.from === x.id ? 'selected' : ''}>Перевёл со своего счёта «${esc(x.name)}» (${esc(FC.unitsOn(x) ? 'свободных ' + C(so.cash, x.ccy) : C(so.value, x.ccy))})</option>`; }).join('')}</select><span class="err" data-err="from"></span><span class="hint">Переложили деньги с другого своего счёта — выберите его. Иначе одни и те же деньги посчитаются дважды.</span></label>` : ''}
           ${(f.units != null ? f.units : unitsDef) ? fieldNum('a-open-q', 'openQ', 'Количество, шт.', f.openQ) : ''}` : ''}`}
       ${!isNew ? `<label class="check full"><input type="checkbox" id="a-arch" data-f="archived" ${f.archived ? 'checked' : ''}> Счёт закрыт — скрыть из списков (история и расчёты сохранятся)</label>
         ${f.archived && !a.archived && (Math.abs(num(o.value)) > 0.5 || num(o.debt) > 0.5) ? `<p class="note warn small full">На счёте ещё ${FC.isLiab(a) ? 'долг ' + M(o.debt) : M(o.value, a.ccy)}. Закрытый счёт по-прежнему считается в капитале — сначала переведите или снимите остаток.</p>` : ''}` : ''}
@@ -2909,13 +3549,15 @@ function accForm(a = null, preCat = null, flow = {}) {
     b.addEventListener('change', e => {
       const k = e.target.dataset.f; if (!k) return;
       f[k] = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
-      if (['cat', 'ccy', 'units', 'archived'].includes(k)) { if (k === 'cat') { delete f.units; delete f.goalSel; } draw(); }
+      if (['cat', 'ccy', 'units', 'archived'].includes(k)) { if (k === 'cat') { delete f.units; delete f.goalSel; } if (k === 'cat' || k === 'ccy') delete f.from; draw(); }   // список «откуда» зависит от валюты
     });
     $('#a-save').onclick = () => saveAcc(f, a);
     if (!isNew) $('#a-del').onclick = () => confirmAccDelete(a);
   };
   draw();
 }
+// Свои счета той же валюты, с которых можно переложить деньги на новый счёт (машина и имущество — не деньги)
+const fromAccs = ccy => assetAccs(false).filter(x => x.cat !== 'prop' && (x.ccy || 'KZT') === (ccy || 'KZT'));
 function confirmAccDelete(a) {
   const ops = Store.data.ops.filter(o => o.acc === a.id || o.acc2 === a.id);
   const others = [...new Set(ops.map(o => (o.acc === a.id ? o.acc2 : o.acc)).filter(Boolean))].map(id => accById(id)).filter(Boolean);
@@ -2935,10 +3577,10 @@ async function saveAcc(f, a) {
   const errs = {};
   const name = String(f.name || '').trim();
   if (!name) errs.name = 'Назовите счёт';
-  const n = k => { const v = FC.parseNum(f[k]); return isNum(v) ? v : null; };
+  const n = k => { const v = amt(f[k]); return isNum(v) ? v : null; };
   const blank = k => String(f[k] ?? '').trim() === '';
   const acc = { ...(a || {}), id: a ? a.id : f._id, name: name.slice(0, 60), cat: f.cat, platform: String(f.platform || '').trim().slice(0, 40) };
-  for (const k of ['open', 'openD', 'openQ', 'debt', 'debtD', 'goalSel', '_id', '_openId']) delete acc[k];
+  for (const k of ['open', 'openD', 'openQ', 'debt', 'debtD', 'goalSel', 'from', '_id', '_openId']) delete acc[k];
   const s = settings();
   if (f.cat === 'loan') {
     acc.ccy = 'KZT';
@@ -2972,10 +3614,29 @@ async function saveAcc(f, a) {
       else if (v > 0) {
         const d = f.openD || today();
         if (!FC.validDate(d)) errs.open = 'Неверная дата';
-        const o = { id: f._openId, ts: Date.now(), date: d, type: 'open', acc: acc.id, amt: v, note: 'Остаток на начало учёта' };
-        const q = n('openQ'); if (q > 0) o.qty = q;
-        if (acc.ccy !== 'KZT') { const r = FC.rateAt(s.rates, acc.ccy, d); if (isNum(r)) o.fx = r; }
-        ops.push(o);
+        // есть другие свои счета — человек выбирает, новые это деньги или переложенные: иначе капитал удвоится
+        const srcList = fromAccs(acc.ccy);
+        const from = srcList.length ? f.from : 'new';
+        const S = from && from !== 'new' && from !== 'in' ? srcList.find(x => x.id === from) || null : null;
+        if (!from) errs.from = 'Выберите, откуда деньги';
+        else if (from !== 'new' && from !== 'in' && !S) errs.from = 'Выберите, откуда деньги';   // источник другой валюты или уже не в списке
+        else if (from === 'in') {   // отложил сейчас из дохода — это пополнение: попадёт в «отложено за месяц»
+          const o = { id: f._openId, ts: Date.now(), date: d, type: 'in', acc: acc.id, amt: v, note: 'Отложил на новый счёт' };
+          const q = n('openQ'); if (q > 0) o.qty = q;
+          if (acc.ccy !== 'KZT') { const r = FC.rateAt(s.rates, acc.ccy, d); if (isNum(r)) o.fx = r; }
+          ops.push(o);
+        } else if (S) {
+          const so = comp.accs[S.id] || {}, have = num(FC.unitsOn(S) ? so.cash : so.value);
+          if (v > have + 0.5) errs.open = `На «${S.name}» по учёту только ${M(have, S.ccy)}`;
+          const o = { id: f._openId, ts: Date.now(), date: d, type: 'xfer', acc: S.id, acc2: acc.id, amt: v, note: 'Переложил на новый счёт' };
+          const q = n('openQ'); if (q > 0) o.qty2 = q;
+          ops.push(o);
+        } else {
+          const o = { id: f._openId, ts: Date.now(), date: d, type: 'open', acc: acc.id, amt: v, note: 'Остаток на начало учёта' };
+          const q = n('openQ'); if (q > 0) o.qty = q;
+          if (acc.ccy !== 'KZT') { const r = FC.rateAt(s.rates, acc.ccy, d); if (isNum(r)) o.fx = r; }
+          ops.push(o);
+        }
       }
     }
   }
@@ -2990,7 +3651,7 @@ async function saveAcc(f, a) {
 
 // ---------- форма месяца ----------
 const EXP_CATS = [['home', 'Жильё и коммуналка'], ['food', 'Питание'], ['trans', 'Транспорт и машина'], ['comm', 'Связь и подписки'], ['other', 'Прочее'], ['unpl', 'Незапланированное']];
-function monthForm(mk, draft) {
+function monthForm(mk, draft, dirty) {
   fresh();
   if (!ready()) return;
   if (!Store.canWrite) return;
@@ -3007,12 +3668,12 @@ function monthForm(mk, draft) {
   const opDate = mk === comp.curMk ? today() : mk < comp.curMk ? FC.monthEnd(mk) : `${mk}-01`;
   const body = `
     ${pm && pm.todo ? `<details class="more" ${mk === comp.curMk ? 'open' : ''}><summary>Что делать по плану</summary><div class="todo note" style="margin-top:6px">${esc(pm.todo)}</div></details>` : ''}
-    <div><div class="eyebrow" style="margin-bottom:8px">Доходы за месяц</div><div class="fgrid">
+    <div><div class="row sp" style="margin-bottom:8px"><div class="eyebrow">Доходы за месяц</div><button class="btn sm" id="m-fill" type="button" title="Заполнит пустые поля суммами из плана — поправьте только то, что было иначе">Как по плану</button></div><div class="fgrid">
       ${srcs.map(x => fieldNum('m-inc-' + x.id, 'inc.' + x.id, esc(x.name) + ', ₸', v(rec.inc, x.id), x.gone ? 'Источник удалён в настройках — сумма сохраняется.' : '', `placeholder="план ${esc(fmtIn(planInc[x.id] || 0))}"`)).join('')}
     </div></div>
     <div><div class="eyebrow" style="margin-bottom:8px">Расходы</div>
       <div class="fgrid">${fieldNum('m-exp', 'exp', 'Всего потратил, ₸', v(rec, 'exp'), '', `placeholder="план ${esc(fmtIn(planExp))}"`)}</div>
-      <details class="more" ${rec.expBy && Object.values(rec.expBy).some(x => x !== '' && x != null) ? 'open' : ''}><summary>По статьям</summary><div class="fgrid three" style="margin-top:8px">${EXP_CATS.map(([k, nm]) => fieldNum('m-eb-' + k, 'expBy.' + k, nm, v(rec.expBy, k))).join('')}</div><p class="hint">Если заполнить статьи, «Всего» посчитается как их сумма.</p></details>
+      <details class="more" ${rec.expBy && Object.values(rec.expBy).some(x => x !== '' && x != null) ? 'open' : ''}><summary>По статьям</summary><div class="fgrid three" style="margin-top:8px">${EXP_CATS.map(([k, nm]) => fieldNum('m-eb-' + k, 'expBy.' + k, nm, v(rec.expBy, k))).join('')}</div><p class="hint" id="m-eb-sum">Статьи расписывают «Всего потратил» — не обязательно заполнять все.</p></details>
     </div>
     <div><div class="eyebrow" style="margin-bottom:8px">Из журнала операций</div>
       <div class="kv">
@@ -3028,16 +3689,19 @@ function monthForm(mk, draft) {
     </div>
     <div><div class="eyebrow" style="margin-bottom:8px">Итог месяца</div><div class="kv" id="m-sum"></div>
       <div class="fgrid" style="margin-top:10px">${fieldNum('m-plan', 'planSave', 'Свой план отложить на этот месяц, ₸', v(rec, 'planSave'), 'Пусто — по плану или правилу из настроек. Учитывается и в прогнозе.')}</div></div>
-    <label class="f"><span>Заметка</span><textarea class="in" id="m-note" data-f="note" maxlength="500" placeholder="Например: премия, ремонт машины">${esc(rec.note || '')}</textarea></label>`;
-  openModal(cap(FC.mkLong(mk)), body, `${Store.data.months[mk] ? '<button class="btn danger" id="m-clear">Очистить месяц</button>' : ''}<span class="spacer"></span><button class="btn" data-act="modal-close">Отмена</button><button class="btn pri" id="m-save">Сохранить</button>`, { wide: true, noFocus: !!draft });
+    <label class="f"><span>Заметка</span><textarea class="in" id="m-note" data-f="note" maxlength="500" placeholder="Например: премия, ремонт машины">${esc(rec.note || '')}</textarea></label>
+    ${Store.data.months[mk] ? '<div><button class="btn sm danger" id="m-clear" type="button">Очистить месяц…</button></div>' : ''}`;
+  openModal(cap(FC.mkLong(mk)), body, `<span class="spacer"></span><button class="btn" data-act="modal-close">Отмена</button><button class="btn pri" id="m-save">Сохранить</button>`, { wide: true, noFocus: !!draft });
+  if (dirty) modalDirty = true;
   $('#modal-root')._month = { mk, read: () => readMonth(srcs) };
-  let expBeforeBreak = rec.exp;
   const summary = () => {
-    // сначала приводим «Всего потратил» в соответствие со статьями, потом считаем итог — иначе он отстаёт на одно нажатие
-    const ex = $('#m-exp');
-    const by = EXP_CATS.map(([k]) => FC.parseNum($('#m-eb-' + k).value)).filter(isNum);
-    if (by.length) { if (!ex.readOnly) expBeforeBreak = FC.parseNum(ex.value); ex.value = fmtIn(by.reduce((a, b) => a + b, 0)); ex.readOnly = true; }
-    else if (ex.readOnly) { ex.readOnly = false; ex.value = isNum(expBeforeBreak) ? fmtIn(expBeforeBreak) : ''; }
+    // статьи только расписывают «Всего»: одна заполненная статья не превращается в расходы всего месяца
+    const by = EXP_CATS.map(([k]) => amt($('#m-eb-' + k).value)).filter(isNum), tot = amt($('#m-exp').value);
+    const bySum = by.reduce((a, b) => a + b, 0);
+    $('#m-eb-sum').textContent = !by.length ? 'Статьи расписывают «Всего потратил» — не обязательно заполнять все.'
+      : !isNum(tot) ? `«Всего потратил» не указано — в расходы пойдёт сумма статей: ${M(bySum)}.`
+      : bySum > tot + 0.5 ? `Статьи (${M(bySum)}) больше, чем «Всего» (${M(tot)}) — в расходы пойдёт сумма статей.`
+      : `Расписано ${M(bySum)} из ${M(tot)}${tot - bySum > 0.5 ? ` · не расписано ${M(tot - bySum)} — это прочие расходы` : ''}.`;
     const r0 = readMonth(srcs);
     const tmp = { ...st(), months: { ...Store.data.months, [mk]: r0 } };
     const r = FC.monthRow(tmp, comp, mk);
@@ -3048,13 +3712,24 @@ function monthForm(mk, draft) {
       <div class="total"><span>Свободно</span><b>${r.free != null ? M(r.free) + (r.expEst ? ' <span class="muted small">с расходами по плану</span>' : '') : '—'}</b></div>
       <div><span>План отложить</span><b>${r.plan != null ? M(r.plan) : '—'}</b></div>
       <div class="total"><span>Отложено (из операций)</span><b>${M(r.saved)}${r.done != null ? ` · ${P(r.done, 0)}` : ''}</b></div>
-      ${r.leftover != null ? `<div><span>Осталось свободных, не отложено</span><b class="${r.leftover < -0.5 ? 'neg' : ''}">${M(r.leftover)}</b></div>` : ''}`;
+      ${r.leftover == null ? '' : r.leftover < -0.5 ? `<div><span>Отложено больше, чем осталось свободных</span><b>${M(-r.leftover)} <span class="muted small">из прошлых денег</span></b></div>`
+        : `<div><span>Осталось свободных, не отложено</span><b>${M(r.leftover)}</b></div>`}`;
     let bad = false;
-    $$('#modal-b .in[data-f]').forEach(el => { const val = el.value.trim(); const ok = !val || el.id === 'm-note' || (isNum(FC.parseNum(val)) && FC.parseNum(val) >= 0); el.classList.toggle('bad', !ok); if (!ok) bad = true; });
+    $$('#modal-b .in[data-f]').forEach(el => { const val = el.value.trim(); const ok = !val || el.id === 'm-note' || (isNum(amt(val)) && amt(val) >= 0); el.classList.toggle('bad', !ok); if (!ok) bad = true; });
     $('#m-save').disabled = bad;
   };
   $('#modal-b').addEventListener('input', summary);
   summary();
+  // «Как по плану»: пустые поля доходов и расходов получают суммы плана — остаётся поправить то, что было иначе
+  $('#m-fill').onclick = () => {
+    let n = 0;
+    for (const x of srcs) { const el = $('#m-inc-' + x.id); if (el && !x.gone && !el.value.trim() && planInc[x.id] > 0) { el.value = fmtIn(planInc[x.id]); n++; } }
+    const ex = $('#m-exp'); if (!ex.value.trim() && planExp > 0) { ex.value = fmtIn(planExp); n++; }
+    modalDirty = modalDirty || n > 0;
+    summary();
+    const hasPlan = Object.values(planInc).some(x => x > 0) || planExp > 0;
+    toast(n ? 'Заполнено по плану — поправьте, что было иначе' : hasPlan ? 'Все поля уже заполнены' : `В плане на ${FC.mkLong(mk)} нет сумм доходов и расходов — впишите сами`);
+  };
   $('#m-save').onclick = async () => {
     const r0 = readMonth(srcs); const empty = !Object.keys(r0).length; const gen = modalGen;
     const ok = await commitFrom($('#m-save'), () => Store.put('mon', mk, empty ? null : r0));
@@ -3064,10 +3739,10 @@ function monthForm(mk, draft) {
 }
 function readMonth(srcs) {
   const out = { inc: {}, expBy: {} };
-  for (const x of srcs) { const el = $('#m-inc-' + x.id); const v = el ? FC.parseNum(el.value) : NaN; if (isNum(v)) out.inc[x.id] = v; }
-  for (const [k] of EXP_CATS) { const v = FC.parseNum($('#m-eb-' + k).value); if (isNum(v)) out.expBy[k] = v; }
-  const e = FC.parseNum($('#m-exp').value); if (isNum(e) && !Object.keys(out.expBy).length) out.exp = e;
-  const p = FC.parseNum($('#m-plan').value); if (isNum(p)) out.planSave = p;
+  for (const x of srcs) { const el = $('#m-inc-' + x.id); const v = el ? amt(el.value) : NaN; if (isNum(v)) out.inc[x.id] = v; }
+  for (const [k] of EXP_CATS) { const v = amt($('#m-eb-' + k).value); if (isNum(v)) out.expBy[k] = v; }
+  const e = amt($('#m-exp').value); if (isNum(e)) out.exp = e;
+  const p = amt($('#m-plan').value); if (isNum(p)) out.planSave = p;
   const note = $('#m-note').value.trim(); if (note) out.note = note.slice(0, 500);
   if (!Object.keys(out.inc).length) delete out.inc;
   if (!Object.keys(out.expBy).length) delete out.expBy;
@@ -3076,7 +3751,7 @@ function readMonth(srcs) {
 
 // ---------- экспорт, импорт, очистка ----------
 function exportData() {
-  return { app: 'moi-finansy', version: 1, exportedAt: new Date().toISOString(), settings: Store.data.settings, accounts: Store.data.accounts, ops: Store.data.ops, months: Store.data.months };
+  return { app: 'moi-finansy', version: 1, exportedAt: new Date().toISOString(), settings: Store.data.settings, accounts: Store.data.accounts, ops: Store.data.ops, months: Store.data.months, story: Store.data.story };
 }
 async function offerFile(filename, text, title) {
   let dl = null;
@@ -3109,12 +3784,13 @@ function importFlow() {
       const v = FC.validateImport(obj);
       if (!v.ok) { $('#imp-out').innerHTML = `<div class="note warn small"><b>Файл не подходит:</b><ul style="margin:6px 0 0 18px;padding:0">${v.errors.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>`; return; }
       const mp = FC.mergePlan(Store.data, obj);
-      $('#imp-out').innerHTML = `<div class="note small">В файле: счетов ${v.counts.accounts}, операций ${v.counts.ops}, месяцев ${v.counts.months}${v.counts.settings ? ', настройки' : ''}.${v.warnings.map(w => ' ' + esc(w)).join('')}</div>
-        <div class="kv"><div><span>Новых счетов</span><b>${mp.addAcc.length}</b></div><div><span>Новых операций</span><b>${mp.addOps.length}</b></div><div><span>Уже есть (пропущу)</span><b>${mp.dup.length}</b></div><div><span>Новых месяцев</span><b>${mp.addMonths.length}</b></div></div>
+      $('#imp-out').innerHTML = `<div class="note small">В файле: счетов ${v.counts.accounts}, операций ${v.counts.ops}, месяцев ${v.counts.months}${v.counts.story ? `, отметок пути за ${v.counts.story} мес.` : ''}${v.counts.settings ? ', настройки' : ''}.${v.warnings.map(w => ' ' + esc(w)).join('')}</div>
+        <div class="kv"><div><span>Новых счетов</span><b>${mp.addAcc.length}</b></div><div><span>Новых операций</span><b>${mp.addOps.length}</b></div><div><span>Уже есть (пропущу)</span><b>${mp.dup.length}</b></div><div><span>Новых месяцев</span><b>${mp.addMonths.length}</b></div>${mp.addStory.length ? `<div><span>Новых месяцев с отметками пути</span><b>${mp.addStory.length}</b></div>` : ''}</div>
         ${obj.settings && Store.data.settings ? `<label class="check"><input type="checkbox" id="imp-cfg" ${!(settings().plan.months || []).length && ((obj.settings.plan || {}).months || []).length ? 'checked' : ''}> Взять из файла настройки и план по месяцам (заменят текущие настройки)</label>` : ''}
         <div class="row"><button class="btn pri" id="imp-merge">Добавить новое к моим данным</button><button class="btn danger" id="imp-replace">Заменить все мои данные…</button></div><div id="imp-confirm"></div><div id="imp-prog" class="hint"></div>`;
       $('#imp-merge').onclick = async () => {
-        const items = [...mp.addAcc.map(a => ({ kind: 'acc', id: a.id, body: a })), ...mp.addOps.map(o => ({ kind: 'ops', id: o.id, body: o })), ...mp.addMonths.map(mk => ({ kind: 'mon', id: mk, body: obj.months[mk] }))];
+        const items = [...mp.addAcc.map(a => ({ kind: 'acc', id: a.id, body: a })), ...mp.addOps.map(o => ({ kind: 'ops', id: o.id, body: o })), ...mp.addMonths.map(mk => ({ kind: 'mon', id: mk, body: obj.months[mk] })),
+          ...mp.addStory.map(mk => ({ kind: 'sty', id: mk, body: obj.story[mk] }))];
         if (obj.settings && Store.data.settings && $('#imp-cfg') && $('#imp-cfg').checked) items.unshift({ kind: 'cfg', id: 'main', body: FC.normalizeSettings(obj.settings) });
         if (!Store.data.settings && obj.settings && (await Store.ensureSettings(FC.normalizeSettings(obj.settings))) === 'exists') toast('Настройки уже были — оставил их');
         if (!items.length) { closeModal(); toast('Нового в файле нет'); return; }
@@ -3124,13 +3800,16 @@ function importFlow() {
         $('#imp-confirm').innerHTML = `<div class="note warn small"><p style="margin:0 0 6px">Все текущие счета (${Store.data.accounts.length}), операции (${Store.data.ops.length}) и месяцы заменятся данными из файла. Сначала запишутся новые данные, потом удалятся старые — при сбое ничего не потеряется. Напишите <b>заменить</b>, чтобы подтвердить.</p><div class="row"><input class="in" id="imp-word" style="width:160px" autocomplete="off"><button class="btn danger solid" id="imp-go" disabled>Заменить</button></div></div>`;
         $('#imp-word').oninput = e2 => { $('#imp-go').disabled = e2.target.value.trim().toLowerCase() !== 'заменить'; };
         $('#imp-go').onclick = async () => {
-          const newAcc = new Set(obj.accounts.map(a => a.id)), newOps = new Set(obj.ops.map(o => o.id)), newMon = new Set(Object.keys(obj.months || {}));
+          const newAcc = new Set(obj.accounts.map(a => a.id)), newOps = new Set(obj.ops.map(o => o.id)), newMon = new Set(Object.keys(obj.months || {})), newSty = new Set(Object.keys(obj.story || {}));
           const items = [
             ...(obj.settings ? [{ kind: 'cfg', id: 'main', body: FC.normalizeSettings(obj.settings) }] : []),
             ...obj.accounts.map(a => ({ kind: 'acc', id: a.id, body: a })), ...obj.ops.map(o => ({ kind: 'ops', id: o.id, body: o })), ...Object.entries(obj.months || {}).map(([mk, r]) => ({ kind: 'mon', id: mk, body: r })),
+            ...Object.entries(obj.story || {}).map(([mk, r]) => ({ kind: 'sty', id: mk, body: r })),
             ...Store.data.ops.filter(o => !newOps.has(o.id)).map(o => ({ kind: 'ops', id: o.id, body: null })),
             ...Store.data.accounts.filter(a => !newAcc.has(a.id)).map(a => ({ kind: 'acc', id: a.id, body: null })),
             ...Object.keys(Store.data.months).filter(mk => !newMon.has(mk)).map(mk => ({ kind: 'mon', id: mk, body: null })),
+            // в старой копии нет отметок пути — свои отметки не трогаем: они привязаны к тексту плана, а не к копии
+            ...(obj.story && typeof obj.story === 'object' ? Object.keys(Store.data.story).filter(mk => !newSty.has(mk)).map(mk => ({ kind: 'sty', id: mk, body: null })) : []),
           ];
           await runBulk(items, 'Данные заменены');
         };
@@ -3154,12 +3833,13 @@ async function runBulk(items, okMsg) {
 }
 function clearFlow() {
   if (!Store.canWrite) return;
-  openModal('Удалить все данные', `<p>Удалятся все счета (${Store.data.accounts.length}), операции (${Store.data.ops.length}) и записи месяцев (${Object.keys(Store.data.months).length}). Настройки и план останутся. Отменить это нельзя.</p>
+  openModal('Удалить все данные', `<p>Удалятся все счета (${Store.data.accounts.length}), операции (${Store.data.ops.length}), записи месяцев (${Object.keys(Store.data.months).length}) и отметки пути. Настройки и план останутся. Отменить это нельзя.</p>
     <p class="small">Сначала скачайте резервную копию: <button class="btn sm" data-act="export-json">Скачать копию</button></p>
     <label class="f"><span>Напишите <b>удалить</b>, чтобы подтвердить</span><input class="in" id="clr-word" autocomplete="off"></label><div id="imp-prog" class="hint"></div>`,
     `<span class="spacer"></span><button class="btn" data-act="modal-close">Отмена</button><button class="btn danger solid" id="clr-go" disabled>Удалить всё</button>`);
   $('#clr-word').oninput = e => { $('#clr-go').disabled = e.target.value.trim().toLowerCase() !== 'удалить'; };
-  $('#clr-go').onclick = () => runBulk([...Store.data.ops.map(o => ({ kind: 'ops', id: o.id, body: null })), ...Store.data.accounts.map(a => ({ kind: 'acc', id: a.id, body: null })), ...Object.keys(Store.data.months).map(mk => ({ kind: 'mon', id: mk, body: null }))], 'Данные удалены');
+  $('#clr-go').onclick = () => runBulk([...Store.data.ops.map(o => ({ kind: 'ops', id: o.id, body: null })), ...Store.data.accounts.map(a => ({ kind: 'acc', id: a.id, body: null })), ...Object.keys(Store.data.months).map(mk => ({ kind: 'mon', id: mk, body: null })),
+    ...Object.keys(Store.data.story).map(mk => ({ kind: 'sty', id: mk, body: null }))], 'Данные удалены');
 }
 
 // ---------- настройки: запись ----------
@@ -3206,13 +3886,15 @@ function xlEl() {
   return el;
 }
 let xlHist = false;
-async function openExcel() {
+async function openExcel(sheet) {
   const el = xlEl();
   el.hidden = false; document.body.style.overflow = 'hidden';
   el.style.setProperty('--xlz', XL.zoom + 'px');
   for (const x of [$('header.top'), $('#view'), $('#fab')]) if (x) x.inert = true;
   try { history.pushState({ xl: 1 }, ''); xlHist = true; } catch (e) { xlHist = false; }
   await xlLoadMeta();
+  // открыть сразу нужный лист (например, «Сценарии» со страницы пути)
+  if (sheet && XL.meta) { const i = XL.meta.sheets.findIndex(x => String(x.name).toLowerCase() === String(sheet).toLowerCase()); if (i >= 0 && i !== XL.cur) xlShow(i); }
 }
 function closeExcel(fromPop) {
   const el = $('#xl'); if (!el || el.hidden) return;
@@ -3221,7 +3903,6 @@ function closeExcel(fromPop) {
   if (!fromPop && xlHist) { xlHist = false; try { history.back(); } catch (e) { /* без истории */ } }
   xlHist = false;
 }
-window.addEventListener('popstate', () => { if ($('#xl') && !$('#xl').hidden) { xlHist = false; closeExcel(true); } });
 async function xlLoadMeta(force) {
   const grid = $('#xl-grid');
   if (XL.meta && !force) { xlRenderShell(); return; }
@@ -3392,7 +4073,7 @@ function xlSettingsCard() {
 document.addEventListener('click', e => {
   const el = e.target.closest('[data-act]'); if (!el || el.disabled) return;
   const act = el.dataset.act, d = el.dataset;
-  if (act === 'modal-bg') { if (e.target === el) closeModal(); return; }
+  if (act === 'modal-bg') { if (e.target === el) closeModal(false, true); return; }
   switch (act) {
     case 'tab': UI.tab = d.tab; saveUI(); setHash(d.tab); render(); window.scrollTo({ top: 0 }); break;
     case 'chart': UI.chart = d.v; saveUI(); render(); break;
@@ -3404,13 +4085,33 @@ document.addEventListener('click', e => {
     case 'modal-close': closeModal(); break;
     case 'init-defaults': Store.ensureSettings(FC.defaultSettings()).then(r => toast(r === 'exists' ? 'Данные уже есть — открываю их' : 'Готово. Теперь добавьте первый счёт.')).catch(err => toast(failText(err))); break;
     case 'month': if (Store.canWrite) monthForm(d.mk); break;
-    case 'month-op': { const mo = $('#modal-root')._month; const draft = mo ? mo.read() : null; const mk = mo ? mo.mk : comp.curMk; opForm({ type: d.type, date: d.date }, null, { after: () => monthForm(mk, draft) }); break; }
+    case 'month-op': {   // введённое в месяце вернётся после записи: пока открыта операция, о потере не спрашиваем, а вернувшийся черновик снова «грязный»
+      const mo = $('#modal-root')._month; const draft = mo ? mo.read() : null; const mk = mo ? mo.mk : comp.curMk; const wasDirty = modalDirty;
+      opForm({ type: d.type, date: d.date }, null, { after: () => monthForm(mk, draft, wasDirty) }); modalDirty = false; break;
+    }
     case 'acc-new': { const fl = $('#modal-root')._flow; accForm(null, d.cat || null, fl && fl.after ? { after: fl.after } : {}); break; }
     case 'acc-edit': accForm(accById(d.id)); break;
     case 'acc-ops': UI.of = { q: '', type: 'all', acc: d.id, per: 'all' }; UI.tab = 'operacii'; saveUI(); setHash('operacii'); render(); window.scrollTo({ top: 0 }); break;
-    case 'op-new': { const pre = {}; if (d.type) pre.type = d.type; if (d.acc) pre.acc = d.acc; if (d.date) pre.date = d.date; opForm(pre); break; }
+    case 'op-new': { const pre = {}; if (d.type) pre.type = d.type; if (d.acc) pre.acc = d.acc; if (d.date) pre.date = d.date; if (d.purpose) pre.purpose = d.purpose; opForm(pre); break; }
     case 'op-type': { const fl = $('#modal-root')._flow || {}; opForm({ ...(fl.pre || {}), type: d.type }, null, fl); break; }
     case 'op-back': { const fl = $('#modal-root')._flow || {}; opForm({ ...(fl.pre || {}) }, null, fl); break; }
+    case 'op-repeat': {   // та же запись на сегодня: тип, счета и сумма, без комментария
+      const o = Store.data.ops.find(x => x.id === d.id), fl = $('#modal-root')._flow || {};
+      if (o) { const pre = { type: o.type, acc: o.acc, date: today(), amt: fmtIn(o.amt), _id: uid() }; for (const k of ['acc2', 'kind', 'purpose']) if (o[k]) pre[k] = o[k]; opForm(pre, null, fl); }
+      break;
+    }
+    case 'op-sugg': { const el = $('#op-amt'); if (el) { el.value = fmtIn(+d.v); el.dispatchEvent(new Event('input', { bubbles: true })); el.focus(); } break; }
+    case 'op-day': { const el = $('#op-date'); if (el) { const dt = new Date(); dt.setDate(dt.getDate() + +d.d); el.value = FC.todayStr(dt); el.dispatchEvent(new Event('change', { bubbles: true })); } break; }
+    case 'share': shareFlow(d.k); break;
+    case 'item-tick': storyMark(d.mk, d.k, 'd'); break;
+    case 'item-skip': storyMark(d.mk, d.k, 's'); break;
+    case 'step-open': { const s0 = new Set(UI.pathOpen || []); if (s0.has(d.mk)) s0.delete(d.mk); else s0.add(d.mk); UI.pathOpen = [...s0].slice(-12); saveUI(); render(); break; }
+    case 'chap-open': {   // текущую главу можно свернуть: для неё храним «закрытые», для остальных — «открытые»
+      const i = +d.i, cur = d.cur === '1', key = cur ? 'pathChClosed' : 'pathCh', s0 = new Set(UI[key] || []);
+      if (s0.has(i)) s0.delete(i); else s0.add(i);
+      UI[key] = [...s0]; saveUI(); render(); break;
+    }
+    case 'fc-more': UI.fcMore = !UI.fcMore; saveUI(); render(); break;
     case 'op-edit': { const o = Store.data.ops.find(x => x.id === d.id); if (o) { const pre = { ...o }; for (const k of ['amt', 'amt2', 'qty', 'qty2', 'price', 'value', 'tax', 'fee', 'bal', 'fx']) if (isNum(o[k])) pre[k] = fmtIn(o[k]); opForm(pre, o.id); } break; }
     case 'op-del': confirmDel = d.id; $('#ops-list').innerHTML = opsListHtml(); break;
     case 'op-del-no': confirmDel = null; $('#ops-list').innerHTML = opsListHtml(); break;
@@ -3450,7 +4151,7 @@ document.addEventListener('click', e => {
     case 'clear': clearFlow(); break;
     case 'broken-dl': offerFile(`moi-finansy-povrezhdeno-${today()}.txt`, Store.broken || '', 'Сохранённый текст'); break;
     case 'broken-reset': Store.clearBroken(); render(); break;
-    case 'xl-open': if (Store.loaded) openExcel(); break;
+    case 'xl-open': if (Store.loaded) openExcel(d.sheet); break;
     case 'xl-upload': xlPick(); break;
   }
 });
@@ -3488,9 +4189,29 @@ document.addEventListener('change', e => {
   if (a === 'fc-custom') { UI.fc.custom = el.value; saveUI(); schedule(); }
   if (a === 'fc-rate') { UI.fc.rate = el.value; saveUI(); schedule(); }
 });
+// Поле суммы в окне: разряды через пробел прямо при наборе; «45к» или «12 000+8 500» — итог под полем
+function amtLive(el, e) {
+  const v = el.value, eq = el.parentElement && el.parentElement.querySelector('.eq');
+  // пробел, набранный самим человеком, не убираем: «12 000 8 500» должно остаться ошибкой, а не склеиться в 120 008 500
+  if (e && e.inputType === 'insertText' && /\s/.test(e.data || '')) el._userSpace = true;
+  if (!v.trim()) el._userSpace = false;
+  const m = el._userSpace ? null : v.replace(/\s/g, '').match(/^(-?)(\d*)([.,]\d*)?$/);
+  if (m && /\d/.test(v)) {
+    const out = m[1] + m[2].replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + (m[3] || '');
+    if (out !== v) {
+      const caret = el.selectionStart == null ? v.length : el.selectionStart;
+      const before = v.slice(0, caret).replace(/\s/g, '').length;   // курсор остаётся после той же цифры
+      let pos = 0, k = 0; while (pos < out.length && k < before) { if (out[pos] !== ' ') k++; pos++; }
+      el.value = out;
+      try { el.setSelectionRange(pos, pos); } catch (e) { /* поле без курсора */ }
+    }
+  }
+  if (eq) eq.textContent = FC.amtIsExpr(el.value) ? '= ' + fmtIn(amt(el.value)) : '';
+}
 let qT = 0;
 document.addEventListener('input', e => {
   const el = e.target;
+  if (el.matches && el.matches('#modal-root input[inputmode="decimal"]')) amtLive(el, e);
   if (el.dataset.actInput === 'of-q') { clearTimeout(qT); qT = setTimeout(() => { UI.of.q = el.value; UI.opsLimit = 200; saveUI(); $('#ops-list').innerHTML = opsListHtml(); }, 150); }
   if ((el.dataset.calc || el.dataset.calcM) && !UI.calc) { if (!comp) return; UI.calc = calcDefaults(); }
   if (el.dataset.calc) { UI.calc[el.dataset.calc] = el.value; if (el.dataset.calc === 'months') UI.calc.m = null; saveUI(); updateCalc(); }
@@ -3499,7 +4220,7 @@ document.addEventListener('input', e => {
 document.addEventListener('keydown', e => {
   const root = $('#modal-root');
   if (!root.innerHTML) { if (e.key === 'Escape' && $('#xl') && !$('#xl').hidden) closeExcel(); return; }
-  if (e.key === 'Escape') { closeModal(); return; }
+  if (e.key === 'Escape') { if ($('#discard')) $('#discard').remove(); else closeModal(false, true); return; }
   if (e.key === 'Tab') {   // фокус не уходит из окна
     const f = $$('#modal-root button:not([disabled]), #modal-root input:not([disabled]), #modal-root select:not([disabled]), #modal-root textarea, #modal-root summary').filter(x => x.offsetParent !== null);
     if (!f.length) return;
