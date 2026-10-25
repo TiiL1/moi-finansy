@@ -1,0 +1,9 @@
+rules_version = '2';
+// Каждый видит и меняет только свои документы: users/<его uid>/...
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{uid}/{rest=**} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+    }
+  }
+}

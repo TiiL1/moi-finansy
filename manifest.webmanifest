@@ -1,0 +1,25 @@
+{
+ "name": "Мои финансы",
+ "short_name": "Финансы",
+ "description": "Счета, вложения, месяцы и прогноз взноса за квартиру",
+ "lang": "ru",
+ "start_url": "./",
+ "scope": "./",
+ "display": "standalone",
+ "background_color": "#f2f5f6",
+ "theme_color": "#0b6b8a",
+ "icons": [
+  {
+   "src": "icon-192.png",
+   "sizes": "192x192",
+   "type": "image/png",
+   "purpose": "any maskable"
+  },
+  {
+   "src": "icon-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "any maskable"
+  }
+ ]
+}
