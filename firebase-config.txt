@@ -1,6 +1,10 @@
 Настройки базы Firebase для «Моих финансов».
 
-Удалите этот текст и вставьте сюда блок, который показывает консоль Firebase
-(Настройки проекта → Ваши приложения → Web-приложение → SDK setup and configuration → Config).
-Можно вставить его целиком, как есть, вместе с «const firebaseConfig = {» и «};».
-Сохраните файл.
+const firebaseConfig = {
+  apiKey: "AIzaSyCuaQ0Bzi8EWOp9Mr0u9l7KJZKlXvnQSsE",
+  authDomain: "moi-finansymoi-finansy.firebaseapp.com",
+  projectId: "moi-finansymoi-finansy",
+  storageBucket: "moi-finansymoi-finansy.firebasestorage.app",
+  messagingSenderId: "412843537432",
+  appId: "1:412843537432:web:2572d69e6705831f973f6d"
+};
