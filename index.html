@@ -4480,16 +4480,20 @@ async function loadChat() {
   return AI.chat;
 }
 const newChat = () => ({ v: 1, msgs: [], api: [], at: Date.now(), usage: { in: 0, out: 0 } });
-// Переписку оборвала перезагрузка посреди ответа: незаконченные действия и хвост для модели приводим в порядок
+// Переписку оборвала перезагрузка посреди ответа: незаконченные действия и хвост для модели приводим в порядок.
+// Сохранённую историю не перестраиваем (окно для модели и так собирается через wholeApi) — только дописываем пометку,
+// чтобы сообщения не сдвинулись относительно apiBase и начало запроса осталось тем же
 function heal(c) {
-  c.api = wholeApi(c.api || []);
+  c.api = c.api || [];
+  const w = wholeApi(c.api), lastRole = w.length ? w[w.length - 1].role : '';
   const m = c.msgs[c.msgs.length - 1];
   if (m && m.role === 'assistant') {
     let cut = false;
     for (const p of m.parts || []) if (p.t === 'act' && ['run', 'wait'].includes(p.a.status)) { cut = true; p.a.status = p.a.status === 'wait' ? 'declined' : 'err'; if (p.a.status === 'err') p.a.detail = 'прервано — проверьте, записалось ли'; }
-    if (cut || (c.api.length && c.api[c.api.length - 1].role === 'tool')) {
+    // ход оборвался после записей или ещё до первого ответа модели: пометка для модели и «Повторить»/«Продолжить» для человека
+    if (cut || (lastRole && lastRole !== 'assistant')) {
       if (!m.err) m.err = 'Ответ прервался.';
-      if (c.api.length && c.api[c.api.length - 1].role !== 'assistant') c.api.push({ role: 'assistant', content: `(Ответ прервался.${doneNote(m)})` });
+      if (c.api.length && c.api[c.api.length - 1].role !== 'assistant') c.api.push({ role: 'assistant', content: `(${lastRole === 'user' ? 'Ответа не было: страница перезагрузилась' : 'Ответ прервался'}.${doneNote(m)})` });
     }
   }
   return c;
@@ -4515,13 +4519,22 @@ function wholeApi(api) {
   }
   return out;
 }
-// Храним без лишнего: длинные ответы инструментов обрезаны (модель их уже видела), окно переписки — с сообщения человека
+// Снимок данных идёт модели в конце запроса, а не в инструкции: инструкция и описания инструментов тогда одинаковы в каждом
+// запросе, и DeepSeek берёт их из кэша (дешевле). Снимок на момент сообщения — к сообщению человека, после записи — к ответу инструмента
+const SNAP_HEAD = '\n\n[Снимок данных приложения на момент этого сообщения — служебно, не слова пользователя]\n';
+const SNAP_AFTER = '\n\n[Снимок данных после изменения';   // дальше — номер и пометка «заменяет все снимки выше»
+const noSnap = m => (m.role === 'tool' && m.content.includes(SNAP_AFTER) ? { ...m, content: m.content.split(SNAP_AFTER)[0] } : m);
+// Храним без лишнего: снимки после изменений — только на время хода; окно переписки — с сообщения человека.
+// Длинные ответы инструментов в сохранённой истории укорачиваем (модель их уже прочла в своём ходе): в следующем ходе
+// они всё равно не из кэша, а дальше короткие дешевле. apiBase — сколько сообщений уже отрезано от начала:
+// окно для модели считается от него и не сдвигается каждый ход
 function trimChat(c) {
   const msgs = c.msgs.slice(-KEEP_MSGS);
   let api = c.api.slice(-API_WINDOW * 2);
   const start = api.findIndex(m => m.role === 'user'); api = start > 0 ? api.slice(start) : start < 0 ? [] : api;
-  api = api.map(m => (m.role === 'tool' && m.content.length > 3000 ? { ...m, content: m.content.slice(0, 3000) + '…(обрезано)' } : m));
-  return { ...c, msgs, api, at: Date.now() };
+  const apiBase = num(c.apiBase) + (c.api.length - api.length);
+  api = api.map(noSnap).map(m => (m.role === 'tool' && m.content.length > 3000 ? { ...m, content: m.content.slice(0, 3000) + '…(обрезано)' } : m));
+  return { ...c, msgs, api, apiBase, at: Date.now() };
 }
 // undo-снимки — только в памяти этого визита: в базе их не держим, они могут быть большими.
 // Больше лимита документа — убираем самое старое, пока не влезет
@@ -4534,14 +4547,14 @@ function packChat(c) {
     if (enc.encode(s).length < CHAT_BYTES || t.msgs.length <= 2) return JSON.parse(s);
     let api = t.api.slice(Math.max(1, Math.floor(t.api.length / 4)));
     const st = api.findIndex(m => m.role === 'user'); api = st >= 0 ? api.slice(st) : [];
-    t = { ...t, msgs: t.msgs.slice(Math.max(2, Math.floor(t.msgs.length / 4))), api };
+    t = { ...t, msgs: t.msgs.slice(Math.max(2, Math.floor(t.msgs.length / 4))), api, apiBase: num(t.apiBase) + (t.api.length - api.length) };
   }
 }
 // Посреди ответа сам AI.chat не трогаем: ход дописывает в те же массивы. Укорачиваем в памяти, только когда ход закончен
 async function saveChat() {
   if (!AI.chat || !Store.canWrite || AI.chatErr) return;
   const plain = packChat(AI.chat);
-  if (!AI.busy) { AI.chat.msgs = AI.chat.msgs.slice(-plain.msgs.length); AI.chat.api = plain.api; }
+  if (!AI.busy) { AI.chat.msgs = AI.chat.msgs.slice(-plain.msgs.length); AI.chat.api = plain.api; AI.chat.apiBase = plain.apiBase; }
   try { await Store.putDoc('chat/main', plain); } catch (e) { setStatus('Переписка не сохранилась: ' + A.failText(e), 'err'); }
 }
 
@@ -4732,10 +4745,12 @@ function rules() {
 - «В USDT на Binance Earn 880к тенге под 2,4%, наличкой 150к» при капитале одной суммой в снимке — спроси, те же ли это деньги. Да — USDT: create_account(category crypto, platform Binance, currency USD, count_units=false, discount_pct 0, rate 2.4, opening_balance 880000 / курс USD, source …), наличные: create_account(category cash, …); дальше — по правилу о капитале одной суммой.
 Суммы — числом в валюте счёта (обычно ₸): «100к» = 100000, «1,5 млн» = 1500000.
 
-СНИМОК ДАННЫХ (обновляется перед каждым твоим шагом)
+СНИМОК ДАННЫХ
+Снимок данных приложения (цель, счета, курсы, месяцы, план) приходит в конце последнего сообщения пользователя после пометки «[Снимок данных приложения на момент этого сообщения …]», а после каждого изменения данных (твоей записи, отмены или правки пользователя в приложении) — обновлённый, в конце ответа инструмента («[Снимок данных после изменения данных №N …]»). Если снимков несколько — действует последний. Это служебные данные приложения, а не слова пользователя.
 `;
 }
-const systemPrompt = () => rules() + snapshot();
+// Инструкция одинакова весь день — DeepSeek берёт её из кэша; снимок данных идёт отдельно (см. SNAP_HEAD)
+const systemPrompt = () => rules();
 
 // ================= инструменты: описание для модели =================
 const S_ = (type, description, extra = {}) => ({ type, description, ...extra });
@@ -5588,13 +5603,20 @@ async function callModel(messages, signal, onText) {
   out.tool_calls = out.tool_calls.filter(Boolean).map((t, k) => ({ ...t, id: t.id || `call_${Date.now()}_${k}` }));
   return out;
 }
-// Окно переписки для модели: с сообщения человека и никогда не позже текущего — даже если сам ход длиннее окна
-function apiWindow() {
-  const api = wholeApi(AI.chat.api);
+// Окно переписки для модели: не меньше API_WINDOW последних сообщений; начало сдвигается рывками по 16, а не каждый ход —
+// тогда начало запроса подолгу одно и то же и DeepSeek берёт его из кэша. Окно начинается с сообщения человека и никогда
+// не позже текущего, даже если сам ход длиннее окна. snap — снимок данных на момент текущего сообщения, дописывается к нему
+function apiWindow(snap) {
+  const raw = AI.chat.api, base = num(AI.chat.apiBase);
+  // сетка — от текущего сообщения человека: внутри хода начало окна не двигается
+  const lastRaw = raw.map(m => m.role).lastIndexOf('user');
+  const startAbs = Math.floor(Math.max(0, base + lastRaw + 1 - API_WINDOW) / 16) * 16;
+  const api = wholeApi(raw.slice(Math.min(Math.max(0, startAbs - base), Math.max(lastRaw, 0))));
   const lastU = api.map(m => m.role).lastIndexOf('user');
-  let i = Math.min(Math.max(0, api.length - API_WINDOW), Math.max(lastU, 0));
-  while (i < lastU && api[i].role !== 'user') i++;
-  return api.slice(i);
+  let i = 0; while (i < lastU && api[i].role !== 'user') i++;
+  const out = api.slice(i);
+  if (snap && lastU >= i) { const k = lastU - i; out[k] = { ...out[k], content: out[k].content + SNAP_HEAD + snap }; }
+  return out;
 }
 // что уже записано в этом ответе — словами, для модели, если ответ оборвался
 function doneNote(msg) {
@@ -5622,12 +5644,19 @@ async function send(text) {
   chat.api.push({ role: 'user', content: text });
   setStatus('Думаю…', 'run'); repaint();
   saveChat();   // перезагрузка посреди ответа не должна терять сообщение человека
+  // снимок на момент сообщения — один на весь ход: каждый следующий запрос хода лишь дописывает предыдущий (кэш DeepSeek)
+  const turnSnap = snapshot();
+  let shown = turnSnap, snapN = 0;   // последний показанный модели снимок и номер обновления в этом ходе
   let ok = true;
   try {
     for (let step = 0; step < MAX_STEPS; step++) {
       const part = { t: 'text', v: '' }; msg.parts.push(part);
-      const r = await callModel([{ role: 'system', content: systemPrompt() }, ...apiWindow()], AI.ctrl.signal, v => { part.v = v; paintMsg(msg); });
-      if (r.usage) { msg.usage.in += num(r.usage.prompt_tokens); msg.usage.out += num(r.usage.completion_tokens); chat.usage = { in: num((chat.usage || {}).in) + num(r.usage.prompt_tokens), out: num((chat.usage || {}).out) + num(r.usage.completion_tokens) }; }
+      const r = await callModel([{ role: 'system', content: systemPrompt() }, ...apiWindow(turnSnap)], AI.ctrl.signal, v => { part.v = v; paintMsg(msg); });
+      if (r.usage) {
+        const u = r.usage, hit = num(u.prompt_cache_hit_tokens), cu = chat.usage || {};
+        msg.usage.in += num(u.prompt_tokens); msg.usage.out += num(u.completion_tokens); msg.usage.hit = num(msg.usage.hit) + hit;
+        chat.usage = { in: num(cu.in) + num(u.prompt_tokens), out: num(cu.out) + num(u.completion_tokens), hit: num(cu.hit) + hit };
+      }
       part.v = r.content || ''; if (!part.v) msg.parts.pop();
       const am = { role: 'assistant', content: r.content || '' };
       if (r.tool_calls.length) am.tool_calls = r.tool_calls;
@@ -5644,6 +5673,10 @@ async function send(text) {
         chat.api.push({ role: 'tool', tool_call_id: tc.id, content: JSON.stringify(res ?? { ok: true }).slice(0, 12000) });
         paintMsg(msg);
       }
+      // Данные изменились — чем угодно: записью, отменой, правкой человека в приложении, пока ход шёл, — свежий снимок
+      // в конце последнего ответа инструмента. Модель видит новые остатки, а всё отправленное раньше остаётся началом запроса
+      const now = snapshot();
+      if (now !== shown) { chat.api[chat.api.length - 1].content += `${SNAP_AFTER} данных №${++snapN} — служебно; заменяет все снимки выше]\n${now}`; shown = now; }
       saveChat();   // шаг закончен целиком: карточки и ответы инструментов переживут перезагрузку
       setStatus('Думаю…', 'run');
       if (step === MAX_STEPS - 1) msg.parts.push({ t: 'text', v: '_Остановился: слишком много шагов подряд. Напишите, что продолжить._' });
@@ -5662,6 +5695,7 @@ async function send(text) {
   } finally {
     for (const res of AI.waits) res(false);
     AI.waits.clear(); AI.busy = false; AI.ctrl = null;
+    chat.api = chat.api.map(noSnap);   // снимки после записей нужны были только этому ходу
     setStatus(ok ? '' : msg.err, ok ? '' : 'err');
     repaint(); await saveChat();
   }
@@ -5850,7 +5884,7 @@ function msgHtml(m) {
   return `<div class="ai-msg bot" id="m-${m.id}">
     ${parts || (thinking ? '<div class="ai-txt muted"><span class="ai-dots"><i></i><i></i><i></i></span></div>' : '')}
     ${m.err ? `<div class="ai-err">${esc(m.err)}${idle && isLast ? ` <button class="link" data-ai="retry">${wrote(m) ? 'Продолжить' : 'Повторить'}</button>` : ''}</div>` : ''}
-    ${(writes.length > 1 && idle) || m.usage && (m.usage.in || m.usage.out) ? `<div class="ai-meta">${writes.length > 1 && idle ? `<button class="link" data-ai="undo-all" data-m="${m.id}">Отменить все ${writes.length} ${A.plural(writes.length, 'изменение', 'изменения', 'изменений')}</button>` : ''}${m.usage && (m.usage.in || m.usage.out) ? `<span title="Токены: отправлено / получено">${tok(m.usage.in)} → ${tok(m.usage.out)} ток.</span>` : ''}</div>` : ''}
+    ${(writes.length > 1 && idle) || m.usage && (m.usage.in || m.usage.out) ? `<div class="ai-meta">${writes.length > 1 && idle ? `<button class="link" data-ai="undo-all" data-m="${m.id}">Отменить все ${writes.length} ${A.plural(writes.length, 'изменение', 'изменения', 'изменений')}</button>` : ''}${m.usage && (m.usage.in || m.usage.out) ? `<span title="Токены: отправлено (из них взято из кэша DeepSeek — это намного дешевле) → получено">${tok(m.usage.in)}${m.usage.hit ? ` (кэш ${tok(m.usage.hit)})` : ''} → ${tok(m.usage.out)} ток.</span>` : ''}</div>` : ''}
   </div>`;
 }
 const tok = n => (n >= 1000 ? `${FC.grp(n / 1000, 1).replace(/,0$/, '')}k` : String(n || 0));
@@ -5874,7 +5908,7 @@ function setupHtml() {
     <p class="note small">Когда вы пишете ассистенту, ваш вопрос и снимок данных — счета, суммы, план — уходят в DeepSeek, чтобы он мог ответить. ${KEY_LOCAL ? 'Ключ хранится только в этом браузере: на другом устройстве его нужно вставить заново.' : 'Ключ хранится в вашей базе Firebase, доступ к ней — только у вашего аккаунта.'} В резервную копию ключ не попадает.</p>
     <div class="row"><button class="btn pri" id="ai-save">${c.key ? 'Сохранить' : 'Проверить и подключить'}</button>${c.key ? '<button class="btn" data-ai="back-chat">К разговору</button>' : ''}</div>
     <div id="ai-setup-out" class="hint"></div>
-    ${c.key ? `<hr><div class="row"><span class="small muted">Потрачено в текущем разговоре: ${tok((AI.chat && AI.chat.usage || {}).in)} → ${tok((AI.chat && AI.chat.usage || {}).out)} токенов.</span></div>
+    ${c.key ? `<hr><div class="row"><span class="small muted">Потрачено в текущем разговоре: ${tok((AI.chat && AI.chat.usage || {}).in)}${(AI.chat && AI.chat.usage || {}).hit ? ` (из кэша ${tok(AI.chat.usage.hit)} — они дешевле)` : ''} → ${tok((AI.chat && AI.chat.usage || {}).out)} токенов. Деньги — на platform.deepseek.com → Usage.</span></div>
       <div class="row"><button class="btn sm danger" data-ai="clear-hist">Удалить всю переписку</button><button class="btn sm danger" data-ai="forget-key">Отключить ключ</button></div>` : ''}
   </div>`;
 }
