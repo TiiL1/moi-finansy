@@ -1292,7 +1292,10 @@ function shockedAvail(state, comp, shock) {
   let A = 0;
   for (const a of state.accounts || []) {
     const o = comp.accs[a.id]; if (!o || !o.goal) continue;
-    const sh = num(shock[a.cat]);
+    // стейблкоин в долларах (валютный счёт без штук со своим низким дисконтом) — «падение рынка» его не задевает
+    const own = a.cut != null && a.cut !== '' ? num(+a.cut) : null;
+    const stable = a.ccy && a.ccy !== 'KZT' && !unitsOn(a) && own != null && own <= 15;
+    const sh = stable ? 0 : num(shock[a.cat]);
     A += o.valueK * (1 - Math.min(100, sh) / 100) * (1 - o.cut / 100);
   }
   return A;
@@ -3029,7 +3032,7 @@ function vData() {
 function vSettings() {
   const s = settings(), G = FC.goalInfo(s);
   const months = []; for (let k = 1; k <= 84; k++) months.push(FC.addMonths(comp.curMk, k));
-  const curRates = FC.currencies(s.rates).map(c => ({ c, r: FC.rateAt(s.rates, c, today()), d: (s.rates || []).filter(x => isNum(x[c])).map(x => x.d).sort().pop() }));
+  const curRates = FC.currencies(s.rates).map(c => ({ c, r: FC.rateAt(s.rates, c, today()), d: (s.rates || []).filter(x => isNum(x[c]) && x.d <= today()).map(x => x.d).sort().pop() }));
   const planM = (s.plan || {}).months || [];
   const ro = Store.canWrite ? '' : 'disabled';
   const inp = (id, path, val, attrs = '') => `<input class="in" id="${id}" inputmode="decimal" value="${fmtIn(val)}" data-s="${path}" data-kind="num" ${attrs} ${ro}>`;
@@ -3078,7 +3081,7 @@ function vSettings() {
 
   <div class="sec-h"><h2>Курсы валют</h2></div>
   <section class="card form">
-    ${curRates.length ? `<div class="kv">${curRates.map(x => `<div><span>1 ${esc(x.c)}</span><b>${FC.grp(x.r, 2)} ₸ <span class="muted small">на ${esc(FC.dateLong(x.d))}</span></b></div>`).join('')}</div>` : '<p class="muted">Курсов нет.</p>'}
+    ${curRates.length ? `<div class="kv">${curRates.map(x => `<div><span>1 ${esc(x.c)}</span><b>${FC.grp(x.r, 2)} ₸ ${x.d ? `<span class="muted small">на ${esc(FC.dateLong(x.d))}</span>` : ''}</b></div>`).join('')}</div>` : '<p class="muted">Курсов нет.</p>'}
     ${Store.canWrite ? `<div class="fgrid three">
       <label class="f"><span>Валюта</span><input class="in" id="fx-c" placeholder="USD" maxlength="3" style="text-transform:uppercase"></label>
       <label class="f"><span>Курс, ₸ за 1</span><input class="in" id="fx-r" inputmode="decimal" placeholder="451,05"></label>
@@ -3662,7 +3665,7 @@ function accForm(a = null, preCat = null, flow = {}) {
         <label class="f"><span>Валюта</span><select class="in" id="a-ccy" data-f="ccy" ${!isNew && nOps ? 'disabled' : ''}>${ccys.map(c => `<option ${f.ccy === c ? 'selected' : ''}>${c}</option>`).join('')}</select><span class="err" data-err="ccy"></span>${!isNew && nOps ? '<span class="hint">Валюту нельзя менять, пока есть операции.</span>' : ''}</label>
         <label class="f"><span>Для чего деньги</span><select class="in" id="a-goal" data-f="goalSel"><option value="goal" ${goalSel === 'goal' ? 'selected' : ''}>На взнос за квартиру</option><option value="reserve" ${goalSel === 'reserve' ? 'selected' : ''}>Резерв на непредвиденное</option><option value="none" ${goalSel === 'none' ? 'selected' : ''}>Другое — не считать в цель</option></select></label>
         ${fieldNum('a-ret', 'ret', f.cat === 'dep' ? 'Ставка вклада, % годовых' : 'Ожидаемая доходность, % годовых', f.ret != null && f.ret !== '' ? inVal(f.ret) : '', `Пусто — по умолчанию ${FC.grp(num((s.rets || {})[f.cat] ?? CATS[f.cat].ret), 1)}%`)}
-        ${fieldNum('a-cut', 'cut', 'Дисконт для взноса, %', f.cut != null && f.cut !== '' ? inVal(f.cut) : '', `Пусто — ${FC.grp(num((s.cuts || {})[f.cat] ?? CATS[f.cat].cut), 0)}%`)}
+        ${fieldNum('a-cut', 'cut', 'Дисконт для взноса, %', f.cut != null && f.cut !== '' ? inVal(f.cut) : '', `Пусто — ${FC.grp(num((s.cuts || {})[f.cat] ?? CATS[f.cat].cut), 0)}%${f.ccy && f.ccy !== 'KZT' && num(+s.fxCut) ? `. У валютного счёта прибавится ${FC.grp(num(+s.fxCut), 0)}% за валюту` : ''}`)}
         <label class="check full"><input type="checkbox" id="a-units" data-f="units" ${(f.units != null ? f.units : unitsDef) ? 'checked' : ''}> Учитывать количество (штуки акций, монеты) — для средней цены и прибыли с продаж</label>
         ${isNew ? `${fieldNum('a-open', 'open', `Сколько на счёте сейчас, ${FC.SYM[f.ccy] || f.ccy}`, f.open, srcAccs.length ? 'Можно оставить пустым.' : 'Станет начальным остатком. Можно оставить пустым.')}
           <label class="f"><span>На дату</span><input class="in" id="a-open-d" type="date" data-f="openD" value="${esc(f.openD || today())}"></label>
@@ -4586,8 +4589,46 @@ const accLine = a => {
   const role = a.reserve ? 'резерв' : a.goal === false ? 'не в цель' : 'на взнос';
   const units = FC.unitsOn(a) ? ` | штук ${qt(o.units)}${o.units > 0 && o.price > 0 ? ` по ${FC.grp(o.price, 2).replace(/,00$/, '')}` : ''}, свободных денег ${FC.grp(num(o.cash), 2)}` : '';
   const rate = a.ret != null && a.ret !== '' ? a.ret + '%' : `не указана (в прогнозе — ${FC.grp(FC.retOf(a, A.settings()), 1).replace(/,0$/, '')}% по умолчанию для вида)`;
-  return `${a.id} | ${a.name} | ${a.cat} (${CATS[a.cat].name}) | ${a.ccy || 'KZT'} | ${a.platform || '—'} | сейчас ${FC.grp(num(o.value), a.ccy && a.ccy !== 'KZT' ? 2 : 0)} | ставка ${rate} | ${role}${a.archived ? ' | закрыт' : ''}${units}`;
+  const fx = ccyOf(a) !== 'KZT', val = `${FC.grp(num(o.value), fx ? 2 : 0)}${fx ? ` ${a.ccy} (≈ ${FC.grp(num(o.valueK))} ₸)` : ''}`;
+  // сколько счёта идёт в «Собрано на взнос»: дисконт на риск свой у каждого счёта (у валютных — плюс валютный)
+  const toGoal = o.goal ? ` | в «Собрано» ${Math.round(100 - num(o.cut))}% (дисконт ${FC.grp(num(o.cut), 0)}%)` : '';
+  const op0 = Store.data.ops.find(y => y.acc === a.id && y.type === 'open' && y.note && !/^(Остаток|Долг) на начало учёта$/.test(y.note));
+  const opNote = !op0 ? '' : wasLump(a) && !isLump(a) ? ' | капитал одной суммой уже разнесён' : ` | начальный остаток ${op0.id}: «${op0.note.slice(0, 90)}»`;
+  return `${a.id} | ${a.name} | ${a.cat} (${CATS[a.cat].name}) | ${a.ccy || 'KZT'} | ${a.platform || '—'} | сейчас ${val} | ставка ${rate} | ${role}${toGoal}${a.archived ? ' | закрыт' : ''}${units}${opNote}`;
 };
+// Капитал одной суммой на начало учёта (стартовый файл: начальный остаток с пометкой «Разнесите по счетам»).
+// Пока он не разнесён, любые «деньги, которые уже лежат» — скорее всего, те же деньги, и existing посчитал бы их дважды.
+// Узнаём по пометке, а не по названию; пополнения из дохода делают счёт обычным
+const wasLump = a => !!a && !FC.isLiab(a) && Store.data.ops.some(y => y.acc === a.id && y.type === 'open' && /Разнесите/i.test(y.note || ''))
+  && !Store.data.ops.some(y => (y.acc === a.id && ['in', 'inc'].includes(y.type)) || (y.acc2 === a.id && y.type === 'xfer'));
+const lumpLeft = (a, delta) => num((A.comp().accs[a.id] || {}).value) + num((delta || {})[a.id]);
+const isLump = (a, delta) => wasLump(a) && !a.archived && lumpLeft(a, delta) > 0.5;
+const lumpAcc = delta => Store.data.accounts.find(a => isLump(a, delta)) || null;
+const lumpOpens = a => Store.data.ops.filter(y => y.acc === a.id && y.type === 'open').map(y => y.id);
+// с капитала уже переводили или тратили — удалять его начальный остаток нельзя: ушедшие суммы оставили бы минус
+const lumpSplit = a => Store.data.ops.some(y => (y.acc === a.id && ['xfer', 'out', 'trade', 'cost'].includes(y.type)) || (y.acc2 === a.id && y.type === 'pay'));
+// как убрать остаток капитала, если пользователь перечислил деньги заново (source=existing)
+const lumpCloseHow = (L, v) => (lumpSplit(L)
+  ? `с «${L.name}» уже переводили — начальный остаток не удаляй: оставшиеся ${M(v, ccyOf(L))} переведи xfer на один из новых счетов или уменьши начальный остаток update_operation id=${lumpOpens(L).join(', ')} на сумму, заведённую как existing`
+  : `удали начальный остаток delete_operation id=${lumpOpens(L).join(', ')}`) + ` и закрой «${L.name}» (update_account archived=true)`;
+const amtTxt = (v, ccy) => (ccy === 'KZT' ? M(v) : `${FC.grp(v, 2)} ${ccy}`);   // точная сумма для повтора вызова (M округляет крупные валютные суммы)
+// Взять из капитала одной суммой больше, чем там есть: разница — деньги, которые были до начала учёта, в валюте счёта назначения
+function lumpShort(L, have, need, dest, amt2) {
+  const lc = ccyOf(L), dc = dest ? ccyOf(dest) : lc, rs = A.settings().rates, today = A.today();
+  const rL = lc === 'KZT' ? 1 : FC.rateAt(rs, lc, today), rD = dc === 'KZT' ? 1 : FC.rateAt(rs, dc, today);
+  const diff = dc === lc ? need - have : amt2 ? amt2 * (need - have) / need : rL > 0 && rD > 0 ? (need - have) * rL / rD : null;
+  const part = !dest ? '' : dc === lc ? `, а разницу ${amtTxt(diff, dc)} запиши add_operations type open на «${dest.name}» с confirm_new=true (деньги были до начала учёта)`
+    : `${amt2 ? ` (to_amount ${FC.grp(amt2 * have / need, 2)} ${dc})` : ''}, а разницу ${diff != null ? amtTxt(diff, dc) : '(в валюте счёта)'} запиши add_operations type open на «${dest.name}» с confirm_new=true (деньги были до начала учёта)`;
+  return `на «${L.name}» ${amtTxt(have, lc)} — это капитал одной суммой, взять ${amtTxt(need, lc)} нельзя. Если это те же деньги — переведи сколько есть (amount ${amtTxt(have, lc)})${part}. Если пользователь заново перечисляет все свои деньги — заведи счета с source=existing и confirm_new=true, затем ${lumpCloseHow(L, have)}. force оставил бы на нём минус`;
+}
+function lumpError(L, what) {
+  const v = lumpLeft(L);
+  return { code: 'lump', error: `на «${L.name}» (${L.id}) лежит ${M(v)} — капитал одной суммой на начало учёта. ${what} Если это те же деньги — бери их оттуда: source=${L.id} (или xfer с ${L.id}). Если пользователь заново перечисляет, где лежат все его деньги, и сумма не сходится — заведи счета с source=existing и confirm_new=true, потом ${lumpCloseHow(L, v)}. Непонятно, те же ли это деньги, — спроси. Новые деньги сверх этого — confirm_new=true только после ответа пользователя` };
+}
+// капитал уже разнесён — денег на нём нет, force тут ничего не исправит
+const lumpDone = L => ({ code: 'lump_done', error: `капитал одной суммой «${L.name}» уже разнесён — этих денег на нём нет. Лежали до начала учёта — source=existing (или type open) с confirm_new=true; из дохода — income (или in)` });
+// после записи «новых» денег при неразнесённом капитале — напоминание, чтобы он не остался посчитанным второй раз
+const lumpNext = () => { const L = lumpAcc(); return L ? { next_step: `«${L.name}» (${L.id}) ещё ${M(lumpLeft(L))}: если пользователь сказал, что это те же деньги, — ${lumpCloseHow(L, lumpLeft(L))}; если это другие деньги — так и оставь` } : {}; };
 // Месяц глазами плана: «отложено» вместе с процентами по резерву — так же считает шаг «Пути»
 function monthFacts(mk) {
   const S = A.st(), comp = A.comp(), r = FC.monthRow(S, comp, mk), ri = num(A.reserveIncome()[mk]);
@@ -4608,9 +4649,17 @@ function snapshot() {
   const L = [];
   L.push(`Сегодня ${A.today()} (${new Date().toLocaleDateString('ru-RU', { weekday: 'long' })}). Текущий месяц ${mk} (${FC.mkLong(mk)}).`);
   L.push(`Цель: взнос ${FC.grp(G.target)} ₸ (квартира ${FC.grp(G.price)} ₸, взнос ${Math.round(G.dpPct * 100)}%, оформление ${FC.grp(G.costs)} ₸) к ${G.targetMk || '—'}. Собрано на взнос ${FC.grp(t.avail)} ₸ (${P(G.target > 0 ? t.avail / G.target : 0, 0)}). Прогноз сбора: ${F.base.reach || 'не достигается'}.`);
-  L.push(`Всего: капитал ${FC.grp(t.netWorth)} ₸, долги ${FC.grp(t.debt)} ₸, вложено своих ${FC.grp(t.netIn - t.borrowed)} ₸, заработали вложения ${FC.grp(t.result)} ₸.`);
+  // переоценка валют — не доход вложений: показываем отдельно, как на «Обзоре»
+  const fxT = num(t.fx);
+  L.push(`Всего: капитал ${FC.grp(t.netWorth)} ₸, долги ${FC.grp(t.debt)} ₸, вложено своих ${FC.grp(t.netIn - t.borrowed)} ₸, заработали вложения ${FC.grp(t.result - fxT)} ₸${Math.abs(fxT) > 0.5 ? `, курс валют ${FC.signed(fxT)} ₸ (переоценка, не доход)` : ''}.`);
+  // курсы вводятся вручную: модели нужны и число, и его возраст
+  const cc = FC.currencies(s.rates);
+  if (cc.length) L.push(`Курсы валют к тенге (вводятся вручную; новый курс — set_rate): ${cc.map(c => {
+    const d = (s.rates || []).filter(x => isNum(x[c]) && x.d <= A.today()).map(x => x.d).sort().pop(), age = d ? Math.round((Date.parse(A.today()) - Date.parse(d)) / 864e5) : null;
+    return `1 ${c} = ${FC.grp(FC.rateAt(s.rates, c, A.today()), 2)} ₸${d ? ` на ${d}` : ''}${age > 30 ? ` (${age} дн. назад — предложи обновить)` : ''}`;
+  }).join('; ')}. Валютный дисконт для «Собрано» — ${pctTxt(num(+s.fxCut))} к каждому валютному счёту (меняет set_fx_discount).`);
   const accs = Store.data.accounts.filter(a => CATS[a.cat]);
-  L.push(`Счета (id | название | вид | валюта | банк | сейчас | ставка | назначение):`);
+  L.push(`Счета (id | название | вид | валюта | банк | сейчас | ставка | назначение | сколько идёт в «Собрано на взнос»):`);
   L.push(accs.length ? accs.map(a => '- ' + accLine(a)).join('\n') : '- счетов пока нет');
   L.push(`Источники дохода (id: название, план на этот месяц): ${(s.sources || []).map(x => `${x.id}: ${x.name}, ${FC.grp(num(inc[x.id]))} ₸`).join('; ')}.`);
   L.push(`Этот месяц (${mk}): ${monthLine(mk)}.`);
@@ -4636,7 +4685,10 @@ function rules() {
 - Факты записывай сразу, без вопросов. Спрашивай, только если без ответа запись будет неверной: непонятно, какой счёт (подходят несколько, подсказки нет), нет суммы, непонятен месяц или дата выходит странной.
 - Счета указывай по id из снимка ниже. Нужного счёта для денег нет (новый вклад, брокерский счёт, кошелёк) — заведи его create_account (вид, банк и ставку — если сказаны; ставку можно указать позже).
 - План в снимке называет счёт резервом («резерв … на Kaspi Депозит») — заводи этот счёт с purpose=reserve и скажи об этом: резерв не идёт в «Собрано на взнос». Не ясно, резерв это или деньги на взнос, — спроси.
-- Проценты по вкладам и купоны приложение само не начисляет; капитализацию, частоту выплат и срок вклада не хранит — ставка нужна только прогнозу. Назвал пользователь такие условия — скажи это и попроси присылать сумму, когда придёт (inc kind=int или cpn), или остаток по выписке (val). Срок можно оставить в названии счёта («Kaspi Депозит 6 мес»).
+- Проценты по вкладам, Earn, стейкинг и купоны приложение само не начисляет; капитализацию, частоту выплат и срок вклада не хранит — ставка нужна только прогнозу. Назвал пользователь ставку или условия — скажи это и попроси присылать начисления, когда придут (inc kind=int или cpn, в валюте счёта), или остаток по выписке (val). Срок можно оставить в названии счёта («Kaspi Депозит 6 мес»).
+- «Собрано на взнос» — деньги счетов «на взнос» за вычетом дисконта на риск: у каждого счёта он свой (в снимке — «в «Собрано» N%»; по умолчанию крипта 60%, акции 30%, у валютных счетов плюс валютный дисконт из настроек). Заводишь счёт с дисконтом — скажи, сколько из суммы пойдёт в «Собрано». Поменять дисконт — discount_pct, только с согласия пользователя.
+- «Дисконт для долларов N» — валютный дисконт для всех валютных счетов: set_fx_discount (только по просьбе пользователя); дисконт одного счёта — update_account discount_pct.
+- Капитал одной суммой (в снимке у счёта пометка «Разнесите по счетам», пока на нём есть деньги) — это все деньги пользователя на начало учёта. Называет, где они лежат, — это те же деньги: заводи счета с source = id этого счёта, не existing. Перечисляет все свои деньги заново и сумма не сходится — спроси, те же ли это деньги; если да — заведи счета с source=existing и confirm_new=true, удали начальный остаток (delete_operation по id из снимка; если с капитала уже переводили — переведи остаток xfer) и закрой опустевший счёт (archived=true). Пользователь сказал, что это отдельные деньги (например, вклад в Halyk), — дай счёту имя и банк update_account: он станет обычным счётом. force, val и out для этого не используй: будет минус, «убыток» или трата, которых не было.
 - Платил с карты или счёта, которого нет в учёте (Kaspi Gold, зарплатная карта), — это деньги из дохода: source=income у create_account или операция in. Пустой счёт-источник не заводи. force — только если пользователь подтвердил, что сумма верна.
 - Несколько операций из одного сообщения — одним вызовом add_operations со списком.
 - Не выдумывай суммы, даты и ставки. Чего-то нет — не заполняй и скажи, что это можно добавить позже.
@@ -4665,6 +4717,8 @@ function rules() {
 - pay — платёж по кредиту: account = кредит; to_account — свой счёт, если платил из накоплений; из зарплаты — без to_account.
 - borrow — взял кредит (to_account — куда пришли деньги); val — новая стоимость счёта (цена акций/крипты или остаток по данным банка); cost — отдельная комиссия или налог; trade — купил или продал бумагу на деньги, которые уже лежат свободными на этом же счёте («свободных денег» в снимке; quantity обязательно), купил на деньги с другого своего счёта — xfer с to_quantity; open — начальный остаток (только деньги, которые были до начала учёта).
 Крипта и акции: счёт в тенге (currency KZT), сумма — сколько заплатил в ₸, quantity / opening_quantity — число монет или бумаг. BTC, ETH — не валюта.
+Стейблкоины (USDT, USDC, FDUSD) — это доллары: create_account(category crypto, currency USD, count_units=false, discount_pct 0 — стейблкоин не скачет, как монета), суммы — в долларах (1 USDT ≈ 1 $). Скажи, что в «Собрано» останется только валютный дисконт из настроек и что дисконт можно поднять, если пользователь хочет учесть риск площадки. Названо в тенге — раздели на курс USD из снимка и назови обе суммы; точное число USDT лучше спросить. Начисления Earn — inc kind=int в USDT.
+Валютные счета (USD и т. п.): все суммы — в валюте счёта, не в тенге. Курс к тенге — из снимка; пользователь назвал новый курс — set_rate.
 Акции и фонды: один счёт — одна бумага (в названии — компания или тикер). Купил другую бумагу — новый счёт create_account, а не перевод на существующий: иначе все бумаги на нём переоценятся по новой цене. Какая бумага и сколько штук — не выдумывай, спроси.
 Месяц (set_month): доходы по источникам (id из снимка: sal — зарплата, dlv — доставка, oth — подработки), расходы месяца — всего и, если сказано, по статьям (home жильё и коммуналка, food питание, trans транспорт и машина, comm связь и подписки, other прочее, unpl незапланированное), свой план «отложить», заметка.
 Примеры:
@@ -4675,6 +4729,7 @@ function rules() {
 - «Пришёл купон 2 500 ₸ 5-го по облигациям, вложил в них же» — inc kind=cpn на счёт облигаций, дата ${day5}; «вложил в них же» уже учтено.
 - «Вчера пришёл купон 2 500 по облигациям, на него купил 1 акцию Halyk за 2 400» — inc kind=cpn на облигации (дата вчера), затем: счёта этой бумаги нет — create_account(category stock, name «Halyk Bank», opening_balance 2400, opening_quantity 1, opening_date вчера, source = id облигаций); есть — xfer облигации → счёт бумаги, amount 2400, to_quantity 1. Это не «отложено». Не сказано, какая бумага или сколько штук, — запиши купон и спроси.
 - «Закрыл вклад X, деньги перевёл на Y» — inc kind=int (если названы проценты при закрытии), xfer всего остатка X → Y, затем update_account archived=true.
+- «В USDT на Binance Earn 880к тенге под 2,4%, наличкой 150к» при капитале одной суммой в снимке — спроси, те же ли это деньги. Да — USDT: create_account(category crypto, platform Binance, currency USD, count_units=false, discount_pct 0, rate 2.4, opening_balance 880000 / курс USD, source …), наличные: create_account(category cash, …); дальше — по правилу о капитале одной суммой.
 Суммы — числом в валюте счёта (обычно ₸): «100к» = 100000, «1,5 млн» = 1500000.
 
 СНИМОК ДАННЫХ (обновляется перед каждым твоим шагом)
@@ -4688,7 +4743,7 @@ const OP_FIELDS = {
   type: S_('string', 'Тип операции', { enum: Object.keys(OPS) }),
   date: S_('string', 'Дата ГГГГ-ММ-ДД; по умолчанию сегодня. Уже случившееся — не позже сегодня'),
   account: S_('string', 'id счёта из снимка (или его название)'),
-  amount: S_('number', 'Сумма в валюте счёта (для val не нужна)'),
+  amount: S_('number', 'Сумма в валюте счёта: для USD-счёта — доллары (USDT = доллары), не тенге (для val не нужна)'),
   to_account: S_('string', 'xfer — куда; pay/borrow — свой счёт, откуда платил или куда пришли деньги'),
   to_amount: S_('number', 'xfer между валютами: сколько зачислено на второй счёт'),
   kind: S_('string', 'inc: int проценты, cpn купон, div дивиденды, prem премия Отбасы, oth прочее; cost: fee комиссия, tax налог', { enum: [...Object.keys(INC_KINDS), 'fee', 'tax'] }),
@@ -4697,16 +4752,18 @@ const OP_FIELDS = {
   quantity: S_('number', 'Штуки на счёте account (только для счетов с учётом количества): in/open — куплено, out/xfer — продано, trade — сколько куплено или продано'),
   to_quantity: S_('number', 'xfer: сколько штук купили на счёте to_account на эти деньги'),
   price: S_('number', 'val: цена за 1 шт.'),
-  value: S_('number', 'val: вся стоимость счёта сейчас (или остаток долга для кредита)'),
+  value: S_('number', 'val: вся стоимость счёта сейчас в валюте счёта (или остаток долга для кредита)'),
   tax: S_('number', 'inc: удержанный налог'),
   fee: S_('number', 'inc: комиссия'),
-  fx: S_('number', 'Курс валюты счёта к тенге на дату, если счёт не в тенге и курса нет'),
+  fx: S_('number', 'Курс валюты счёта к тенге на дату операции (in, out, xfer, inc), если он отличается от курса из снимка; для оценки счёта курс — только set_rate'),
   balance_after: S_('number', 'pay: остаток долга после платежа по данным банка'),
   note: S_('string', 'Комментарий'),
   allow_duplicate: S_('boolean', 'true — записать, даже если такая же операция уже есть'),
   force: S_('boolean', 'true — записать, даже если на счёте по учёту не хватает денег (только если пользователь подтвердил сумму)'),
   planned: S_('boolean', 'true — запись на будущую дату, о которой пользователь прямо сказал; посчитается только с того дня'),
-  confirm_price: S_('boolean', 'true — пользователь подтвердил цену за штуку, сильно отличающуюся от последней известной на этом счёте'),
+  confirm_price: S_('boolean', 'true — пользователь подтвердил цену за штуку или новую стоимость счёта, сильно отличающуюся от прежней'),
+  confirm_amount: S_('boolean', 'true — пользователь подтвердил очень большую сумму в валюте счёта (проверь, что это не тенге)'),
+  confirm_new: S_('boolean', 'open: пользователь подтвердил, что это новые деньги, а не часть капитала одной суммой'),
 };
 const OP_KEYS = new Set([...Object.keys(OP_FIELDS), 'from_account']);
 const fn = (name, description, properties, required = []) => ({ type: 'function', function: { name, description, parameters: { type: 'object', properties, required } } });
@@ -4719,20 +4776,25 @@ const TOOLS = [
     name: S_('string', 'Название, например «Freedom вклад 3 мес»'),
     category: S_('string', 'Вид счёта', { enum: Object.keys(CATS) }),
     platform: S_('string', 'Банк или брокер'),
-    currency: S_('string', 'Валюта счёта: KZT (по умолчанию) или USD/EUR и т. п. — курс должен быть в настройках. Крипта и акции: KZT, opening_balance — сколько заплатил в ₸, opening_quantity — число монет/бумаг; BTC, ETH — не валюта'),
+    currency: S_('string', 'Валюта счёта: KZT (по умолчанию) или USD/EUR и т. п. — курс должен быть в настройках. Стейблкоины USDT/USDC — USD с count_units=false и discount_pct 0 (USDT можно передать и так — учтётся как USD). Крипта и акции: KZT, opening_balance — сколько заплатил в ₸, opening_quantity — число монет/бумаг; BTC, ETH — не валюта'),
     rate: S_('number', 'Ставка вклада или ожидаемая доходность, % годовых; не знаем — не указывать'),
     purpose: S_('string', 'goal — на взнос, reserve — резерв, none — другое', { enum: ['goal', 'reserve', 'none'] }),
-    opening_balance: S_('number', 'Сколько положили/лежит на счёте'),
+    discount_pct: S_('number', 'Свой дисконт на риск для «Собрано на взнос», % от 0 до 100 (пусто — по виду счёта: крипта 60, акции 30…; у валютных счетов прибавится валютный дисконт из настроек)'),
+    opening_balance: S_('number', 'Сколько положили/лежит на счёте — в валюте счёта (для USD — доллары, не тенге)'),
     opening_date: S_('string', 'Дата остатка ГГГГ-ММ-ДД, по умолчанию сегодня, не позже сегодня'),
     source: S_('string', 'Откуда деньги для opening_balance: income — из зарплаты, доставки, подработок (в том числе платил с карты, которой нет в учёте); existing — лежали там до начала учёта; или id своего счёта, с которого перевёл — и туда же, если купил на купон, проценты или дивиденды, пришедшие на этот счёт'),
     opening_quantity: S_('number', 'Штуки (акции, монеты, облигации поштучно)'),
     count_units: S_('boolean', 'true — вести на счёте количество штук (для акций и крипты включено и так; для облигаций — если пользователь называет штуки)'),
     loan_debt: S_('number', 'Кредит: остаток долга'), loan_rate: S_('number', 'Кредит: ставка, %'), loan_payment: S_('number', 'Кредит: платёж в месяц'),
     force: S_('boolean', 'true — даже если на счёте-источнике по учёту не хватает денег'),
+    confirm_amount: S_('boolean', 'true — пользователь подтвердил очень большую сумму в валюте счёта'),
+    confirm_new: S_('boolean', 'true — пользователь подтвердил, что это новые деньги, а не часть капитала одной суммой'),
   }, ['name', 'category']),
-  fn('update_account', 'Изменить счёт: название, банк, ставку, назначение, закрыть/открыть, платёж и ставку кредита.', {
+  fn('update_account', 'Изменить счёт: название, банк, ставку, назначение, дисконт для «Собрано», закрыть/открыть, платёж и ставку кредита.', {
     account: S_('string', 'id или название счёта'), name: S_('string', 'Новое название'), platform: S_('string', 'Банк'), rate: S_('number', 'Ставка, % годовых'),
     purpose: S_('string', 'goal / reserve / none', { enum: ['goal', 'reserve', 'none'] }), archived: S_('boolean', 'true — счёт закрыт'),
+    discount_pct: S_('number', 'Свой дисконт на риск для «Собрано на взнос», % от 0 до 100. Только с согласия пользователя. У валютных счетов к нему прибавится валютный дисконт (его меняет set_fx_discount)'),
+    reset_discount: S_('boolean', 'true — убрать свой дисконт счёта: снова по виду счёта'),
     loan_rate: S_('number', 'Кредит: ставка, %'), loan_payment: S_('number', 'Кредит: платёж в месяц'),
   }, ['account']),
   fn('set_month', 'Записать доходы, расходы, свой план и заметку месяца. Значения заменяют прежние; add_* = true — прибавить к уже записанным.', {
@@ -4753,6 +4815,14 @@ const TOOLS = [
   fn('update_goal', 'Изменить цель: цену квартиры, процент взноса, оформление, срок.', {
     price: S_('number', 'Цена квартиры, ₸'), down_payment_pct: S_('number', 'Первый взнос, %'), extra_costs: S_('number', 'Оформление и прочие расходы, ₸'), target_month: S_('string', 'Срок ГГГГ-ММ'),
   }),
+  fn('set_rate', 'Записать курс валюты к тенге. Курсы вводятся вручную, по ним оцениваются валютные счета (USD, а значит и USDT). Пользователь назвал курс — запиши.', {
+    currency: S_('string', 'Код валюты: USD, EUR… (USDT, USDC — это USD)'), rate: S_('number', 'Сколько тенге за 1 единицу валюты'),
+    date: S_('string', 'Дата курса ГГГГ-ММ-ДД, по умолчанию сегодня, не позже сегодня'),
+    confirm_rate: S_('boolean', 'true — пользователь подтвердил курс, который отличается от прежнего больше чем на 30%'),
+  }, ['currency', 'rate']),
+  fn('set_fx_discount', 'Валютный дисконт из настроек: прибавляется к дисконту каждого валютного счёта (USD, а значит и USDT) при подсчёте «Собрано на взнос». «Дисконт для долларов N» — это он. Только по просьбе пользователя.', {
+    pct: S_('number', 'Дисконт, % от 0 до 100'),
+  }, ['pct']),
   fn('undo_last', 'Отменить изменения, сделанные тобой в этом разговоре.', { scope: S_('string', 'last_message (по умолчанию) — всё, что ты записал в ответ на прошлое сообщение пользователя: это «отмени», «отмени последнее», «я ошибся»; last_action — только одно последнее действие, если пользователь просит отменить одну часть', { enum: ['last_message', 'last_action'] }) }),
   fn('list_operations', 'Найти операции (новые сверху).', {
     from: S_('string', 'С даты ГГГГ-ММ-ДД или месяца ГГГГ-ММ'), to: S_('string', 'По дату или месяц'), account: S_('string', 'id или название счёта'),
@@ -4771,17 +4841,21 @@ const TOOLS = [
     sheet: S_('string', 'Лист Excel, например «Сценарии»'),
   }, ['screen']),
 ];
-const WRITE = new Set(['add_operations', 'update_operation', 'delete_operation', 'create_account', 'update_account', 'set_month', 'mark_plan_step', 'update_goal']);
+const WRITE = new Set(['add_operations', 'update_operation', 'delete_operation', 'create_account', 'update_account', 'set_month', 'mark_plan_step', 'update_goal', 'set_rate', 'set_fx_discount']);
 const TOOL_TITLE = {
   add_operations: 'Записываю операции', update_operation: 'Исправляю операцию', delete_operation: 'Удаляю операцию', create_account: 'Завожу счёт',
-  update_account: 'Меняю счёт', set_month: 'Записываю месяц', mark_plan_step: 'Отмечаю шаг плана', update_goal: 'Меняю цель', undo_last: 'Отменяю',
+  update_account: 'Меняю счёт', set_month: 'Записываю месяц', mark_plan_step: 'Отмечаю шаг плана', update_goal: 'Меняю цель', set_rate: 'Записываю курс', set_fx_discount: 'Меняю валютный дисконт', undo_last: 'Отменяю',
   list_operations: 'Смотрю операции', get_month: 'Смотрю месяц', analyze: 'Считаю', forecast: 'Считаю прогноз', get_plan: 'Смотрю план', open_screen: 'Открываю',
 };
 // что не записалось — для заголовка карточки «Не записал: …»
 const TOOL_WHAT = {
   add_operations: 'операции', update_operation: 'правку операции', delete_operation: 'удаление операции', create_account: 'новый счёт',
-  update_account: 'изменения счёта', set_month: 'данные месяца', mark_plan_step: 'отметку плана', update_goal: 'изменения цели',
+  update_account: 'изменения счёта', set_month: 'данные месяца', mark_plan_step: 'отметку плана', update_goal: 'изменения цели', set_rate: 'курс', set_fx_discount: 'валютный дисконт',
 };
+// Стейблкоины привязаны к доллару: в приложении это долларовый счёт
+const STABLE = /^(USDT|USDC|BUSD|FDUSD|TUSD|USDE|USDP|DAI)$/;
+// счёт «как стейблкоин»: валютный, без штук, со своим низким дисконтом — так же решает и сценарий «рынок упал»
+const isStable = a => ccyOf(a) !== 'KZT' && !FC.unitsOn(a) && a.cut != null && a.cut !== '' && num(+a.cut) <= 15;
 
 // ================= операции: из слов модели в запись приложения =================
 const parse = v => (v == null || v === '' ? null : FC.parseAmt(v));
@@ -4789,11 +4863,20 @@ const ccyOf = a => (a && a.ccy) || 'KZT';
 function dateTxt(d) { return FC.validDate(d) ? FC.dateLong(d).replace(` ${A.today().slice(0, 4)}`, '') : d; }
 const qt = v => FC.grp(num(v), 6).replace(/,?0+$/, '');   // штуки без хвоста нулей: «1», «0,25»
 const pctTxt = v => FC.grp(num(+v), 2).replace(/,?0+$/, '') + '%';
+// «Подозрительно большая» сумма в ₸: втрое больше всего капитала без этого счёта (или цели) — не растёт от уже записанной ошибки
+const bigKzt = accId => { const c = A.comp(); return 3 * Math.max(Math.max(0, num(c.tot.netWorth) - num(((accId && c.accs[accId]) || {}).valueK)) + 1e6, num(FC.goalInfo(A.settings()).target)); };
+const priceSame0 = (prev, o) => !!prev && ['type', 'acc', 'value', 'price'].every(k => (prev[k] ?? null) === (o[k] ?? null));
 // Штуки видны в тексте операции: и модели, и человеку на карточке — иначе потерянное количество никто не заметит
 function opText(o) {
   const a = A.accById(o.acc) || { name: '?' }, b = o.acc2 ? A.accById(o.acc2) || { name: '?' } : null, m = x => M(x, ccyOf(a));
   const q1 = o.qty ? ` · ${['in', 'open'].includes(o.type) ? 'куплено' : 'продано'} ${qt(o.qty)} шт.` : '', q2 = o.qty2 ? ` · куплено ${qt(o.qty2)} шт.` : '';
-  const t = { in: `Отложил ${m(o.amt)} → ${a.name}${q1}`, out: `Снял ${m(o.amt)} с «${a.name}» — ${OUT_PURPOSE[o.purpose || 'spend']}${q1}`, xfer: `Перевёл ${m(o.amt)}: ${a.name} → ${b ? b.name : '?'}${q1}${q2}`,
+  // перевод между валютами: сколько зачислено на второй счёт — чтобы пересчёт можно было проверить глазами
+  let got = '';
+  if (o.type === 'xfer' && b && b.id && ccyOf(b) !== ccyOf(a)) {
+    const rs = A.settings().rates, rA = ccyOf(a) === 'KZT' ? 1 : num(o.fx) || FC.rateAt(rs, a.ccy, o.date), rB = ccyOf(b) === 'KZT' ? 1 : FC.rateAt(rs, b.ccy, o.date);
+    got = o.amt2 ? ` (зачислено ${M(o.amt2, ccyOf(b))})` : rA > 0 && rB > 0 ? ` (зачислено ≈ ${M(o.amt * rA / rB, ccyOf(b))})` : '';
+  }
+  const t = { in: `Отложил ${m(o.amt)} → ${a.name}${q1}`, out: `Снял ${m(o.amt)} с «${a.name}» — ${OUT_PURPOSE[o.purpose || 'spend']}${q1}`, xfer: `Перевёл ${m(o.amt)}: ${a.name} → ${b ? b.name : '?'}${got}${q1}${q2}`,
     inc: `${INC_KINDS[o.kind || 'int']} ${m(o.amt)} на «${a.name}»${o.tax ? `, налог ${m(o.tax)}` : ''}`, cost: `${o.kind === 'tax' ? 'Налог' : 'Комиссия'} ${m(o.amt)} — «${a.name}»`,
     val: `Стоимость «${a.name}»: ${isNum(o.value) ? m(o.value) : `цена ${m(o.price)} за шт.`}`, pay: `Платёж ${M(o.amt)} по «${a.name}»${b ? ` из «${b.name}»` : ''}`,
     borrow: `Кредит ${M(o.amt)} — «${a.name}»`, trade: `${o.side === 'sell' ? 'Продал' : 'Купил'} ${qt(o.qty)} шт. на ${m(o.amt)} — «${a.name}»`, open: `Начальный остаток ${m(o.amt)} — «${a.name}»${q1}` }[o.type] || OPS[o.type];
@@ -4822,8 +4905,16 @@ function buildOp(x, idx, prev, delta, pending) {
   if (type === 'val') {
     const price = pos('price', 'price'), value = pos('value', 'value');
     if (price == null && value == null) errs.push('нужна новая стоимость: value или price');
-    if (price != null) { if (!(price > 0) || !units) errs.push('price — только для счетов с количеством и больше нуля'); else o.price = price; }
-    else if (value != null) o.value = value;
+    // штуки на дату: с учётом операций той же пачки (купил переводом — и сразу оценил)
+    const had = price != null && units ? FC.unitsAt(A.st(), a.id, date, prev && prev.id) + (pending || []).reduce((n, y) => n
+      + (y.acc === a.id && y.qty > 0 ? (['in', 'open'].includes(y.type) || (y.type === 'trade' && y.side !== 'sell') ? y.qty : -y.qty) : 0) + (y.acc2 === a.id && y.qty2 > 0 ? y.qty2 : 0), 0) : 0;
+    if (price != null) {
+      if (!(price > 0) || !units) errs.push('price — только для счетов с количеством и больше нуля');
+      else if (!(had > 0) && value != null) o.value = value;
+      else if (!(had > 0)) errs.push(`на «${a.name}» 0 шт. — цену не к чему применить; укажи value — всю стоимость в валюте счёта (${ccyOf(a)})`);
+      else o.price = price;
+    } else if (value != null) o.value = value;
+    if (x.fx != null) errs.push('fx у val не записывается — оценка идёт по курсу из настроек; новый курс — set_rate');
   } else {
     o.amt = pos('amount', 'amount', true);
     if (o.amt === 0) errs.push('сумма должна быть больше нуля');
@@ -4831,7 +4922,8 @@ function buildOp(x, idx, prev, delta, pending) {
   // штуки на счёт без учёта количества не записать — говорим об этом, а не теряем молча
   const viaXfer = `купил бумагу на деньги этого счёта — xfer account=${a.id} to_account=<счёт бумаги> to_quantity=N`;
   if (!units && x.quantity != null && type !== 'xfer') errs.push(`на «${a.name}» не ведётся количество — quantity не записать${type === 'trade' ? '; ' + viaXfer : ''}`);
-  const q = units ? pos('quantity', 'quantity') : null; if (q) o.qty = q;
+  if (type === 'inc' && units && x.quantity != null) errs.push('у inc штуки не записываются: сумма — в валюте счёта; новые монеты или бумаги учти val с новой стоимостью');
+  const q = units && type !== 'inc' ? pos('quantity', 'quantity') : null; if (q) o.qty = q;
   if (type === 'trade') {
     if (!units) { if (x.quantity == null) errs.push(`на «${a.name}» не ведётся количество — trade невозможен; ${viaXfer}`); }
     else if (!(q > 0)) errs.push('trade: нужно quantity');
@@ -4868,8 +4960,26 @@ function buildOp(x, idx, prev, delta, pending) {
     if (fx != null) { if (!(fx > 0)) errs.push('fx должен быть больше нуля'); else o.fx = fx; }
     else if (!isNum(FC.rateAt(s.rates, a.ccy, date))) errs.push(`нужен курс ${a.ccy} к тенге (fx) — в настройках его нет`);
   }
+  if (type === 'trade' && x.fx != null) errs.push('fx у trade не записывается — оценка идёт по курсу из настроек; новый курс — set_rate');
   if (x.note) o.note = String(x.note).trim().slice(0, 200);
   if (errs.length) return { error: errs.join('; ') };
+  // Начальный остаток при неразнесённом капитале одной суммой — скорее всего, те же деньги второй раз
+  if (type === 'open' && !prev && !x.confirm_new && !FC.isLiab(a)) { const L = lumpAcc(delta); if (L && L.id !== a.id) return lumpError(L, 'Начальный остаток на другом счёте посчитал бы их второй раз.'); }
+  const rNow = ccyOf(a) === 'KZT' ? 1 : num(o.fx) || FC.rateAt(s.rates, a.ccy, date);
+  // Сумма в валюте счёта, похожая на тенге: 880 000 «долларов» вместо 1 951
+  if (ccyOf(a) !== 'KZT' && !FC.isLiab(a) && !x.confirm_amount && rNow > 0) {
+    const v = type === 'val' ? o.value : o.amt, big = bigKzt(a.id);
+    if (v * rNow > big && !(prev && (type === 'val' ? prev.value : prev.amt) === v)) return { error: `${M(v, a.ccy)} ≈ ${M(v * rNow)} — сумма точно в ${a.ccy}? Названа в тенге — раздели на курс ${FC.grp(rNow, 2)} (≈ ${M(v / rNow, a.ccy)}). Если сумма верная — повтори с confirm_amount=true после подтверждения пользователя`, code: 'check_amount' };
+  }
+  // Новая стоимость сильно не та: разница запишется доходом или убытком вложений, которых не было
+  if (type === 'val' && o.value != null && !FC.isLiab(a) && !x.confirm_price && !priceSame0(prev, o)) {
+    // деньги, вклады, облигации и стейблкоины (свой дисконт ≤15% у валютного счёта без штук) почти не меняются в цене; остальное — сильнее.
+    // Сравниваем со стоимостью на дату оценки, с учётом операций той же пачки («пополнил на 1 млн, теперь там 1,52 млн»)
+    const st0 = { ...A.st(), ops: [...A.st().ops.filter(y => !prev || y.id !== prev.id), ...(pending || [])] };
+    const cur = num((FC.compute(st0, date).accs[a.id] || {}).value), d = o.value - cur;
+    const lim = ['cash', 'dep', 'otb', 'bond'].includes(a.cat) || isStable(a) ? 0.2 : 0.5;
+    if (cur > 0.5 && Math.abs(d) * rNow > 50000 && Math.abs(d) > lim * cur) return { error: `стоимость «${a.name}» ${M(cur, ccyOf(a))} → ${M(o.value, ccyOf(a))}: разница ${M(d, ccyOf(a))} запишется ${d > 0 ? 'доходом' : 'убытком'} вложений («заработали вложения»). Деньги переложены — xfer; потрачены — out; неверен начальный остаток — исправь open (update_operation / delete_operation)${ccyOf(a) !== 'KZT' ? `; value — в ${a.ccy}, не в тенге` : ''}. Если стоимость правда такая — повтори с confirm_price=true после подтверждения пользователя`, code: 'value_check' };
+  }
   // те же предупреждения, что и в форме: дубль и нехватка денег на счёте-источнике
   if (!x.allow_duplicate) { const sig = FC.opSig(o); const d = Store.data.ops.find(y => y.id !== o.id && FC.opSig(y) === sig); if (d) return { error: `такая операция уже есть (${d.id}: ${opText(d)})`, code: 'duplicate' }; }
   // Цена за штуку далеко от последней известной: все бумаги на счёте переоценятся по ней — прибыль или убыток из воздуха.
@@ -4920,6 +5030,9 @@ function buildOp(x, idx, prev, delta, pending) {
         const cands = Store.data.accounts.filter(y => y.id !== src && !FC.isLiab(y) && !y.archived && y.cat !== 'prop' && ccyOf(y) === ccyOf(Sa) && num(FC.unitsOn(y) ? (comp.accs[y.id] || {}).cash : (comp.accs[y.id] || {}).value) + num((delta || {})[y.id]) >= need - 0.5).map(y => ({ id: y.id, name: y.name }));
         return { error: `свободных денег на «${Sa.name}» по учёту ${M(have, Sa.ccy)} — не хватает. trade — покупка на деньги, которые уже лежат на этом же счёте. Купил на купон, проценты или деньги с другого своего счёта — xfer account=<тот счёт> to_account=${Sa.id} amount=${o.amt} to_quantity=${o.qty}; из зарплаты — in на «${Sa.name}» с quantity.`, code: 'not_enough', ...(cands.length ? { candidates: cands } : {}) };
       }
+      // из капитала одной суммой больше, чем там есть, не берём даже с force: минус на нём — не настоящий долг
+      if (isLump(Sa, delta)) return { error: lumpShort(Sa, have, need, type === 'xfer' ? A.accById(o.acc2) : null, o.amt2), code: 'not_enough' };
+      if (wasLump(Sa)) return lumpDone(Sa);
       if (!x.force) return { error: `на «${Sa.name}» по учёту только ${M(have, Sa.ccy)} — не хватает. ${empty ? `На «${Sa.name}» нет ни одной записи: если платил из дохода (карта не в учёте), это пополнение in счёта назначения, а не перевод.` : 'Если сумма верная, сначала нужна запись пополнения; force=true — только если пользователь подтвердил сумму.'}`, code: 'not_enough' };
       warn.push(`на «${Sa.name}» по учёту станет ${M(have - need, Sa.ccy)} — меньше нуля`);
     }
@@ -4991,7 +5104,8 @@ const W = {
     const ops = built.map(b => b.op), warn = [...new Set(built.flatMap(b => b.warn))];
     const nOps = ops.length > 1 ? `${ops.length} ${A.plural(ops.length, 'операцию', 'операции', 'операций')}` : 'операцию';
     return { changes: ops.map(o => ({ kind: 'ops', id: o.id, before: null, after: o })), title: `Записал ${nOps}`, ask: `Записать ${nOps}?`,
-      lines: ops.map(opText), warn, result: () => ({ ok: true, saved: ops.length, operations: ops.map(o => ({ id: o.id, text: opText(o) })), months: monthsEffect(ops.map(o => FC.mkOf(o.date))), ...(warn.length ? { warning: warn.join('; ') } : {}) }) };
+      lines: ops.map(opText), warn, result: () => ({ ok: true, saved: ops.length, operations: ops.map(o => ({ id: o.id, text: opText(o) })), months: monthsEffect(ops.map(o => FC.mkOf(o.date))),
+        ...(ops.some(o => o.type === 'open') ? lumpNext() : {}), ...(warn.length ? { warning: warn.join('; ') } : {}) }) };
   },
   update_operation(a) {
     const prev = Store.data.ops.find(o => o.id === String(a.id || ''));
@@ -5000,7 +5114,7 @@ const W = {
     // старые штуки на счёте, где количество не ведётся (выключили учёт или записано раньше), не мешают править дату или сумму
     const base = opToArgs(prev), accOf = ref => (ref == null ? null : A.accById(ref) || resolveAcc(ref, 'any').acc);
     const A1 = accOf(ch.account ?? prev.acc), A2 = accOf(ch.to_account ?? prev.acc2);
-    if (!('quantity' in ch) && !(A1 && FC.unitsOn(A1))) delete base.quantity;
+    if (!('quantity' in ch) && (!(A1 && FC.unitsOn(A1)) || (ch.type ?? prev.type) === 'inc')) delete base.quantity;
     if (!('to_quantity' in ch) && !(A2 && FC.unitsOn(A2))) delete base.to_quantity;
     const b = buildOp({ ...base, ...ch, allow_duplicate: true, force: ch.force }, 0, prev);
     if (b.error) return b;
@@ -5010,6 +5124,13 @@ const W = {
   delete_operation(a) {
     const prev = Store.data.ops.find(o => o.id === String(a.id || ''));
     if (!prev) return { error: `нет операции ${a.id}` };
+    // без этой записи на счёте не должно стать меньше нуля: с него уже переводили или тратили (так бывает с начальным остатком)
+    const after = FC.compute({ ...A.st(), ops: Store.data.ops.filter(y => y.id !== prev.id) }, A.today()), now = A.comp();
+    for (const id of [prev.acc, prev.acc2].filter(Boolean)) {
+      const acc = A.accById(id); if (!acc || FC.isLiab(acc)) continue;
+      const v1 = num((after.accs[id] || {})[FC.unitsOn(acc) ? 'cash' : 'value']), v0 = num((now.accs[id] || {})[FC.unitsOn(acc) ? 'cash' : 'value']);
+      if (v1 < -0.5 && v1 < v0 - 0.5) return { error: `после удаления на «${acc.name}» станет ${M(v1, ccyOf(acc))}: с него уже переводили или тратили эти деньги. Удали или исправь и те записи${wasLump(acc) ? `, или уменьши этот начальный остаток (update_operation id=${prev.id}) на сумму, заведённую заново как existing` : ''}`, code: 'negative' };
+    }
     return { changes: [{ kind: 'ops', id: prev.id, before: prev, after: null }], title: 'Удалил операцию', ask: 'Удалить операцию?', lines: [opText(prev)], result: () => ({ ok: true, deleted: prev.id, months: monthsEffect([FC.mkOf(prev.date)]) }) };
   },
   create_account(a) {
@@ -5020,6 +5141,7 @@ const W = {
     const s = A.settings(), id = A.uid(), today = A.today();
     const acc = { id, name, cat: a.category, platform: String(a.platform || '').trim().slice(0, 40) };
     const changes = [], lines = [], warn = [];
+    let valK = 0, cutNow = 0, stableNote = '', afterLump = false;   // остаток в тенге, дисконт для «Собрано» и подсказки — для ответа модели
     const date = a.opening_date ? String(a.opening_date) : today;
     if (!FC.validDate(date)) return { error: `неверная дата «${date}»` };
     if (date > today) return { error: `дата ${date} в будущем — счёт с остатком заводят на дату, когда деньги уже лежат (не позже ${today})`, code: 'future_date' };
@@ -5032,29 +5154,43 @@ const W = {
       changes.push({ kind: 'acc', id, before: null, after: acc });
       if (d > 0) { const o = { id: A.uid(), ts: Date.now(), date, type: 'open', acc: id, amt: d, note: 'Долг на начало учёта' }; changes.push({ kind: 'ops', id: o.id, before: null, after: o }); lines.push(`долг ${M(d)}`); }
     } else {
-      acc.ccy = String(a.currency || 'KZT').toUpperCase();
-      if (!/^[A-Z]{3}$/.test(acc.ccy)) return { error: 'валюта — три латинские буквы' };
+      // стейблкоин — это доллары: счёт в USD без штук и без «крипто»-дисконта (если не сказано иначе)
+      const ccyIn = String(a.currency || 'KZT').toUpperCase().trim(), stable = STABLE.test(ccyIn);
+      acc.ccy = stable ? 'USD' : ccyIn;
+      const countUnits = a.count_units ?? (stable ? false : null), discIn = a.discount_pct ?? (stable ? 0 : null);
+      if (stable) stableNote = `${ccyIn} учтён как доллары (USD, без штук${a.discount_pct == null ? ', свой дисконт 0' : ''}); opening_balance — в долларах`;
+      const known = FC.currencies(s.rates), list = ['KZT', ...known].join(', ');
+      if (!/^[A-Z]{3}$/.test(acc.ccy)) return { error: `валюта — код из трёх латинских букв (${list}). Для крипты и акций: currency KZT, opening_balance — сколько заплатил в ₸, opening_quantity — число монет или бумаг`, code: 'currency' };
       if (acc.ccy !== 'KZT' && !isNum(FC.rateAt(s.rates, acc.ccy, today))) {
-        const known = FC.currencies(s.rates);
-        return { error: known.includes(acc.ccy) ? `нет курса ${acc.ccy} на сегодня в настройках` : `${acc.ccy} — не валюта из настроек (${['KZT', ...known].join(', ')}). Для крипты и акций: currency KZT, opening_balance — сколько заплатил в ₸, opening_quantity — число монет или бумаг`, code: 'currency' };
+        return { error: known.includes(acc.ccy) ? `нет курса ${acc.ccy} на сегодня в настройках` : `${acc.ccy} — не валюта из настроек (${list}). Курс новой валюты — set_rate; для крипты и акций: currency KZT, opening_balance — сколько заплатил в ₸, opening_quantity — число монет или бумаг`, code: 'currency' };
       }
       const purpose = a.purpose || ((CATS[a.category] || {}).goal ? 'goal' : 'none');
       acc.reserve = purpose === 'reserve'; acc.goal = purpose === 'goal';
-      if (a.count_units != null && !!a.count_units !== !!CATS[a.category].units) acc.units = !!a.count_units;
+      if (countUnits != null && !!countUnits !== !!CATS[a.category].units) acc.units = !!countUnits;
       const r = parse(a.rate); if (r != null) { if (!(r >= -50 && r <= 100)) return { error: 'ставка от −50 до 100' }; acc.ret = r; }
+      const dc = parse(discIn); if (dc != null) { if (!(dc >= 0 && dc <= 100)) return { error: 'discount_pct от 0 до 100' }; acc.cut = dc; }
       changes.push({ kind: 'acc', id, before: null, after: acc });
       if (acc.ret != null) lines.push(`ставка ${FC.grp(acc.ret, 2).replace(/,?0+$/, '')}%`);
       if (acc.reserve) lines.push('резерв — не идёт в «Собрано на взнос»');
+      cutNow = FC.cutOf(acc, s);
+      if (acc.goal && cutNow > 0) lines.push(`в «Собрано на взнос» — ${pctTxt(100 - cutNow)} (дисконт ${pctTxt(cutNow)})`);
       const v = parse(a.opening_balance), qn = parse(a.opening_quantity);
       if (v != null && !(v >= 0)) return { error: 'opening_balance: нужно число не меньше нуля' };
       if (qn != null && !(qn >= 0)) return { error: 'opening_quantity: нужно число не меньше нуля' };
-      if (qn > 0 && !FC.unitsOn(acc)) return { error: a.count_units === false ? 'count_units=false выключает штуки — убери opening_quantity или count_units' : `у вида «${CATS[acc.cat].name}» штуки по умолчанию не ведутся — opening_quantity не записать. Если пользователь назвал штуки, повтори с count_units=true` };
+      if (qn > 0 && !FC.unitsOn(acc)) return { error: countUnits === false ? 'count_units=false выключает штуки — убери opening_quantity или count_units' : `у вида «${CATS[acc.cat].name}» штуки по умолчанию не ведутся — opening_quantity не записать. Если пользователь назвал штуки, повтори с count_units=true` };
       if (qn > 0 && !(v > 0)) return { error: 'opening_quantity без opening_balance: нужна сумма, сколько заплатил за эти штуки' };
       const qTxt = qn > 0 ? `, ${qt(qn)} шт.` : '', dTxt = date !== today ? `, ${dateTxt(date)}` : '';
+      const rA = acc.ccy === 'KZT' ? 1 : FC.rateAt(s.rates, acc.ccy, date);
+      valK = v > 0 ? v * rA : 0;
+      // сумма в валюте счёта, похожая на тенге: 880 000 «долларов» вместо 1 951
+      if (acc.ccy !== 'KZT' && v > 0 && !a.confirm_amount && valK > bigKzt(null))
+        return { error: `${M(v, acc.ccy)} ≈ ${M(valK)} — сумма точно в ${acc.ccy}? Названа в тенге — раздели на курс ${FC.grp(rA, 2)} (≈ ${amtTxt(v / rA, acc.ccy)}). Если верно — повтори с confirm_amount=true после подтверждения пользователя`, code: 'check_amount' };
       if (v > 0) {
-        const srcs = Store.data.accounts.filter(x => !FC.isLiab(x) && !x.archived && x.cat !== 'prop' && ccyOf(x) === acc.ccy);
+        const srcs = Store.data.accounts.filter(x => !FC.isLiab(x) && !x.archived && x.cat !== 'prop');
         const srcRef = a.source == null ? '' : String(a.source).trim();
         if (!srcRef && srcs.length) return { error: 'откуда деньги? source: income (из зарплаты, доставки, подработок), existing (лежали до учёта) или id счёта, с которого перевёл (туда же — купон или проценты, пришедшие на этот счёт)', code: 'need_source', candidates: srcs.map(x => ({ id: x.id, name: x.name })) };
+        if (srcRef === 'existing' && !a.confirm_new) { const L = lumpAcc(); if (L) return lumpError(L, 'source=existing посчитал бы их второй раз.'); }
+        if (srcRef === 'existing') afterLump = true;
         if (srcRef === 'income') {
           const o = { id: A.uid(), ts: Date.now(), date, type: 'in', acc: id, amt: v, note: 'Отложил на новый счёт' }; if (qn > 0) o.qty = qn;
           if (acc.ccy !== 'KZT') { const fx = FC.rateAt(s.rates, acc.ccy, date); if (isNum(fx)) o.fx = fx; }
@@ -5065,28 +5201,50 @@ const W = {
           changes.push({ kind: 'ops', id: o.id, before: null, after: o }); lines.push(`начальный остаток ${M(v, acc.ccy)}${qTxt}${dTxt}`);
         } else {
           const rs = resolveAcc(srcRef, 'asset'); if (rs.error) return { ...rs, error: 'source: ' + rs.error };
-          const S0 = rs.acc;
-          if (ccyOf(S0) !== acc.ccy) return { error: `«${S0.name}» в другой валюте — перевод между валютами сделайте операцией xfer` };
+          const S0 = rs.acc, sc = ccyOf(S0), cross = sc !== acc.ccy;
+          if (S0.archived) return { error: `«${S0.name}» закрыт — с него ничего не взять. Деньги лежали до начала учёта — source=existing${wasLump(S0) ? ' с confirm_new=true' : ''}; из дохода — income` };
+          // перевод между валютами — по курсам из настроек: со счёта-источника списано в его валюте, зачислено opening_balance
+          const rS = sc === 'KZT' ? 1 : FC.rateAt(s.rates, sc, date);
+          if (cross && !(rS > 0 && rA > 0)) return { error: `нет курса для перевода ${sc} → ${acc.ccy} — сначала set_rate` };
+          let amtS = cross ? Math.round(v * rA / rS * 100) / 100 : v;
           const so = A.comp().accs[S0.id] || {}, have = num(FC.unitsOn(S0) ? so.cash : so.value);
-          if (v > have + 0.5) {
+          // из капитала одной суммой «всё, что есть» между валютами: копейки округления не оставляем — иначе он так и не опустеет
+          if (cross && isLump(S0) && Math.abs(amtS - have) <= Math.max(1, rA / rS * 0.01)) amtS = have;
+          if (amtS > have + 0.5) {
             const empty = !Store.data.ops.some(y => y.acc === S0.id || y.acc2 === S0.id);
-            if (!a.force) return { error: `на «${S0.name}» по учёту только ${M(have, S0.ccy)}. ${empty ? `На «${S0.name}» нет ни одной записи: если платил из дохода (карта не в учёте), укажи source=income.` : 'force=true — только если пользователь подтвердил сумму.'}`, code: 'not_enough' };
-            warn.push(`на «${S0.name}» по учёту станет ${M(have - v, S0.ccy)} — меньше нуля`);
+            if (isLump(S0)) {
+              const haveA = cross ? Math.floor(have * rS / rA * 100) / 100 : have;
+              return { error: `на «${S0.name}» ${amtTxt(have, sc)} — капитал одной суммой, взять ${amtTxt(amtS, sc)} нельзя. Если это те же деньги — заведи счёт с opening_balance ${amtTxt(haveA, acc.ccy)} (source=${S0.id}), а разницу ${amtTxt(Math.round((v - haveA) * 100) / 100, acc.ccy)} запиши add_operations type open на этот счёт с confirm_new=true (деньги были до начала учёта). Если пользователь заново перечисляет все свои деньги — source=existing и confirm_new=true, затем ${lumpCloseHow(S0, have)}. force оставил бы на нём минус`, code: 'not_enough' };
+            }
+            if (wasLump(S0)) return lumpDone(S0);
+            if (!a.force) return { error: `на «${S0.name}» по учёту только ${M(have, sc)}. ${empty ? `На «${S0.name}» нет ни одной записи: если платил из дохода (карта не в учёте), укажи source=income.` : 'force=true — только если пользователь подтвердил сумму.'}`, code: 'not_enough' };
+            warn.push(`на «${S0.name}» по учёту станет ${M(have - amtS, sc)} — меньше нуля`);
           }
-          const o = { id: A.uid(), ts: Date.now(), date, type: 'xfer', acc: S0.id, acc2: id, amt: v, note: 'Переложил на новый счёт' }; if (qn > 0) o.qty2 = qn;
-          changes.push({ kind: 'ops', id: o.id, before: null, after: o }); lines.push(`перевёл ${M(v, acc.ccy)} с «${S0.name}»${qTxt}${dTxt}`);
+          const o = { id: A.uid(), ts: Date.now(), date, type: 'xfer', acc: S0.id, acc2: id, amt: amtS, note: 'Переложил на новый счёт' }; if (cross) o.amt2 = v; if (qn > 0) o.qty2 = qn;
+          changes.push({ kind: 'ops', id: o.id, before: null, after: o }); lines.push(`перевёл ${M(amtS, sc)} с «${S0.name}»${cross ? ` → ${M(v, acc.ccy)}` : ''}${qTxt}${dTxt}`);
         }
       }
     }
     const purposeOut = FC.isLiab(acc) ? undefined : acc.reserve ? 'reserve' : acc.goal ? 'goal' : 'none';
     return { changes, title: `Завёл счёт «${name}»`, ask: `Завести счёт «${name}»?`, lines: [`${CATS[acc.cat].name}${acc.platform ? ', ' + acc.platform : ''}`, ...lines], warn,
-      result: () => ({ ok: true, account_id: id, name, ...(purposeOut ? { purpose: purposeOut } : {}), ...(acc.ret == null && !FC.isLiab(acc) ? { rate_note: `ставка не указана — в прогнозе ${FC.retOf(acc, A.settings())}% по умолчанию для вида` } : {}), ...(warn.length ? { warning: warn.join('; ') } : {}) }) };
+      result: () => ({ ok: true, account_id: id, name, ...(purposeOut ? { purpose: purposeOut } : {}),
+        ...(acc.ccy && acc.ccy !== 'KZT' && valK ? { opening_kzt: Math.round(valK), rate_used: FC.rateAt(A.settings().rates, acc.ccy, date) } : {}),
+        ...(acc.goal ? { discount_pct: cutNow, to_goal_kzt: Math.round(valK * (1 - cutNow / 100)) } : {}),
+        ...(acc.ret == null && !FC.isLiab(acc) ? { rate_note: `ставка не указана — в прогнозе ${FC.retOf(acc, A.settings())}% по умолчанию для вида` } : {}),
+        ...(acc.ret > 0 ? { interest_note: 'проценты и награды сами не начисляются — ставка только для прогноза; когда придут — inc kind=int в валюте счёта или val с остатком из приложения банка/биржи' } : {}),
+        ...(stableNote ? { stable_note: stableNote } : {}), ...(afterLump ? lumpNext() : {}),
+        ...(warn.length ? { warning: warn.join('; ') } : {}) }) };
   },
   update_account(a) {
     const ra = resolveAcc(a.account, 'any'); if (ra.error) return ra;
-    const prev = ra.acc, next = { ...prev }, lines = [];
+    const prev = ra.acc, next = { ...prev }, lines = [], extra = [], warn = [];
     if (a.name != null && String(a.name).trim()) { next.name = String(a.name).trim().slice(0, 60); lines.push(`название: ${next.name}`); }
     if (a.platform != null) { next.platform = String(a.platform).trim().slice(0, 40); lines.push(`банк: ${next.platform || '—'}`); }
+    // капитал одной суммой получил имя или банк — пользователь сказал, что это за деньги: дальше это обычный счёт
+    if (wasLump(prev) && (next.name !== prev.name || next.platform !== prev.platform)) {
+      for (const y of Store.data.ops.filter(z => z.acc === prev.id && z.type === 'open' && /Разнесите/i.test(z.note || ''))) extra.push({ kind: 'ops', id: y.id, before: y, after: { ...y, note: 'Остаток на начало учёта' } });
+      if (extra.length) lines.push('больше не «капитал одной суммой» — обычный счёт');
+    }
     if (FC.isLiab(prev)) {
       const r = parse(a.loan_rate ?? a.rate), p = parse(a.loan_payment);
       if (r != null) { if (!(r >= 0 && r <= 200)) return { error: 'ставка кредита от 0 до 200' }; next.rate = r; lines.push(`ставка ${r}%`); }
@@ -5096,19 +5254,70 @@ const W = {
       if (r != null) { if (!(r >= -50 && r <= 100)) return { error: 'ставка от −50 до 100' }; next.ret = r; lines.push(`ставка ${prev.ret != null && prev.ret !== '' ? `${pctTxt(prev.ret)} → ` : ''}${pctTxt(r)}`); }
       if (a.purpose) { if (!['goal', 'reserve', 'none'].includes(a.purpose)) return { error: 'purpose: goal, reserve или none' }; next.reserve = a.purpose === 'reserve'; next.goal = a.purpose === 'goal'; lines.push({ goal: 'на взнос', reserve: 'резерв', none: 'не в цель' }[a.purpose]); }
     }
+    // свой дисконт для «Собрано на взнос»; reset_discount — снова по виду счёта (null — «не указано», как у других полей)
+    const discTouched = !FC.isLiab(prev) && (a.reset_discount || (a.discount_pct != null && a.discount_pct !== ''));
+    if (discTouched) {
+      const s = A.settings(), was = FC.cutOf(prev, s);
+      if (a.reset_discount) delete next.cut;
+      else { const d = parse(a.discount_pct); if (!(d >= 0 && d <= 100)) return { error: 'discount_pct от 0 до 100' }; next.cut = d; }
+      const now = FC.cutOf(next, s), fxc = ccyOf(prev) !== 'KZT' ? num(+s.fxCut) : 0;
+      lines.push(`дисконт для «Собрано» ${pctTxt(was)} → ${pctTxt(now)}${fxc ? ` (вместе с валютным ${pctTxt(fxc)})` : ''}`);
+      if (fxc > 0 && num(next.cut) === 0 && !a.reset_discount) warn.push(`к дисконту счёта прибавляется валютный ${pctTxt(fxc)} из настроек — итог ${pctTxt(now)}; убрать его для всех валютных счетов — set_fx_discount`);
+    }
     if (a.archived != null) {
       // закрытый счёт с деньгами продолжает считаться в капитале — сначала деньги должны куда-то уйти
       if (a.archived && !prev.archived) {
         const o = A.comp().accs[prev.id] || {}, v = FC.isLiab(prev) ? num(o.debt) : num(o.value);
         if (Math.abs(v) > 0.5) return { error: FC.isLiab(prev)
           ? `по «${prev.name}» по учёту ещё долг ${M(v)} — сначала запиши погашение: pay с balance_after=0 (to_account — если платил со своего счёта) или val value=0 по данным банка; потом archived=true`
-          : `на «${prev.name}» по учёту ещё ${M(v, ccyOf(prev))} — закрытый счёт продолжит считаться в капитале. Сначала запиши проценты при закрытии (inc kind=int, если названы) и куда ушли деньги (xfer на свой счёт или out), потом archived=true`, code: 'not_empty' };
+          : isLump(prev)
+            ? `на «${prev.name}» по учёту ещё ${M(v, ccyOf(prev))} — капитал одной суммой на начало учёта. Если эти деньги уже записаны на других счетах (заведены как existing) — ${lumpCloseHow(prev, v)}. Иначе переведи их на счета xfer. Пользователь сам назвал трату из них — out; без этого out показал бы трату, которой не было, а val — убыток вложений`
+            : `на «${prev.name}» по учёту ещё ${M(v, ccyOf(prev))} — закрытый счёт продолжит считаться в капитале. Сначала запиши проценты при закрытии (inc kind=int, если названы) и куда ушли деньги (xfer на свой счёт или out), потом archived=true`, code: 'not_empty' };
       }
       next.archived = !!a.archived; lines.push(next.archived ? 'счёт закрыт' : 'счёт открыт');
     }
     if (!lines.length) return { error: 'нечего менять' };
-    return { changes: [{ kind: 'acc', id: prev.id, before: prev, after: next }], title: `Изменил «${prev.name}»`, ask: `Изменить «${prev.name}»?`, lines,
-      result: () => ({ ok: true, account_id: prev.id, ...(a.rate != null && !FC.isLiab(prev) ? { rate_before: prev.ret ?? null, rate_now: next.ret } : {}) }) };
+    return { changes: [{ kind: 'acc', id: prev.id, before: prev, after: next }, ...extra], title: `Изменил «${prev.name}»`, ask: `Изменить «${prev.name}»?`, lines, warn,
+      result: () => {
+        const o = A.comp().accs[prev.id] || {};
+        return { ok: true, account_id: prev.id, ...(a.rate != null && !FC.isLiab(prev) ? { rate_before: prev.ret ?? null, rate_now: next.ret } : {}),
+          ...(discTouched ? { discount_pct: num(o.cut), to_goal_kzt: o.goal ? Math.round(num(o.valueK) * (1 - num(o.cut) / 100)) : 0, ...(o.goal ? {} : { note: 'счёт не идёт в «Собрано на взнос» (резерв или «не в цель»)' }), collected_now: Math.round(A.comp().tot.avail) } : {}),
+          ...(warn.length ? { warning: warn.join('; ') } : {}) };
+      } };
+  },
+  // Валютный дисконт из настроек: прибавляется к дисконту каждого валютного счёта. «Дисконт для долларов N» — это он
+  set_fx_discount(a) {
+    const d = parse(a.pct); if (!(d >= 0 && d <= 100)) return { error: 'pct — от 0 до 100' };
+    const prev = Store.data.settings, s = JSON.parse(JSON.stringify(A.settings())), was = num(+s.fxCut);
+    s.fxCut = d;
+    const accs = Store.data.accounts.filter(x => ccyOf(x) !== 'KZT' && !FC.isLiab(x) && !x.archived);
+    return { changes: [{ kind: 'cfg', id: 'main', before: prev, after: s }], title: `Валютный дисконт: ${pctTxt(was)} → ${pctTxt(d)}`, ask: `Поставить валютный дисконт ${pctTxt(d)}?`,
+      lines: accs.map(x => `${x.name}: в «Собрано» ${pctTxt(100 - FC.cutOf(x, s))}`),
+      result: () => { const comp = A.comp(); return { ok: true, fx_discount_before: was, fx_discount_now: d,
+        accounts: accs.map(x => { const o = comp.accs[x.id] || {}; return { id: x.id, name: x.name, discount_pct: num(o.cut), to_goal_kzt: o.goal ? Math.round(num(o.valueK) * (1 - num(o.cut) / 100)) : 0 }; }), collected_now: Math.round(comp.tot.avail) }; } };
+  },
+  // Курс валюты к тенге — как в «Настройках»: запись на дату (та же дата — заменяется)
+  set_rate(a) {
+    let c = String(a.currency || '').trim().toUpperCase();
+    if (STABLE.test(c)) c = 'USD';
+    if (!/^[A-Z]{3}$/.test(c) || c === 'KZT') return { error: 'currency — код валюты из трёх латинских букв, не KZT' };
+    const r = parse(a.rate); if (!(r > 0)) return { error: 'rate — сколько тенге за 1 единицу, больше нуля' };
+    const today = A.today(), d = a.date ? String(a.date).trim() : today;
+    if (!FC.validDate(d) || d > today) return { error: `дата курса — ГГГГ-ММ-ДД, не позже ${today}` };
+    const prev = Store.data.settings, s = JSON.parse(JSON.stringify(A.settings()));
+    const old = FC.rateAt(s.rates, c, d), warn = [];
+    // курс сильно не тот («USDT ≈ 1 $» → 1 ₸) — до записи, а не предупреждением после
+    if (isNum(old) && old > 0 && (r > old * 1.3 || r < old / 1.3) && !a.confirm_rate) return { error: `курс ${c} ${FC.grp(old, 2)} → ${FC.grp(r, 2)} ₸ — меняется больше чем на 30%; это точно тенге за 1 ${c}? Если да — повтори с confirm_rate=true после подтверждения пользователя`, code: 'rate_check' };
+    const rates = (s.rates || []).map(x => ({ ...x })), ex = rates.find(x => x.d === d);
+    if (ex) ex[c] = r; else rates.push({ d, [c]: r });
+    s.rates = rates;
+    const accs = Store.data.accounts.filter(x => ccyOf(x) === c && !x.archived), comp0 = A.comp();
+    const before = Object.fromEntries(accs.map(x => [x.id, num((comp0.accs[x.id] || {}).valueK)]));
+    return { changes: [{ kind: 'cfg', id: 'main', before: prev, after: s }], title: `Курс ${c}: ${isNum(old) ? FC.grp(old, 2) + ' → ' : ''}${FC.grp(r, 2)} ₸`, ask: `Записать курс ${c} ${FC.grp(r, 2)} ₸?`,
+      lines: [`на ${dateTxt(d)}`, ...accs.map(x => x.name)], warn,
+      result: () => { const comp = A.comp(); return { ok: true, currency: c, rate: r, rate_before: isNum(old) ? old : null, date: d,
+        accounts: accs.map(x => ({ id: x.id, name: x.name, kzt_before: Math.round(before[x.id]), kzt_now: Math.round(num((comp.accs[x.id] || {}).valueK)) })), collected_now: Math.round(comp.tot.avail),
+        ...(warn.length ? { warning: warn.join('; ') } : {}) }; } };
   },
   set_month(a) {
     const mk = String(a.month || '');
@@ -5221,10 +5430,12 @@ const R = {
     const S2 = save != null ? { ...S, settings: { ...S.settings, fcCustom: save } } : S;
     const f = FC.forecast(S2, comp, opt);
     const tMk = G.targetMk || FC.addMonths(comp.curMk, 30), n = FC.monthDiff(comp.curMk, tMk);
-    const req = n > 0 ? FC.requiredSave(t.avail, G.target, opt.rate, n, []) : null;
+    // плановые снятия (машина и т. п.) увеличивают нужный взнос — так же считает «Обзор»
+    const extras = n > 0 ? FC.saveSchedule(S, comp, comp.curMk, n, { mode: 'plan' }).map((x, k) => ({ k: k + 1, amt: x.save })).filter(x => x.amt < -0.5) : [];
+    const req = n > 0 ? FC.requiredSave(t.avail, G.target, opt.rate, n, extras) : null;
     const sc = FC.scenarios(S, comp, { rate: opt.rate }).map(x => ({ name: x.name, reach: x.reach, months: x.months, at_target_month: Math.round(x.atTarget) }));
     const assumed = Store.data.accounts.filter(x => !x.archived && FC.goalOn(x) && (x.ret == null || x.ret === '') && num((comp.accs[x.id] || {}).value) > 0).map(x => `${x.name} — ${FC.retOf(x, S.settings)}% по умолчанию`);
-    return { result: { target: G.target, target_month: tMk, collected: Math.round(t.avail), rate_used: opt.rate, ...(rate == null && assumed.length ? { rate_assumed_for: assumed } : {}), monthly_save: save, reach: f.reach, months: f.months, base_reach: base.base.reach, worse_reach: base.pess.reach, better_reach: base.opt.reach, required_monthly_to_target: req != null ? Math.round(req) : null, scenarios: sc }, title: 'Посчитал прогноз' };
+    return { result: { target: G.target, target_month: tMk, collected: Math.round(t.avail), rate_used: opt.rate, ...(rate == null && assumed.length ? { rate_assumed_for: assumed } : {}), monthly_save: save, reach: f.reach, months: f.months, base_reach: base.base.reach, worse_reach: base.pess.reach, better_reach: base.opt.reach, required_monthly_to_target: req != null ? Math.round(req) : null, ...(extras.length ? { planned_withdrawals_included: extras.map(x => ({ month: FC.addMonths(comp.curMk, x.k), amount: Math.round(x.amt) })) } : {}), scenarios: sc }, title: 'Посчитал прогноз' };
   },
   get_plan(a) {
     const s = A.settings(), all = s.plan.months || [], list = all.filter(m => (!a.from || m.m >= a.from) && (!a.to || m.m <= a.to)).slice(0, 24);
@@ -5264,6 +5475,7 @@ function badArgs(name, args) {
   const hints = [], lost = [];
   for (const k of extra) {
     if (name === 'update_operation' && OP_KEYS.has(k)) { hints.push(`«${k}» — внутри changes`); continue; }
+    if (name === 'update_account' && ['category', 'currency', 'count_units'].includes(k)) { hints.push(`${k === 'category' ? 'вид счёта' : k === 'currency' ? 'валюта счёта' : 'учёт штук'} у заведённого счёта не меняется: заведи новый счёт как нужно (create_account, source = этот счёт, весь остаток) и закрой старый (archived=true).`); continue; }
     const hit = known.find(q => (nrm(k).length > 4 && lev(nrm(q), nrm(k)) <= 1) || nrm(q) === 'loan' + nrm(k));
     if (hit) hints.push(`нет поля «${k}» — имелось в виду «${hit}»?`); else lost.push(k);
   }
