@@ -487,6 +487,108 @@ div.f { display: grid; gap: 5px; min-width: 0; }
 .path-empty p { margin: 0; }
 .path-empty ol { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
 
+/* ИИ-ассистент: на телефоне — отдельный экран, на компьютере — панель справа, сайт рядом видно */
+.hdr-ai svg { width: 16px; height: 16px; }
+.hdr-ai { color: var(--accent); border-color: var(--accent-soft); }
+.ai { position: fixed; z-index: 46; inset: 0; background: var(--bg); display: flex; flex-direction: column; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+/* компьютер: панель под шапкой сайта (её кнопки остаются доступны); на широком экране сайт сдвигается и стоит рядом */
+@media (min-width: 761px) { .ai { left: auto; top: var(--ai-top, 0px); width: min(480px, 100vw); border-left: 1px solid var(--line); box-shadow: -12px 0 40px rgba(8, 18, 22, .16); } }
+@media (min-width: 1100px) { body.ai-on { padding-right: 480px; } .ai { top: 0; } }
+.ai-top { display: flex; align-items: center; gap: 8px; padding: 10px max(14px, env(safe-area-inset-right, 0px)) 10px max(10px, env(safe-area-inset-left, 0px)); background: var(--surface); border-bottom: 1px solid var(--line); }
+.ai-title { display: grid; grid-template-columns: minmax(0, 1fr); line-height: 1.25; min-width: 0; }
+.ai-title b { display: inline-flex; align-items: center; gap: 6px; font-size: 16px; min-width: 0; overflow: hidden; white-space: nowrap; }
+.ai-new > span[aria-hidden] { display: none; }
+.ai-title b svg { width: 18px; height: 18px; color: var(--accent); }
+.ai-title span { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ai-top .icon-btn svg { width: 20px; height: 20px; }
+.ai-list { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 16px 14px 8px; display: grid; grid-template-columns: minmax(0, 1fr); align-content: start; gap: 12px; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+.ai-msg { display: grid; gap: 8px; min-width: 0; }
+.ai-msg > * { min-width: 0; }   /* широкая таблица прокручивается внутри своего блока, а не растягивает весь чат */
+.ai-msg.user { justify-items: end; }
+.ai-bub { background: var(--accent); color: var(--accent-ink); padding: 10px 14px; border-radius: 16px 16px 4px 16px; max-width: 86%; font-size: 15px; line-height: 1.45; overflow-wrap: anywhere; }
+.ai-msg.bot { justify-items: stretch; }
+.ai-txt { font-size: 15px; line-height: 1.55; overflow-wrap: anywhere; }
+.ai-txt p { margin: 0 0 8px; }
+.ai-txt p:last-child { margin-bottom: 0; }
+.ai-txt ul, .ai-txt ol { margin: 4px 0 8px; padding-left: 20px; display: grid; gap: 3px; }
+.ai-txt code { font-family: ui-monospace, Consolas, monospace; font-size: 13px; background: var(--surface-2); padding: 1px 4px; border-radius: 4px; }
+.ai-tbl { overflow-x: auto; margin: 4px 0 8px; border: 1px solid var(--line); border-radius: 8px; }
+.ai-tbl table { border-collapse: collapse; font-size: 13px; width: 100%; }
+.ai-tbl th, .ai-tbl td { padding: 6px 9px; border-bottom: 1px solid var(--line); text-align: left; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.ai-tbl th { background: var(--surface-2); color: var(--ink-2); font-weight: 500; }
+.ai-act { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; gap: 10px; align-items: start; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; }
+.ai-act b { font-weight: 600; font-size: 14px; }
+.ai-act ul { margin: 4px 0 0; padding-left: 18px; font-size: 13.5px; color: var(--ink-2); display: grid; gap: 2px; }
+.ai-act .row { margin-top: 8px; }
+.ai-ico { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; font-size: 14px; background: var(--surface-2); color: var(--ink-2); }
+.ai-act.ok .ai-ico { background: var(--good-bg); color: var(--good); }
+.ai-act.err { border-color: var(--bad-bg); }
+.ai-act.err .ai-ico { background: var(--bad-bg); color: var(--bad); }
+.ai-act.wait { border-color: var(--warn); }
+.ai-act.wait .ai-ico { background: var(--warn-bg); color: var(--warn); }
+.ai-act.undone, .ai-act.declined { opacity: .65; }
+.ai-act.undone ul { text-decoration: line-through; }
+.ai-read { font-size: 12.5px; color: var(--muted); padding-left: 4px; display: flex; gap: 6px; align-items: center; }
+.ai-read.err { color: var(--bad); }
+.ai-err { font-size: 13.5px; color: var(--bad); background: var(--bad-bg); border-radius: 10px; padding: 8px 12px; }
+.ai-meta { display: flex; gap: 12px; justify-content: space-between; align-items: center; font-size: 12px; color: var(--muted); flex-wrap: wrap; }
+.ai-status { display: flex; gap: 8px; align-items: center; font-size: 13px; color: var(--ink-2); padding: 6px 16px; background: var(--surface-2); border-top: 1px solid var(--line); }
+.ai-status.err { color: var(--bad); background: var(--bad-bg); }
+.ai-input { display: flex; gap: 8px; align-items: flex-end; padding: 10px max(12px, env(safe-area-inset-right, 0px)) 12px max(12px, env(safe-area-inset-left, 0px)); background: var(--surface); border-top: 1px solid var(--line); }
+.ai-input textarea { flex: 1; min-width: 0; resize: none; border: 1px solid var(--line-2); border-radius: 20px; padding: 10px 14px; font: inherit; font-size: 15px; line-height: 1.4; background: var(--surface); color: var(--ink); max-height: 160px; }
+.ai-input textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-color: var(--accent); }
+.ai-send { appearance: none; border: 0; width: 42px; height: 42px; flex: none; border-radius: 50%; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; cursor: pointer; }
+.ai-send svg { width: 20px; height: 20px; }
+.ai-send.stop { background: var(--ink); color: var(--surface); }
+.ai-mic { width: 42px; height: 42px; flex: none; }
+.ai-mic svg { width: 20px; height: 20px; }
+.ai-mic.on { color: var(--bad); background: var(--bad-bg); border-radius: 50%; }
+.ai-empty { text-align: center; display: grid; gap: 10px; justify-items: center; padding: 24px 6px; }
+.ai-empty h3 { font-size: 18px; }
+.ai-empty p { margin: 0; max-width: 380px; }
+.ai-hello { width: 64px; height: 64px; border-radius: 20px; display: grid; place-items: center; color: #fff; background: linear-gradient(135deg, var(--accent), #1baf7a); box-shadow: 0 8px 24px rgba(11, 107, 138, .3); }
+.ai-hello svg { width: 34px; height: 34px; }
+.ai-ex { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 6px; }
+.ai-ex .chip { white-space: normal; text-align: left; }
+.ai-setup { display: grid; gap: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; }
+.ai-setup h3 { font-size: 17px; }
+.ai-setup p, .ai-setup ol { margin: 0; }
+.ai-setup ol { padding-left: 20px; display: grid; gap: 4px; }
+.ai-setup hr { border: 0; border-top: 1px solid var(--line); margin: 4px 0; width: 100%; }
+.ai-hist { display: grid; gap: 8px; }
+.ai-hist-i { appearance: none; text-align: left; border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 10px 12px; display: grid; gap: 2px; cursor: pointer; color: var(--ink); font: inherit; }
+.ai-hist-i:hover { border-color: var(--accent); }
+.ai-dots { display: inline-flex; gap: 3px; }
+.ai-dots i { width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: .35; }
+.ai-spin { width: 14px; height: 14px; border: 2px solid var(--line-2); border-top-color: var(--accent); border-radius: 50%; display: inline-block; }
+@media (prefers-reduced-motion: no-preference) {
+  .ai-dots i { animation: ai-dot 1.2s infinite ease-in-out; }
+  .ai-dots i:nth-child(2) { animation-delay: .15s; }
+  .ai-dots i:nth-child(3) { animation-delay: .3s; }
+  .ai-spin { animation: ai-spin .8s linear infinite; }
+  .ai-mic.on { animation: ai-pulse 1.2s infinite; }
+}
+@keyframes ai-dot { 0%, 80%, 100% { opacity: .25; transform: translateY(0); } 40% { opacity: 1; transform: translateY(-3px); } }
+@keyframes ai-spin { to { transform: rotate(360deg); } }
+@keyframes ai-pulse { 50% { box-shadow: 0 0 0 6px var(--bad-bg); } }
+/* строка «Сказать ассистенту» на обзоре */
+.ai-ask { appearance: none; width: 100%; margin-top: 10px; display: flex; gap: 8px; align-items: center; text-align: left; border: 1px dashed var(--accent); background: var(--wash); color: var(--ink-2); border-radius: 999px; padding: 10px 14px; font: inherit; font-size: 14px; cursor: pointer; }
+.ai-ask svg { width: 18px; height: 18px; color: var(--accent); flex: none; }
+.ai-ask:hover { color: var(--ink); }
+@media (max-width: 560px) {
+  .hdr-ai span { display: none; }
+  .hdr-ai { padding: 7px 9px; }
+  .ai-top .btn.sm { padding: 5px 8px; font-size: 12.5px; }
+}
+/* узкий телефон: в шапке три кнопки — индикатор сохранения сжимается, а не выталкивает их за край */
+@media (max-width: 420px) {
+  .top-in { gap: 8px; } .brand { min-width: 0; } .top-r { gap: 4px; min-width: 0; flex-shrink: 1; }
+  .sync { min-width: 0; max-width: 34vw; } .sync span { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+  /* в шапке ассистента «Новый разговор» — одним значком, чтобы заголовок не уезжал под кнопки */
+  .ai-new .ai-new-t { display: none; } .ai-new > span[aria-hidden] { display: inline; font-size: 18px; line-height: 1; }
+  .ai-top { gap: 4px; }
+}
+
 .gate { position: fixed; inset: 0; z-index: 80; background: var(--bg); display: flex; align-items: center; justify-content: center; padding: 24px max(16px, env(safe-area-inset-right, 0px)) 24px max(16px, env(safe-area-inset-left, 0px)); }
 .gate-card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 32px 28px; max-width: 420px; width: 100%; text-align: center; display: grid; gap: 14px; justify-items: center; box-shadow: var(--shadow); }
 .gate-logo { width: 64px; height: 64px; border-radius: 16px; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; font: 600 34px var(--f-body); }
@@ -499,7 +601,7 @@ div.f { display: grid; gap: 5px; min-width: 0; }
 <header class="top">
   <div class="wrap top-in">
     <div class="brand"><h1>Мои финансы</h1><p>Активы, доходы, вложения и цель — квартира в Астане</p></div>
-    <div class="top-r"><div class="sync" id="sync" role="status" aria-live="polite"></div><button class="btn hdr-xl" data-act="xl-open" title="Excel-модель: все листы с формулами"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3" y="3.5" width="14" height="13" rx="2"/><path d="M3 8h14M3 12.3h14M8 3.5v13"/></svg><span>Excel</span></button><button class="btn pri hdr-add" data-act="op-new"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M10 4v12M4 10h12"/></svg><span>Запись</span></button></div>
+    <div class="top-r"><div class="sync" id="sync" role="status" aria-live="polite"></div><button class="btn hdr-ai" data-act="ai-open" title="ИИ-ассистент: расскажите, что произошло с деньгами"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M10 2.5l1.6 4.4 4.4 1.6-4.4 1.6L10 14.5l-1.6-4.4-4.4-1.6 4.4-1.6L10 2.5zM15.5 13l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7.7-1.8z"/></svg><span>Ассистент</span></button><button class="btn hdr-xl" data-act="xl-open" title="Excel-модель: все листы с формулами"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3" y="3.5" width="14" height="13" rx="2"/><path d="M3 8h14M3 12.3h14M8 3.5v13"/></svg><span>Excel</span></button><button class="btn pri hdr-add" data-act="op-new"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M10 4v12M4 10h12"/></svg><span>Запись</span></button></div>
   </div>
   <nav class="wrap tabs-nav" aria-label="Разделы"><div class="tabs" id="tabs" role="tablist"></div></nav>
 </header>
@@ -1578,6 +1680,7 @@ const ICON = {
   edit: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M4 13.5V16h2.5L15 7.5 12.5 5 4 13.5z"/></svg>',
   del: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M5 6h10M8 6V4.5h4V6M6.5 6l.7 9.5h5.6l.7-9.5"/></svg>',
   close: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15"/></svg>',
+  spark: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M10 2.5l1.6 4.4 4.4 1.6-4.4 1.6L10 14.5l-1.6-4.4-4.4-1.6 4.4-1.6L10 2.5zM15.5 13l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7.7-1.8z"/></svg>',
   share: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3v10M6.5 6.5L10 3l3.5 3.5M5 10.5V16h10v-5.5"/></svg>',
 };
 
@@ -1663,7 +1766,8 @@ const Store = (() => {
   const errText = code => code === 'quota_exceeded' ? 'Хранилище заполнено: скачайте резервную копию и удалите старые операции.'
     : code === 'invalid_argument' ? 'Запись отклонена: у этого просмотра нет права изменять данные или данные не прошли проверку.'
     : code === 'resource_exhausted' ? 'Слишком много сохранений подряд — подождите минуту и повторите.' : 'Не сохранилось. Проверьте связь и повторите.';
-  async function dbWrite(path, body) {
+  // soft — служебный документ (ассистент): его отказ не переводит весь сайт в «только просмотр»
+  async function dbWrite(path, body, soft) {
     const once = () => (body === null ? db.doc(path).delete() : db.doc(path).set(body));
     // повтор при временной ошибке — внутри той же очереди, чтобы более новая запись не была затёрта старой
     const run = async () => { try { await once(); } catch (e) { if (e && e.code === 'unavailable') { await new Promise(r => setTimeout(r, 600 + Math.random() * 800)); await once(); } else throw e; } };
@@ -1671,8 +1775,9 @@ const Store = (() => {
     try { await enqueue(path, run); lastAt = new Date(); errs.clear(); }   // неудачная запись уже откатилась на экране — после успеха ошибку не держим
     catch (e) {
       const code = e && e.code;
-      errs.set(path, e instanceof TypeError ? 'Запись отклонена: неверные данные.' : errText(code));
       if (code === 'revoked') { mode = 'readonly'; revoked = true; }
+      if (soft) throw e;
+      errs.set(path, e instanceof TypeError ? 'Запись отклонена: неверные данные.' : errText(code));
       // платформа не сказала, можно ли писать, а правильная запись отклонена — значит, нельзя: до конца визита только просмотр
       if (code === 'invalid_argument' && !(e instanceof TypeError) && canKnown !== true) mode = 'readonly';
       throw e;
@@ -1747,6 +1852,19 @@ const Store = (() => {
     const m = await db.doc(`blob/${key}`).get();
     return m.exists ? m.data() : null;
   }
+  // Отдельные документы без подписки (настройки ассистента, история чата): в базе — по пути, без базы — в этом браузере.
+  // В резервную копию они не попадают: там ключ DeepSeek и переписка.
+  const DOCKEY = p => `${LS}:doc:${p}`;
+  async function getDoc(path) {
+    if (db && mode !== 'local') { const s = await db.doc(path).get(); return s.exists ? s.data() : null; }
+    try { const t = localStorage.getItem(DOCKEY(path)); return t ? JSON.parse(t) : null; } catch (e) { return null; }
+  }
+  async function putDoc(path, body) {
+    if (mode === 'readonly') throw Object.assign(new Error('readonly'), { code: 'readonly' });
+    if (db && mode === 'db') { await dbWrite(path, body === null ? null : clean(body), true); return; }
+    try { if (body === null) localStorage.removeItem(DOCKEY(path)); else localStorage.setItem(DOCKEY(path), JSON.stringify(body)); }
+    catch (e) { throw Object.assign(new Error('local'), { code: 'quota_exceeded' }); }
+  }
   // Создать настройки, только если их действительно нет (другая вкладка могла успеть раньше)
   async function ensureSettings(def) {
     if (mode === 'db') {
@@ -1755,7 +1873,7 @@ const Store = (() => {
     await put('cfg', 'main', def); return 'created';
   }
   return {
-    init, data, put, bulk, ensureSettings, retry: subscribe, putBlob, getBlob, blobInfo,
+    init, data, put, bulk, ensureSettings, retry: subscribe, putBlob, getBlob, blobInfo, getDoc, putDoc,
     get mode() { return mode; }, get pending() { return pending; }, get lastAt() { return lastAt; }, get loadedAt() { return loadedAt; },
     get err() { return errs.size ? [...errs.values()].pop() : ''; }, get dead() { return dead.size ? [...dead.values()][0] : ''; }, get revoked() { return revoked; }, get broken() { return broken; },
     get loaded() { return mode === 'local' || ((mode === 'db' || mode === 'readonly') && got.cfg && got.acc && got.ops && got.mon); },
@@ -2032,7 +2150,8 @@ function nowCard(row) {
       <div class="bar sm" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(pc * 100)}" aria-label="Отложено от плана месяца"><b style="width:${(pc * 100).toFixed(1)}%"></b></div>
       <div class="small ${left > 0.5 ? 'ink2' : 'pos'}">${left > 0.5 ? `Осталось отложить ${M(left)}` : 'План месяца выполнен ✓'}</div></div>` : ''}
     ${next ? `<div class="now-next"><div class="eyebrow">Следующий шаг вашего плана</div><p>${esc(next.text)}</p></div>` : stp && stp.complete ? '<p class="now-next pos">Все шаги месяца отмечены ✓</p>' : ''}
-    ${Store.canWrite ? `<div class="row now-act">${stepAction(stp && stp.plan, null, '')}<button class="btn" data-act="month" data-mk="${mk}">${row.incomeTotal != null || row.expenses != null ? 'Доходы и расходы' : 'Внести доходы и расходы'}</button></div>` : ''}
+    ${Store.canWrite ? `<div class="row now-act">${stepAction(stp && stp.plan, null, '')}<button class="btn" data-act="month" data-mk="${mk}">${row.incomeTotal != null || row.expenses != null ? 'Доходы и расходы' : 'Внести доходы и расходы'}</button></div>
+    <button class="ai-ask" data-act="ai-open">${ICON.spark}<span>Сказать ассистенту: «получил зарплату, отложил 70 000 на вклад…»</span></button>` : ''}
   </section>`;
 }
 
@@ -3176,7 +3295,8 @@ window.addEventListener('popstate', () => {
     closeModal(true);
     return;
   }
-  if ($('#xl') && !$('#xl').hidden) { xlHist = false; closeExcel(true); }
+  if ($('#xl') && !$('#xl').hidden) { xlHist = false; closeExcel(true); return; }
+  for (const h of hooks.pop) if (h()) return;   // панель ассистента
 });
 // что-то введено в окне — закрытие жестом спросит подтверждение
 const markDirty = e => { const el = e.target; if (el.closest && el.closest('#modal-root') && el.matches('input:not([type=file]), select, textarea')) modalDirty = true; };
@@ -3939,13 +4059,16 @@ async function openExcel(sheet) {
   try { history.pushState({ xl: 1 }, ''); xlHist = true; } catch (e) { xlHist = false; }
   await xlLoadMeta();
   // открыть сразу нужный лист (например, «Сценарии» со страницы пути)
-  if (sheet && XL.meta) { const i = XL.meta.sheets.findIndex(x => String(x.name).toLowerCase() === String(sheet).toLowerCase()); if (i >= 0 && i !== XL.cur) xlShow(i); }
+  let sheetFound = !sheet;
+  if (sheet && XL.meta) { const i = XL.meta.sheets.findIndex(x => String(x.name).toLowerCase() === String(sheet).toLowerCase()); sheetFound = i >= 0; if (i >= 0 && i !== XL.cur) xlShow(i); }
+  return { loaded: !!XL.meta, sheetFound, sheets: XL.meta ? XL.meta.sheets.map(x => x.name) : [] };
 }
 function closeExcel(fromPop) {
   const el = $('#xl'); if (!el || el.hidden) return;
   el.hidden = true; document.body.style.overflow = '';
   for (const x of [$('header.top'), $('#view'), $('#fab')]) if (x) x.inert = false;
-  if (!fromPop && xlHist) { xlHist = false; try { history.back(); } catch (e) { /* без истории */ } }
+  // своя запись в истории — «назад» не должен закрыть заодно панель ассистента
+  if (!fromPop && xlHist) { xlHist = false; popSkip = true; try { history.back(); } catch (e) { popSkip = false; } }
   xlHist = false;
 }
 async function xlLoadMeta(force) {
@@ -4274,7 +4397,7 @@ document.addEventListener('input', e => {
 });
 document.addEventListener('keydown', e => {
   const root = $('#modal-root');
-  if (!root.innerHTML) { if (e.key === 'Escape' && $('#xl') && !$('#xl').hidden) closeExcel(); return; }
+  if (!root.innerHTML) { if (e.key === 'Escape') { if ($('#xl') && !$('#xl').hidden) closeExcel(); else for (const h of hooks.esc) if (h()) break; } return; }
   if (e.key === 'Escape') { if ($('#discard')) $('#discard').remove(); else closeModal(false, true); return; }
   if (e.key === 'Tab') {   // фокус не уходит из окна
     const f = $$('#modal-root button:not([disabled]), #modal-root input:not([disabled]), #modal-root select:not([disabled]), #modal-root textarea, #modal-root summary').filter(x => x.offsetParent !== null);
@@ -4288,9 +4411,1287 @@ document.addEventListener('keydown', e => {
 $('#fab').addEventListener('click', () => opForm({}));
 window.addEventListener('hashchange', () => { const h = location.hash.slice(1); if (TABS.some(t => t[0] === h) && h !== UI.tab) { UI.tab = h; saveUI(); render(); } });
 
+// ================= для ИИ-ассистента (fin_ai.js) =================
+// Ассистент записывает через то же хранилище и те же расчёты, что и формы; «Назад» и Esc сначала закрывают его панель
+const hooks = { pop: [], esc: [] };
+window.FinApp = {
+  Store, FC, $, $$, esc, M, C, P, amt, fmtIn, uid, today, plural, cap, ICON, EXP_CATS, TYPE_CARDS, UI, saveUI, hooks,
+  st, settings, accById, assetAccs, loanAccs, fromAccs, pathData, reserveIncome, saveSettings, toast, failText, openModal, closeModal,
+  comp: () => { fresh(); return comp; }, ready: () => { fresh(); return ready(); }, forecastsFor: S => { fresh(); return forecastsFor(S || st()); },
+  setTab: t => { if (!TABS.some(x => x[0] === t)) return false; UI.tab = t; saveUI(); setHash(t); render(); window.scrollTo({ top: 0 }); return true; },
+  openExcel, shareFlow, monthForm, opForm, accForm, render: schedule, get modalOpen() { return !!$('#modal-root').innerHTML; },
+  skipPop: (v = true) => { popSkip = v; },   // следующий «назад» — свой (панель ассистента убирает свою запись), его не обрабатывать
+};
+
 // ================= запуск =================
 render();
 Store.init(onStore);
+})();
+
+</script><script>
+/* Мои финансы — ИИ-ассистент: чат с DeepSeek, который сам ведёт учёт через инструменты приложения.
+   Запросы идут из браузера прямо в api.deepseek.com с ключом пользователя; ключ и переписка лежат в его базе (sec/ai, chat/*). */
+(() => {
+'use strict';
+const A = window.FinApp;
+if (!A) return;
+const { Store, FC, $, $$, esc, M, C, P, cap } = A;
+const { CATS, OPS, INC_KINDS, OUT_PURPOSE } = FC;
+const num = FC.num, isNum = FC.isNum;
+
+const API = 'https://api.deepseek.com/chat/completions';
+const MODELS = [['deepseek-flash', 'Flash — быстрее и дешевле'], ['deepseek-v4-pro', 'Pro — умнее, медленнее и дороже']];
+const MAX_STEPS = 10;          // шагов «модель → инструменты» на одно сообщение
+const API_WINDOW = 48;         // сообщений переписки, которые уходят модели
+const KEEP_MSGS = 160;         // сообщений, которые храним для показа
+const CHAT_BYTES = 800000;     // документ базы — до 1 МБ: переписку держим заметно меньше
+const MAX_TEXT = 20000;        // одно сообщение человека, символов
+const AI = { cfg: null, chat: null, chatErr: '', open: false, busy: false, ctrl: null, hist: false, view: 'chat', archive: null, sentAt: 0, waits: new Set() };
+const IC = {
+  spark: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M10 2.5l1.6 4.4 4.4 1.6-4.4 1.6L10 14.5l-1.6-4.4-4.4-1.6 4.4-1.6L10 2.5zM15.5 13l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7.7-1.8z"/></svg>',
+  send: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 16V4M5 9l5-5 5 5"/></svg>',
+  stop: '<svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><rect x="5" y="5" width="10" height="10" rx="2"/></svg>',
+  mic: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><rect x="7" y="2.5" width="6" height="10" rx="3"/><path d="M4.5 9.5a5.5 5.5 0 0011 0M10 15v2.5"/></svg>',
+  gear: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="10" cy="10" r="2.6"/><path d="M10 2.5v2M10 15.5v2M2.5 10h2M15.5 10h2M4.7 4.7l1.4 1.4M13.9 13.9l1.4 1.4M4.7 15.3l1.4-1.4M13.9 6.1l1.4-1.4"/></svg>',
+  back: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4l-6 6 6 6"/></svg>',
+  hist: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M3.5 10a6.5 6.5 0 106.5-6.5c-2.2 0-4 1-5.3 2.6M3.5 3.5v3h3M10 6.5V10l2.5 1.5"/></svg>',
+};
+
+// ================= ключ и переписка =================
+// Страница в Claude: её база общая для всех, кому страницу показали, — ключ там держим только в этом браузере
+const KEY_LOCAL = window.FIN_STORAGE !== 'firebase', KEY_LS = 'moi-finansy-v1:doc:sec/ai';
+async function cfgGet() {
+  if (!KEY_LOCAL) return Store.getDoc('sec/ai');
+  try { return JSON.parse(localStorage.getItem(KEY_LS) || 'null'); } catch (e) { return null; }
+}
+async function cfgPut(v) {
+  if (!KEY_LOCAL) return Store.putDoc('sec/ai', v);
+  try { localStorage.setItem(KEY_LS, JSON.stringify(v)); } catch (e) { throw Object.assign(new Error('local'), { code: 'quota_exceeded' }); }
+}
+async function loadCfg() { if (!AI.cfg) { try { AI.cfg = (await cfgGet()) || {}; } catch (e) { AI.cfg = {}; } } return AI.cfg; }
+// Не прочиталось — не подменяем пустой перепиской: следующее сохранение затёрло бы историю в базе
+async function loadChat() {
+  if (AI.chat) return AI.chat;
+  try { const c = await Store.getDoc('chat/main'); AI.chat = c && Array.isArray(c.msgs) ? heal(c) : newChat(); AI.chatErr = ''; }
+  catch (e) { AI.chatErr = 'Не удалось загрузить переписку: ' + A.failText(e); }
+  return AI.chat;
+}
+const newChat = () => ({ v: 1, msgs: [], api: [], at: Date.now(), usage: { in: 0, out: 0 } });
+// Переписку оборвала перезагрузка посреди ответа: незаконченные действия и хвост для модели приводим в порядок
+function heal(c) {
+  c.api = wholeApi(c.api || []);
+  const m = c.msgs[c.msgs.length - 1];
+  if (m && m.role === 'assistant') {
+    let cut = false;
+    for (const p of m.parts || []) if (p.t === 'act' && ['run', 'wait'].includes(p.a.status)) { cut = true; p.a.status = p.a.status === 'wait' ? 'declined' : 'err'; if (p.a.status === 'err') p.a.detail = 'прервано — проверьте, записалось ли'; }
+    if (cut || (c.api.length && c.api[c.api.length - 1].role === 'tool')) {
+      if (!m.err) m.err = 'Ответ прервался.';
+      if (c.api.length && c.api[c.api.length - 1].role !== 'assistant') c.api.push({ role: 'assistant', content: `(Ответ прервался.${doneNote(m)})` });
+    }
+  }
+  return c;
+}
+// Переписка для модели должна быть целой: за вызовом инструментов сразу идут все ответы на него, ответов без вызова нет,
+// два сообщения человека подряд склеиваем
+function wholeApi(api) {
+  const out = [];
+  for (let i = 0; i < api.length; i++) {
+    const m = api[i];
+    if (m.role === 'tool') continue;
+    if (m.role === 'assistant' && m.tool_calls && m.tool_calls.length) {
+      let j = i + 1; const res = [];
+      while (j < api.length && api[j].role === 'tool') res.push(api[j++]);
+      const got = m.tool_calls.map(t => res.find(r => r.tool_call_id === t.id));
+      if (got.every(Boolean)) out.push(m, ...got);
+      else if (m.content) out.push({ role: 'assistant', content: m.content });
+      i = j - 1; continue;
+    }
+    const prev = out[out.length - 1];
+    if (m.role === 'user' && prev && prev.role === 'user') { out[out.length - 1] = { role: 'user', content: prev.content + '\n\n' + m.content }; continue; }
+    out.push(m);
+  }
+  return out;
+}
+// Храним без лишнего: длинные ответы инструментов обрезаны (модель их уже видела), окно переписки — с сообщения человека
+function trimChat(c) {
+  const msgs = c.msgs.slice(-KEEP_MSGS);
+  let api = c.api.slice(-API_WINDOW * 2);
+  const start = api.findIndex(m => m.role === 'user'); api = start > 0 ? api.slice(start) : start < 0 ? [] : api;
+  api = api.map(m => (m.role === 'tool' && m.content.length > 3000 ? { ...m, content: m.content.slice(0, 3000) + '…(обрезано)' } : m));
+  return { ...c, msgs, api, at: Date.now() };
+}
+// undo-снимки — только в памяти этого визита: в базе их не держим, они могут быть большими.
+// Больше лимита документа — убираем самое старое, пока не влезет
+const enc = new TextEncoder();
+function packChat(c) {
+  const strip = (k, v) => (k === 'changes' || k.startsWith('_') ? undefined : v);
+  let t = trimChat(c);
+  for (;;) {
+    const s = JSON.stringify(t, strip);
+    if (enc.encode(s).length < CHAT_BYTES || t.msgs.length <= 2) return JSON.parse(s);
+    let api = t.api.slice(Math.max(1, Math.floor(t.api.length / 4)));
+    const st = api.findIndex(m => m.role === 'user'); api = st >= 0 ? api.slice(st) : [];
+    t = { ...t, msgs: t.msgs.slice(Math.max(2, Math.floor(t.msgs.length / 4))), api };
+  }
+}
+// Посреди ответа сам AI.chat не трогаем: ход дописывает в те же массивы. Укорачиваем в памяти, только когда ход закончен
+async function saveChat() {
+  if (!AI.chat || !Store.canWrite || AI.chatErr) return;
+  const plain = packChat(AI.chat);
+  if (!AI.busy) { AI.chat.msgs = AI.chat.msgs.slice(-plain.msgs.length); AI.chat.api = plain.api; }
+  try { await Store.putDoc('chat/main', plain); } catch (e) { setStatus('Переписка не сохранилась: ' + A.failText(e), 'err'); }
+}
+
+// ================= поиск счёта по словам =================
+// «каспи депозит» ↔ «Kaspi Депозит», «фридом» ↔ «Freedom»: сравниваем транслит без гласных
+const TR = { а: 'a', б: 'b', в: 'v', г: 'g', д: 'd', е: 'e', ё: 'e', ж: 'j', з: 'z', и: 'i', й: 'i', к: 'k', л: 'l', м: 'm', н: 'n', о: 'o', п: 'p', р: 'r', с: 's', т: 't', у: 'u', ф: 'f', х: 'h', ц: 'c', ч: 'ch', ш: 'sh', щ: 'sh', ъ: '', ы: 'y', ь: '', э: 'e', ю: 'yu', я: 'ya', қ: 'k', ә: 'a', ғ: 'g', ң: 'n', ө: 'o', ұ: 'u', ү: 'u', һ: 'h', і: 'i' };
+const norm = s => [...String(s || '').toLowerCase()].map(c => TR[c] ?? c).join('').replace(/zh/g, 'j').replace(/kh/g, 'h').replace(/[^a-z0-9]+/g, ' ').trim();
+const skel = w => w.replace(/[aeiouy]/g, '') || w;
+const words = s => norm(s).split(' ').filter(w => w.length >= 2).map(skel);
+function resolveAcc(ref, fit = 'asset') {
+  const all = Store.data.accounts.filter(a => CATS[a.cat] && (fit === 'any' || (fit === 'liab') === FC.isLiab(a)));
+  if (ref == null || ref === '') return { error: 'не указан счёт' };
+  const byId = Store.data.accounts.find(a => a.id === String(ref));
+  if (byId) {
+    if (fit !== 'any' && (fit === 'liab') !== FC.isLiab(byId)) return { error: `«${byId.name}» — ${fit === 'liab' ? 'не кредит' : 'кредит, а нужен счёт с деньгами'}` };
+    return { acc: byId };
+  }
+  const q = words(ref);
+  if (!q.length) return { error: `не понял счёт «${ref}»` };
+  const scored = all.map(a => {
+    const t = words(`${a.name} ${a.platform || ''} ${(CATS[a.cat] || {}).name || ''}`);
+    const hit = q.filter(w => t.some(x => x.startsWith(w) || w.startsWith(x))).length;
+    return { a, s: hit / q.length + (norm(a.name) === norm(ref) ? 1 : 0) - (a.archived ? 0.3 : 0) };
+  }).filter(x => x.s >= 0.99).sort((x, y) => y.s - x.s);
+  if (!scored.length) return { error: `нет счёта «${ref}»`, code: 'no_account', candidates: all.filter(a => !a.archived).map(a => ({ id: a.id, name: a.name })) };
+  if (scored.length > 1 && scored[1].s >= scored[0].s - 0.01) return { error: `под «${ref}» подходят несколько счетов`, code: 'ambiguous', candidates: scored.map(x => ({ id: x.a.id, name: x.a.name })) };
+  return { acc: scored[0].a };
+}
+const SRC_ALIAS = { зарплата: 'sal', зп: 'sal', salary: 'sal', доставка: 'dlv', такси: 'dlv', подработка: 'oth', подработки: 'oth', прочее: 'oth' };
+function resolveSource(ref) {
+  const srcs = A.settings().sources || [];
+  const r = String(ref || '');
+  const byId = srcs.find(x => x.id === r);
+  if (byId) return byId;
+  const q = words(r);
+  const alias = SRC_ALIAS[r.toLowerCase()];
+  return srcs.find(x => { const t = words(x.name); return q.length && q.every(w => t.some(y => y.startsWith(w) || w.startsWith(y))); })
+    || (alias && srcs.find(x => x.id === alias)) || null;
+}
+
+// ================= снимок данных для модели =================
+const accLine = a => {
+  const o = A.comp().accs[a.id] || {};
+  if (FC.isLiab(a)) return `${a.id} | ${a.name} | кредит | долг ${FC.grp(num(o.debt))} ₸ | ставка ${num(+a.rate)}% | платёж ${FC.grp(num(+a.payment))} ₸${a.platform ? ' | ' + a.platform : ''}`;
+  const role = a.reserve ? 'резерв' : a.goal === false ? 'не в цель' : 'на взнос';
+  const units = FC.unitsOn(a) ? ` | штук ${FC.grp(num(o.units), 6)}, свободных денег ${FC.grp(num(o.cash), 2)}` : '';
+  const rate = a.ret != null && a.ret !== '' ? a.ret + '%' : `не указана (в прогнозе — ${FC.grp(FC.retOf(a, A.settings()), 1).replace(/,0$/, '')}% по умолчанию для вида)`;
+  return `${a.id} | ${a.name} | ${a.cat} (${CATS[a.cat].name}) | ${a.ccy || 'KZT'} | ${a.platform || '—'} | сейчас ${FC.grp(num(o.value), a.ccy && a.ccy !== 'KZT' ? 2 : 0)} | ставка ${rate} | ${role}${a.archived ? ' | закрыт' : ''}${units}`;
+};
+// Месяц глазами плана: «отложено» вместе с процентами по резерву — так же считает шаг «Пути»
+function monthFacts(mk) {
+  const S = A.st(), comp = A.comp(), r = FC.monthRow(S, comp, mk), ri = num(A.reserveIncome()[mk]);
+  return { r, ri, savedPlan: r.saved + ri, donePct: r.plan > 0 ? Math.round((r.saved + ri) / r.plan * 100) : null };
+}
+function monthLine(mk) {
+  const { r, ri, donePct } = monthFacts(mk), rec = Store.data.months[mk] || {};
+  return `доход ${r.incomeTotal != null ? FC.grp(r.incomeTotal) + ' ₸' : 'не внесён'}${rec.inc ? ' (' + Object.entries(rec.inc).map(([k, v]) => `${k} ${FC.grp(v)}`).join(', ') + ')' : ''}; `
+    + `расходы ${r.expenses != null ? FC.grp(r.expenses) + ' ₸' : 'не внесены'}${rec.expBy ? ' (' + Object.entries(rec.expBy).map(([k, v]) => `${k} ${FC.grp(v)}`).join(', ') + ')' : ''}; `
+    + `платежи по кредитам ${FC.grp(r.loan)} ₸; план отложить ${r.plan != null ? FC.grp(r.plan) + ' ₸' : '—'}; отложено ${FC.grp(r.saved)} ₸`
+    + `${ri ? ` + проценты по резерву ${FC.grp(ri)} ₸ (входят в план)` : ''}${donePct != null ? ` — ${donePct}% плана` : ''}${rec.note ? `; заметка «${String(rec.note).slice(0, 80)}»` : ''}`;
+}
+function snapshot() {
+  const S = A.st(), s = S.settings, comp = A.comp(), t = comp.tot, G = FC.goalInfo(s), mk = comp.curMk;
+  const F = A.forecastsFor(S), pm = FC.planMonth(s, mk), nm = FC.planMonth(s, FC.addMonths(mk, 1));
+  const P0 = A.pathData(), stp = P0.steps.find(x => x.mk === mk);
+  const inc = FC.monthPlanIncome(s, mk);
+  const L = [];
+  L.push(`Сегодня ${A.today()} (${new Date().toLocaleDateString('ru-RU', { weekday: 'long' })}). Текущий месяц ${mk} (${FC.mkLong(mk)}).`);
+  L.push(`Цель: взнос ${FC.grp(G.target)} ₸ (квартира ${FC.grp(G.price)} ₸, взнос ${Math.round(G.dpPct * 100)}%, оформление ${FC.grp(G.costs)} ₸) к ${G.targetMk || '—'}. Собрано на взнос ${FC.grp(t.avail)} ₸ (${P(G.target > 0 ? t.avail / G.target : 0, 0)}). Прогноз сбора: ${F.base.reach || 'не достигается'}.`);
+  L.push(`Всего: капитал ${FC.grp(t.netWorth)} ₸, долги ${FC.grp(t.debt)} ₸, вложено своих ${FC.grp(t.netIn - t.borrowed)} ₸, заработали вложения ${FC.grp(t.result)} ₸.`);
+  const accs = Store.data.accounts.filter(a => CATS[a.cat]);
+  L.push(`Счета (id | название | вид | валюта | банк | сейчас | ставка | назначение):`);
+  L.push(accs.length ? accs.map(a => '- ' + accLine(a)).join('\n') : '- счетов пока нет');
+  L.push(`Источники дохода (id: название, план на этот месяц): ${(s.sources || []).map(x => `${x.id}: ${x.name}, ${FC.grp(num(inc[x.id]))} ₸`).join('; ')}.`);
+  L.push(`Этот месяц (${mk}): ${monthLine(mk)}.`);
+  // другие месяцы с записями: два последних прошедших и все будущие — чтобы решать «заменить или прибавить», не вспоминая разговор
+  const other = Object.keys(Store.data.months).filter(m => m !== mk && FC.validMk(m)).sort();
+  const show = [...other.filter(m => m < mk).slice(-2), ...other.filter(m => m > mk).slice(0, 6)];
+  if (show.length) L.push(`Другие записанные месяцы:\n${show.map(m => `- ${m}: ${monthLine(m)}`).join('\n')}`);
+  if (pm) L.push(`План на ${mk}: «${pm.todo || ''}». Отложить ${FC.grp(num(pm.save))} ₸, накоплено к концу месяца ${FC.grp(num(pm.acc))} ₸.`);
+  if (nm) L.push(`План на ${nm.m}: «${nm.todo || ''}».`);
+  if (stp) L.push(`Шаг пути ${stp.n} из ${P0.total} (глава «${stp.chTitle}»), пункты [ключ] текст — статус:\n${stp.items.map(it => `- [${it.key}] ${it.text} — ${it.done ? 'сделано' : it.skip ? 'не сделано' : 'не отмечено'}`).join('\n')}`);
+  else if (!(s.plan.months || []).length) L.push('План по месяцам не загружен (вкладка «Путь» пустая).');
+  return L.join('\n');
+}
+
+// ================= инструкция модели =================
+// Примеры дат — от сегодняшнего дня: модель охотно копирует их год
+function rules() {
+  const today = A.today(), mk = today.slice(0, 7), pmk = FC.addMonths(mk, -1), nm = FC.addMonths(mk, 1), far = FC.addMonths(mk, 2);
+  const name = m => FC.mkLong(m).split(' ')[0], day5 = (today.slice(8) >= '05' ? mk : pmk) + '-05';
+  return `Ты — ассистент приложения «Мои финансы». Пользователь живёт в Астане, деньги — в тенге (₸), копит на первый взнос за квартиру по своему плану из Excel-модели. Ты ведёшь его учёт сам: записываешь операции, доходы и расходы месяцев, заводишь счета, отмечаешь шаги плана, отвечаешь на вопросы по его данным и считаешь аналитику. Пользователь пишет свободным текстом, часто несколько фактов сразу — ты раскладываешь их по инструментам.
+
+КАК РАБОТАТЬ
+- Факты записывай сразу, без вопросов. Спрашивай, только если без ответа запись будет неверной: непонятно, какой счёт (подходят несколько, подсказки нет), нет суммы, непонятен месяц или дата выходит странной.
+- Счета указывай по id из снимка ниже. Нужного счёта для денег нет (новый вклад, брокерский счёт, кошелёк) — заведи его create_account (вид, банк и ставку — если сказаны; ставку можно указать позже).
+- Платил с карты или счёта, которого нет в учёте (Kaspi Gold, зарплатная карта), — это деньги из дохода: source=income у create_account или операция in. Пустой счёт-источник не заводи. force — только если пользователь подтвердил, что сумма верна.
+- Несколько операций из одного сообщения — одним вызовом add_operations со списком.
+- Не выдумывай суммы, даты и ставки. Чего-то нет — не заполняй и скажи, что это можно добавить позже.
+- После записи коротко перечисли, что сделал, и что это значит: сколько отложено в месяце против плана, сколько осталось до цели. В «отложить» по плану входят и проценты на резервных счетах — переводить их, чтобы шаг засчитался, не нужно.
+- Пункты плана «Отложить …» и «Внести доходы и расходы» отмечаются сами по записям — их не отмечай. mark_plan_step — для действий из плана (резерв, автошкола, открыть вклад), когда пользователь сказал, что сделал или не сделал.
+- Инструмент вернул ошибку — исправь и повтори; нужна информация от пользователя — спроси. Есть warning — перескажи его пользователю.
+- «Отмени», «отмени последнее», «я ошибся» — undo_last scope=last_message (всё из твоего прошлого ответа). Отменить одну часть — last_action. Старую запись — update_operation / delete_operation.
+- Аналитику считай инструментами (analyze, list_operations, get_month, forecast), а не в уме. Если у счёта ставка не указана, прогноз берёт ставку по умолчанию для вида — так и скажи.
+- Ты не финансовый консультант: не советуй, во что вкладывать, сверх того, что написано в плане пользователя. Ставки и доходность — оценки, банк может изменить условия.
+- Отвечай по-русски, коротко и дружелюбно. Суммы — с пробелами по разрядам и знаком ₸ (100 000 ₸), даты — словами (5 ноября). Можно списки и таблицы markdown.
+
+ДАТЫ (сегодня ${today})
+- Дата — ГГГГ-ММ-ДД, месяц — ГГГГ-ММ. Не сказано когда — сегодня.
+- Событие уже было («пришли», «получил», «перевёл», «купил») — дата не позже сегодня: день или месяц без года — последний такой до сегодня («5-го» = ${day5}). Рассказ задним числом про прошлый месяц — ставь даты в нём, а не сегодня.
+- Доход — в месяц, когда деньги пришли (обычно текущий, ${mk}). «Зарплата за ${name(nm)}» пришла сейчас — это доход ${mk}, а «за ${name(nm)}» напиши в заметку месяца. Пополнения из этого дохода — тем же месяцем.
+- Будущая дата — только когда пользователь прямо говорит о будущем (planned=true); такие записи посчитаются только с того дня.
+- Вопрос о плане или прогнозе с месяцем без года — ближайший будущий такой месяц («что делать в ${FC.mkPrep(far).split(' ')[0]}» = ${far}).
+
+КАК УСТРОЕНЫ ДАННЫЕ
+Виды счетов: dep — вклад, bond — облигации, stock — акции и фонды, cash — карта/наличные, otb — Отбасы, crypto — крипта, other — другое, prop — имущество (машина), loan — кредит. Назначение: goal — деньги на взнос (по умолчанию), reserve — резерв на непредвиденное (в цель не считается), none — другое.
+Операции (поле type в add_operations):
+- in — «отложил»: пополнил счёт из дохода (зарплаты, доставки). Считается «отложено» в месяце.
+- xfer — перевод между своими счетами (с карты на вклад, с вклада на брокерский). Это не «отложено»: денег не прибавилось.
+- inc — доход на счёте: проценты (kind=int), купон (cpn), дивиденды (div), премия Отбасы (prem), прочее (oth). Сумма до налога, налог и комиссия — в tax и fee. Доход остаётся на том же счёте — это и есть реинвестирование. Перевёл доход на другой счёт — отдельно xfer.
+- out — снял деньги со счёта, purpose: spend — траты на жизнь из накоплений, вычитаются из «отложено» месяца; goal — на взнос за квартиру; car — машина и её ремонт; other — разовая плановая трата из капитала (автошкола, медсправка). car и other уменьшают капитал, но не «отложено».
+- pay — платёж по кредиту: account = кредит; to_account — свой счёт, если платил из накоплений; из зарплаты — без to_account.
+- borrow — взял кредит (to_account — куда пришли деньги); val — новая стоимость счёта (цена акций/крипты или остаток по данным банка); cost — отдельная комиссия или налог; trade — купил или продал актив за деньги внутри брокерского счёта (quantity обязательно); open — начальный остаток (только деньги, которые были до начала учёта).
+Крипта и акции: счёт в тенге (currency KZT), сумма — сколько заплатил в ₸, quantity / opening_quantity — число монет или бумаг. BTC, ETH — не валюта.
+Месяц (set_month): доходы по источникам (id из снимка: sal — зарплата, dlv — доставка, oth — подработки), расходы месяца — всего и, если сказано, по статьям (home жильё и коммуналка, food питание, trans транспорт и машина, comm связь и подписки, other прочее, unpl незапланированное), свой план «отложить», заметка.
+Примеры:
+- «Получил зарплату 200 000» — доход месяца: set_month(month ${mk}, incomes {sal: 200000}). Зарплата — не операция.
+- «100 000 на жизнь» (бюджет месяца) и «потратил за месяц 160 000» (итог) — set_month expenses_total, заменяя прежнее. add_expenses=true — только для отдельной новой траты сверх записанного («ещё потратил 5 000»). Скажи, что в конце месяца сумму можно уточнить.
+- «Отложил 100 000 на вклад X» — add_operations: in на счёт X.
+- «Открыл вклад в Freedom под 18%, положил 300 000» — create_account(category dep, platform Freedom, rate 18, opening_balance 300000, source …). source: income — из дохода этого месяца (будет «отложено»), existing — деньги лежали там до начала учёта, или id своего счёта, с которого перевёл. Если эти деньги раньше лежали на другом счёте пользователя — это перевод с него, иначе они посчитаются дважды.
+- «Пришёл купон 2 500 ₸ 5-го по облигациям, вложил в них же» — inc kind=cpn на счёт облигаций, дата ${day5}; «вложил в них же» уже учтено.
+Суммы — числом в валюте счёта (обычно ₸): «100к» = 100000, «1,5 млн» = 1500000.
+
+СНИМОК ДАННЫХ (обновляется перед каждым твоим шагом)
+`;
+}
+const systemPrompt = () => rules() + snapshot();
+
+// ================= инструменты: описание для модели =================
+const S_ = (type, description, extra = {}) => ({ type, description, ...extra });
+const OP_FIELDS = {
+  type: S_('string', 'Тип операции', { enum: Object.keys(OPS) }),
+  date: S_('string', 'Дата ГГГГ-ММ-ДД; по умолчанию сегодня. Уже случившееся — не позже сегодня'),
+  account: S_('string', 'id счёта из снимка (или его название)'),
+  amount: S_('number', 'Сумма в валюте счёта (для val не нужна)'),
+  to_account: S_('string', 'xfer — куда; pay/borrow — свой счёт, откуда платил или куда пришли деньги'),
+  to_amount: S_('number', 'xfer между валютами: сколько зачислено на второй счёт'),
+  kind: S_('string', 'inc: int проценты, cpn купон, div дивиденды, prem премия Отбасы, oth прочее; cost: fee комиссия, tax налог', { enum: [...Object.keys(INC_KINDS), 'fee', 'tax'] }),
+  purpose: S_('string', 'out: spend — траты на жизнь (вычитаются из «отложено» месяца); goal — на взнос; car — машина и ремонт; other — разовая плановая трата из капитала (автошкола и т. п.); car/other не уменьшают «отложено»', { enum: Object.keys(OUT_PURPOSE) }),
+  side: S_('string', 'trade: buy купил, sell продал', { enum: ['buy', 'sell'] }),
+  quantity: S_('number', 'Штуки акций/монет (для счетов с учётом количества)'),
+  to_quantity: S_('number', 'xfer: сколько штук купили на втором счёте'),
+  price: S_('number', 'val: цена за 1 шт.'),
+  value: S_('number', 'val: вся стоимость счёта сейчас (или остаток долга для кредита)'),
+  tax: S_('number', 'inc: удержанный налог'),
+  fee: S_('number', 'inc: комиссия'),
+  fx: S_('number', 'Курс валюты счёта к тенге на дату, если счёт не в тенге и курса нет'),
+  balance_after: S_('number', 'pay: остаток долга после платежа по данным банка'),
+  note: S_('string', 'Комментарий'),
+  allow_duplicate: S_('boolean', 'true — записать, даже если такая же операция уже есть'),
+  force: S_('boolean', 'true — записать, даже если на счёте по учёту не хватает денег (только если пользователь подтвердил сумму)'),
+  planned: S_('boolean', 'true — запись на будущую дату, о которой пользователь прямо сказал; посчитается только с того дня'),
+};
+const OP_KEYS = new Set([...Object.keys(OP_FIELDS), 'from_account']);
+const fn = (name, description, properties, required = []) => ({ type: 'function', function: { name, description, parameters: { type: 'object', properties, required } } });
+const TOOLS = [
+  fn('add_operations', 'Записать одну или несколько операций (пополнение, перевод, доход, снятие, платёж по кредиту и т. д.). Проверяет всё до записи: если хоть одна с ошибкой — не записывает ничего и возвращает ошибки.',
+    { operations: S_('array', 'Список операций', { items: { type: 'object', properties: OP_FIELDS, required: ['type', 'account'] } }) }, ['operations']),
+  fn('update_operation', 'Исправить записанную операцию: передайте только меняющиеся поля.', { id: S_('string', 'id операции'), changes: S_('object', 'Новые значения полей, как в add_operations', { properties: OP_FIELDS }) }, ['id', 'changes']),
+  fn('delete_operation', 'Удалить операцию.', { id: S_('string', 'id операции') }, ['id']),
+  fn('create_account', 'Завести счёт (вклад, карту, брокерский счёт, кредит и т. д.), при необходимости со стартовым остатком.', {
+    name: S_('string', 'Название, например «Freedom вклад 3 мес»'),
+    category: S_('string', 'Вид счёта', { enum: Object.keys(CATS) }),
+    platform: S_('string', 'Банк или брокер'),
+    currency: S_('string', 'Валюта счёта: KZT (по умолчанию) или USD/EUR и т. п. — курс должен быть в настройках. Крипта и акции: KZT, opening_balance — сколько заплатил в ₸, opening_quantity — число монет/бумаг; BTC, ETH — не валюта'),
+    rate: S_('number', 'Ставка вклада или ожидаемая доходность, % годовых; не знаем — не указывать'),
+    purpose: S_('string', 'goal — на взнос, reserve — резерв, none — другое', { enum: ['goal', 'reserve', 'none'] }),
+    opening_balance: S_('number', 'Сколько положили/лежит на счёте'),
+    opening_date: S_('string', 'Дата остатка ГГГГ-ММ-ДД, по умолчанию сегодня, не позже сегодня'),
+    source: S_('string', 'Откуда деньги для opening_balance: income — отложил из дохода (в том числе платил с карты, которой нет в учёте); existing — лежали там до начала учёта; или id своего счёта, с которого перевёл'),
+    opening_quantity: S_('number', 'Штуки (акции, монеты)'),
+    loan_debt: S_('number', 'Кредит: остаток долга'), loan_rate: S_('number', 'Кредит: ставка, %'), loan_payment: S_('number', 'Кредит: платёж в месяц'),
+    force: S_('boolean', 'true — даже если на счёте-источнике по учёту не хватает денег'),
+  }, ['name', 'category']),
+  fn('update_account', 'Изменить счёт: название, банк, ставку, назначение, закрыть/открыть, платёж и ставку кредита.', {
+    account: S_('string', 'id или название счёта'), name: S_('string', 'Новое название'), platform: S_('string', 'Банк'), rate: S_('number', 'Ставка, % годовых'),
+    purpose: S_('string', 'goal / reserve / none', { enum: ['goal', 'reserve', 'none'] }), archived: S_('boolean', 'true — счёт закрыт'),
+    loan_rate: S_('number', 'Кредит: ставка, %'), loan_payment: S_('number', 'Кредит: платёж в месяц'),
+  }, ['account']),
+  fn('set_month', 'Записать доходы, расходы, свой план и заметку месяца. Значения заменяют прежние; add_* = true — прибавить к уже записанным.', {
+    month: S_('string', 'ГГГГ-ММ'),
+    incomes: S_('object', 'Доход по источникам: {"sal": 220000, "dlv": 35000}', { additionalProperties: { type: 'number' } }),
+    add_incomes: S_('boolean', 'true — прибавить к записанным доходам'),
+    expenses_total: S_('number', 'Сколько потратил за месяц всего'),
+    add_expenses: S_('boolean', 'true — прибавить к записанным расходам'),
+    expenses_by_category: S_('object', 'Расходы по статьям: home, food, trans, comm, other, unpl', { additionalProperties: { type: 'number' } }),
+    plan_save: S_('number', 'Свой план «отложить» на месяц (пусто — по плану модели)'),
+    note: S_('string', 'Заметка'), append_note: S_('boolean', 'true — дописать к заметке'),
+    planned: S_('boolean', 'true — доходы или расходы месяца, который ещё не наступил (прогноз со слов пользователя)'),
+  }, ['month']),
+  fn('mark_plan_step', 'Отметить пункт плана месяца на вкладке «Путь»: сделано, не сделано или снять отметку. Пункты «Отложить…» и «Внести доходы и расходы» отмечаются сами по записям.', {
+    month: S_('string', 'ГГГГ-ММ'), item: S_('string', 'Ключ пункта из снимка ([i…], save, month), номер пункта или часть текста'),
+    status: S_('string', 'done / skip / clear', { enum: ['done', 'skip', 'clear'] }),
+  }, ['month', 'item', 'status']),
+  fn('update_goal', 'Изменить цель: цену квартиры, процент взноса, оформление, срок.', {
+    price: S_('number', 'Цена квартиры, ₸'), down_payment_pct: S_('number', 'Первый взнос, %'), extra_costs: S_('number', 'Оформление и прочие расходы, ₸'), target_month: S_('string', 'Срок ГГГГ-ММ'),
+  }),
+  fn('undo_last', 'Отменить изменения, сделанные тобой в этом разговоре.', { scope: S_('string', 'last_message (по умолчанию) — всё, что ты записал в ответ на прошлое сообщение пользователя: это «отмени», «отмени последнее», «я ошибся»; last_action — только одно последнее действие, если пользователь просит отменить одну часть', { enum: ['last_message', 'last_action'] }) }),
+  fn('list_operations', 'Найти операции (новые сверху).', {
+    from: S_('string', 'С даты ГГГГ-ММ-ДД или месяца ГГГГ-ММ'), to: S_('string', 'По дату или месяц'), account: S_('string', 'id или название счёта'),
+    type: S_('string', 'Тип операции', { enum: Object.keys(OPS) }), search: S_('string', 'Текст в комментарии'), limit: S_('number', 'Сколько, по умолчанию 40, максимум 200'),
+  }),
+  fn('get_month', 'Всё о месяце: доходы, расходы, отложено против плана, операции, план и шаг пути.', { month: S_('string', 'ГГГГ-ММ') }, ['month']),
+  fn('analyze', 'Отчёты по данным: months — помесячно доход/расходы/отложено/план; accounts — по счетам: стоимость, вложено, доход, доходность; expenses_by_category — расходы по статьям; incomes — доходы по источникам; investment_income — проценты, купоны, дивиденды по месяцам и счетам; plan_vs_fact — накоплено против плана модели.', {
+    report: S_('string', 'Отчёт', { enum: ['months', 'accounts', 'expenses_by_category', 'incomes', 'investment_income', 'plan_vs_fact'] }), from: S_('string', 'С месяца ГГГГ-ММ'), to: S_('string', 'По месяц ГГГГ-ММ'),
+  }, ['report']),
+  fn('forecast', 'Прогноз сбора взноса: когда наберётся, сколько нужно откладывать к сроку, сценарии «что будет, если». Можно задать свою сумму в месяц и доходность.', {
+    monthly_save: S_('number', 'Откладывать в месяц, ₸ (пусто — по плану)'), annual_rate: S_('number', 'Доходность, % годовых (пусто — по счетам)'),
+  }),
+  fn('get_plan', 'План модели по месяцам: что делать, доход, расходы, кредит, отложить, накоплено.', { from: S_('string', 'С месяца ГГГГ-ММ'), to: S_('string', 'По месяц ГГГГ-ММ') }),
+  fn('open_screen', 'Открыть пользователю раздел сайта, Excel-модель (можно с листом) или картинку «поделиться».', {
+    screen: S_('string', 'Раздел', { enum: ['obzor', 'put', 'mesyacy', 'scheta', 'operacii', 'prognoz', 'nastroiki', 'excel', 'share_save', 'share_inv', 'share_path'] }),
+    sheet: S_('string', 'Лист Excel, например «Сценарии»'),
+  }, ['screen']),
+];
+const WRITE = new Set(['add_operations', 'update_operation', 'delete_operation', 'create_account', 'update_account', 'set_month', 'mark_plan_step', 'update_goal']);
+const TOOL_TITLE = {
+  add_operations: 'Записываю операции', update_operation: 'Исправляю операцию', delete_operation: 'Удаляю операцию', create_account: 'Завожу счёт',
+  update_account: 'Меняю счёт', set_month: 'Записываю месяц', mark_plan_step: 'Отмечаю шаг плана', update_goal: 'Меняю цель', undo_last: 'Отменяю',
+  list_operations: 'Смотрю операции', get_month: 'Смотрю месяц', analyze: 'Считаю', forecast: 'Считаю прогноз', get_plan: 'Смотрю план', open_screen: 'Открываю',
+};
+// что не записалось — для заголовка карточки «Не записал: …»
+const TOOL_WHAT = {
+  add_operations: 'операции', update_operation: 'правку операции', delete_operation: 'удаление операции', create_account: 'новый счёт',
+  update_account: 'изменения счёта', set_month: 'данные месяца', mark_plan_step: 'отметку плана', update_goal: 'изменения цели',
+};
+
+// ================= операции: из слов модели в запись приложения =================
+const parse = v => (v == null || v === '' ? null : FC.parseAmt(v));
+const ccyOf = a => (a && a.ccy) || 'KZT';
+function dateTxt(d) { return FC.validDate(d) ? FC.dateLong(d).replace(` ${A.today().slice(0, 4)}`, '') : d; }
+function opText(o) {
+  const a = A.accById(o.acc) || { name: '?' }, b = o.acc2 ? A.accById(o.acc2) || { name: '?' } : null, m = x => M(x, ccyOf(a));
+  const t = { in: `Отложил ${m(o.amt)} → ${a.name}`, out: `Снял ${m(o.amt)} с «${a.name}» — ${OUT_PURPOSE[o.purpose || 'spend']}`, xfer: `Перевёл ${m(o.amt)}: ${a.name} → ${b ? b.name : '?'}`,
+    inc: `${INC_KINDS[o.kind || 'int']} ${m(o.amt)} на «${a.name}»${o.tax ? `, налог ${m(o.tax)}` : ''}`, cost: `${o.kind === 'tax' ? 'Налог' : 'Комиссия'} ${m(o.amt)} — «${a.name}»`,
+    val: `Стоимость «${a.name}»: ${isNum(o.value) ? m(o.value) : `цена ${m(o.price)} за шт.`}`, pay: `Платёж ${M(o.amt)} по «${a.name}»${b ? ` из «${b.name}»` : ''}`,
+    borrow: `Кредит ${M(o.amt)} — «${a.name}»`, trade: `${o.side === 'sell' ? 'Продал' : 'Купил'} ${FC.grp(o.qty, 6)} шт. на ${m(o.amt)} — «${a.name}»`, open: `Начальный остаток ${m(o.amt)} — «${a.name}»` }[o.type] || OPS[o.type];
+  return `${t} · ${dateTxt(o.date)}`;
+}
+// Поля операции → поля инструмента (для правки: старое + новое)
+const opToArgs = o => ({ type: o.type, date: o.date, account: o.acc, amount: o.amt, to_account: o.acc2, to_amount: o.amt2, kind: o.kind, purpose: o.purpose, side: o.side,
+  quantity: o.qty, to_quantity: o.qty2, price: o.price, value: o.value, tax: o.tax, fee: o.fee, fx: o.fx, balance_after: o.bal, note: o.note });
+// delta — как уже собранные операции той же пачки меняют деньги на счетах (см. flow)
+function buildOp(x, idx, prev, delta) {
+  if (!x || typeof x !== 'object') return { error: 'операция — не объект' };
+  const extra = Object.keys(x).filter(k => !OP_KEYS.has(k));
+  if (extra.length) return { error: `неизвестное поле ${extra.map(k => `«${k}»`).join(', ')} — его нет среди полей операции` };
+  const type = String(x.type || '').trim();
+  if (!OPS[type]) return { error: `неизвестный тип «${type}»` };
+  if (x.from_account != null && !['pay', 'borrow'].includes(type)) return { error: type === 'xfer' ? 'xfer: account — откуда, to_account — куда; from_account не нужен' : 'from_account тут не нужен' };
+  const date = x.date ? String(x.date).trim() : A.today();
+  if (!FC.validDate(date)) return { error: `неверная дата «${date}», нужен формат ГГГГ-ММ-ДД` };
+  if (date > A.today() && !x.planned && !(prev && prev.date === date)) return { error: `дата ${date} в будущем — запись посчитается только с этого дня. Если это уже произошло, поставь дату не позже сегодня (${A.today()}); если пользователь прямо говорит о будущем — повтори с planned=true`, code: 'future_date' };
+  const fit = ['pay', 'borrow'].includes(type) ? 'liab' : ['val', 'open'].includes(type) ? 'any' : 'asset';
+  const ra = resolveAcc(x.account, fit); if (ra.error) return ra;
+  const a = ra.acc, units = FC.unitsOn(a), s = A.settings(), comp = A.comp();
+  const o = { id: prev ? prev.id : A.uid(), ts: prev ? num(prev.ts) || Date.now() : Date.now() + idx, date, type, acc: a.id };
+  const errs = [];
+  const pos = (k, label, req) => { const v = parse(x[k]); if (v == null) { if (req) errs.push(`нужно поле ${label}`); return null; } if (!isNum(v)) { errs.push(`${label}: не число`); return null; } if (v < 0) { errs.push(`${label}: меньше нуля`); return null; } return v; };
+  if (type === 'val') {
+    const price = pos('price', 'price'), value = pos('value', 'value');
+    if (price == null && value == null) errs.push('нужна новая стоимость: value или price');
+    if (price != null) { if (!(price > 0) || !units) errs.push('price — только для счетов с количеством и больше нуля'); else o.price = price; }
+    else if (value != null) o.value = value;
+  } else {
+    o.amt = pos('amount', 'amount', true);
+    if (o.amt === 0) errs.push('сумма должна быть больше нуля');
+  }
+  const q = units ? pos('quantity', 'quantity') : null; if (q) o.qty = q;
+  if (type === 'trade') { if (!units) errs.push(`на «${a.name}» не ведётся количество — trade невозможен`); if (!(q > 0)) errs.push('trade: нужно quantity'); o.side = x.side === 'sell' ? 'sell' : 'buy'; }
+  // продать или вывести больше штук, чем было на дату, нельзя — как в форме
+  if (units && q && (['out', 'xfer'].includes(type) || (type === 'trade' && o.side === 'sell'))) {
+    const had = FC.unitsAt(A.st(), a.id, date, prev && prev.id);
+    if (q > had + 1e-9) errs.push(`на ${date} на «${a.name}» было ${FC.grp(had, 6)} шт. — списать ${FC.grp(q, 6)} нельзя`);
+  }
+  if (type === 'xfer') {
+    const rb = resolveAcc(x.to_account, 'asset'); if (rb.error) return { ...rb, error: 'to_account: ' + rb.error };
+    if (rb.acc.id === a.id) errs.push('перевод на тот же счёт');
+    o.acc2 = rb.acc.id;
+    const a2 = pos('to_amount', 'to_amount'); if (a2) o.amt2 = a2;
+    const q2 = FC.unitsOn(rb.acc) ? pos('to_quantity', 'to_quantity') : null; if (q2) o.qty2 = q2;
+  }
+  const ref2 = x.to_account ?? x.from_account;   // для платежа модель иногда пишет from_account — смысл тот же
+  if (['pay', 'borrow'].includes(type) && ref2) { const rb = resolveAcc(ref2, 'asset'); if (rb.error) return { ...rb, error: 'to_account: ' + rb.error }; o.acc2 = rb.acc.id; }
+  if (type === 'inc') {
+    o.kind = INC_KINDS[x.kind] ? x.kind : 'int';
+    const tx = pos('tax', 'tax'), fe = pos('fee', 'fee'); if (tx) o.tax = tx; if (fe) o.fee = fe;
+    if (o.amt != null && num(tx) + num(fe) > o.amt) errs.push('налог и комиссия больше суммы');
+  }
+  if (type === 'cost') o.kind = x.kind === 'tax' ? 'tax' : 'fee';
+  if (type === 'out') o.purpose = OUT_PURPOSE[x.purpose] ? x.purpose : 'spend';
+  if (type === 'pay') { const b = pos('balance_after', 'balance_after'); if (b != null) o.bal = b; }
+  if (ccyOf(a) !== 'KZT' && !['val', 'trade'].includes(type)) {
+    const fx = parse(x.fx);
+    if (fx != null) { if (!(fx > 0)) errs.push('fx должен быть больше нуля'); else o.fx = fx; }
+    else if (!isNum(FC.rateAt(s.rates, a.ccy, date))) errs.push(`нужен курс ${a.ccy} к тенге (fx) — в настройках его нет`);
+  }
+  if (x.note) o.note = String(x.note).trim().slice(0, 200);
+  if (errs.length) return { error: errs.join('; ') };
+  // те же предупреждения, что и в форме: дубль и нехватка денег на счёте-источнике
+  if (!x.allow_duplicate) { const sig = FC.opSig(o); const d = Store.data.ops.find(y => y.id !== o.id && FC.opSig(y) === sig); if (d) return { error: `такая операция уже есть (${d.id}: ${opText(d)})`, code: 'duplicate' }; }
+  const warn = [];
+  if (date > A.today()) warn.push(`дата ${date} в будущем — запись посчитается только с этого дня`);
+  if (!['open', 'val'].includes(type)) for (const id of [o.acc, o.acc2].filter(Boolean)) {
+    const first = Store.data.ops.filter(y => (y.acc === id || y.acc2 === id) && (!prev || y.id !== prev.id)).map(y => y.date).sort()[0];
+    if (first && date < first) warn.push(`${date} раньше первой записи по «${A.accById(id).name}» (${first}) — проверьте дату`);
+  }
+  const src = type === 'pay' ? o.acc2 : ['out', 'xfer'].includes(type) || (type === 'trade' && o.side === 'buy') ? o.acc : null;
+  const Sa = src && A.accById(src);
+  if (Sa && !FC.isLiab(Sa) && !(o.qty > 0 && type !== 'trade')) {
+    const so = comp.accs[src] || {};
+    const back = prev && prev.acc === src && ['out', 'xfer', 'trade'].includes(prev.type) ? num(prev.amt) : prev && prev.type === 'pay' && prev.acc2 === src ? num(prev.amt) : 0;
+    const have = (FC.unitsOn(Sa) ? num(so.cash) : num(so.value)) + back + num((delta || {})[src]);
+    const r = Sa.ccy && Sa.ccy !== 'KZT' ? FC.rateAt(s.rates, Sa.ccy, o.date) : 1;
+    const need = type === 'pay' ? (r > 0 ? o.amt / r : 0) : o.amt;
+    if (need > have + 0.5) {
+      const empty = !Store.data.ops.some(y => y.acc === src || y.acc2 === src);
+      if (!x.force) return { error: `на «${Sa.name}» по учёту только ${M(have, Sa.ccy)} — не хватает. ${empty ? `На «${Sa.name}» нет ни одной записи: если платил из дохода (карта не в учёте), это пополнение in счёта назначения, а не перевод.` : 'Если сумма верная, сначала нужна запись пополнения; force=true — только если пользователь подтвердил сумму.'}`, code: 'not_enough' };
+      warn.push(`на «${Sa.name}» по учёту станет ${M(have - need, Sa.ccy)} — меньше нуля`);
+    }
+  }
+  return { op: o, warn };
+}
+// Как операция меняет деньги на счетах — чтобы следующие операции той же пачки проверялись по новому остатку
+function flow(o, delta) {
+  const add = (id, v) => { if (id && v) delta[id] = num(delta[id]) + v; };
+  const fx = id => { const a = A.accById(id), r = a && a.ccy && a.ccy !== 'KZT' ? FC.rateAt(A.settings().rates, a.ccy, o.date) : 1; return r > 0 ? r : 1; };
+  const amt = num(o.amt);
+  if (o.type === 'in' && !(o.qty > 0)) add(o.acc, amt);
+  if (o.type === 'inc') add(o.acc, amt - num(o.tax) - num(o.fee));
+  if (o.type === 'cost' || (o.type === 'out' && !(o.qty > 0))) add(o.acc, -amt);
+  if (o.type === 'xfer') { if (!(o.qty > 0)) add(o.acc, -amt); if (!(o.qty2 > 0)) add(o.acc2, num(o.amt2) || amt); }
+  if (o.type === 'trade') add(o.acc, o.side === 'sell' ? amt : -amt);
+  if (o.type === 'pay') add(o.acc2, -amt / fx(o.acc2));
+  if (o.type === 'borrow') add(o.acc2, amt / fx(o.acc2));
+}
+// Как запись изменила месяц: отложено против плана
+function monthsEffect(mks) {
+  return [...new Set(mks)].sort().map(mk => {
+    const { r, ri, donePct } = monthFacts(mk);
+    return { month: mk, saved: Math.round(r.saved), ...(ri ? { reserve_interest: Math.round(ri), saved_with_reserve_interest: Math.round(r.saved + ri) } : {}), plan: r.plan != null ? Math.round(r.plan) : null, done_pct: donePct };
+  });
+}
+
+// ================= изменения и их отмена =================
+const sortKeys = v => (Array.isArray(v) ? v.map(sortKeys) : v && typeof v === 'object' ? Object.fromEntries(Object.keys(v).sort().map(k => [k, sortKeys(v[k])])) : v);
+const same = (a, b) => JSON.stringify(sortKeys(JSON.parse(JSON.stringify(a ?? null)))) === JSON.stringify(sortKeys(JSON.parse(JSON.stringify(b ?? null))));
+const cur = (kind, id) => kind === 'ops' ? Store.data.ops.find(o => o.id === id) || null : kind === 'acc' ? Store.data.accounts.find(a => a.id === id) || null
+  : kind === 'mon' ? Store.data.months[id] || null : kind === 'sty' ? Store.data.story[id] || null : kind === 'cfg' ? Store.data.settings : null;
+// Пишем по очереди; сбой — откатываем уже записанное этой пачки, чтобы не осталось половины
+async function apply(changes) {
+  const done = [];
+  try { for (const c of changes) { await Store.put(c.kind, c.id, c.after); done.push(c); } }
+  catch (e) { for (const c of done.reverse()) { try { await Store.put(c.kind, c.id, c.before); } catch (e2) { /* откат — по возможности */ } } throw e; }
+}
+// Счёт, заведённый этим действием, не убираем, пока по нему есть записи из других действий: они остались бы без счёта
+function undoBlock(changes) {
+  const own = new Set(changes.filter(c => c.kind === 'ops').map(c => c.id));
+  for (const c of changes) if (c.kind === 'acc' && c.before === null && c.after) {
+    if (Store.data.ops.some(o => (o.acc === c.id || o.acc2 === c.id) && !own.has(o.id))) return `по счёту «${c.after.name}» есть более поздние записи — сначала отмените их`;
+  }
+  return '';
+}
+async function undoChanges(changes) {
+  const out = { undone: 0, conflicts: [] };
+  const block = undoBlock(changes);
+  if (block) { out.blocked = block; return out; }
+  for (const c of [...changes].reverse()) {
+    if (!same(cur(c.kind, c.id), c.after)) { out.conflicts.push(`${c.kind}/${c.id}`); continue; }   // запись с тех пор меняли — не затираем
+    await Store.put(c.kind, c.id, c.before); out.undone++;
+  }
+  return out;
+}
+
+// ================= инструменты: исполнение =================
+// Запись: plan(args) → { changes, title, lines, result } без записи — для подтверждения; потом apply(changes)
+const W = {
+  add_operations(a) {
+    const list = Array.isArray(a.operations) ? a.operations : a.type ? [a] : [];
+    if (!list.length) return { error: 'пустой список operations' };
+    if (list.length > 30) return { error: 'не больше 30 операций за раз' };
+    const delta = {};
+    const built = list.map((x, i) => { const b = buildOp(x, i, null, delta); if (b.op) flow(b.op, delta); return b; });
+    const errs = built.map((b, i) => (b.error ? { index: i, error: b.error, ...(b.code ? { code: b.code } : {}), ...(b.candidates ? { candidates: b.candidates } : {}) } : null)).filter(Boolean);
+    if (errs.length) return { error: `${errs.length} из ${list.length} с ошибкой — ничего не записано`, details: errs };
+    const ops = built.map(b => b.op), warn = built.flatMap(b => b.warn);
+    const nOps = ops.length > 1 ? `${ops.length} ${A.plural(ops.length, 'операцию', 'операции', 'операций')}` : 'операцию';
+    return { changes: ops.map(o => ({ kind: 'ops', id: o.id, before: null, after: o })), title: `Записал ${nOps}`, ask: `Записать ${nOps}?`,
+      lines: ops.map(opText), warn, result: () => ({ ok: true, saved: ops.length, operations: ops.map(o => ({ id: o.id, text: opText(o) })), months: monthsEffect(ops.map(o => FC.mkOf(o.date))), ...(warn.length ? { warning: warn.join('; ') } : {}) }) };
+  },
+  update_operation(a) {
+    const prev = Store.data.ops.find(o => o.id === String(a.id || ''));
+    if (!prev) return { error: `нет операции ${a.id}` };
+    const ch = a.changes && typeof a.changes === 'object' ? a.changes : {};
+    const b = buildOp({ ...opToArgs(prev), ...ch, allow_duplicate: true, force: ch.force }, 0, prev);
+    if (b.error) return b;
+    return { changes: [{ kind: 'ops', id: prev.id, before: prev, after: b.op }], title: 'Исправил операцию', ask: 'Исправить операцию?', lines: [`было: ${opText(prev)}`, `стало: ${opText(b.op)}`], warn: b.warn,
+      result: () => ({ ok: true, operation: { id: b.op.id, text: opText(b.op) }, months: monthsEffect([FC.mkOf(prev.date), FC.mkOf(b.op.date)]), ...(b.warn.length ? { warning: b.warn.join('; ') } : {}) }) };
+  },
+  delete_operation(a) {
+    const prev = Store.data.ops.find(o => o.id === String(a.id || ''));
+    if (!prev) return { error: `нет операции ${a.id}` };
+    return { changes: [{ kind: 'ops', id: prev.id, before: prev, after: null }], title: 'Удалил операцию', ask: 'Удалить операцию?', lines: [opText(prev)], result: () => ({ ok: true, deleted: prev.id, months: monthsEffect([FC.mkOf(prev.date)]) }) };
+  },
+  create_account(a) {
+    const name = String(a.name || '').trim().slice(0, 60);
+    if (!name) return { error: 'нужно название' };
+    if (!CATS[a.category]) return { error: `неизвестный вид «${a.category}»` };
+    if (Store.data.accounts.some(x => x.name.trim().toLowerCase() === name.toLowerCase())) return { error: `счёт «${name}» уже есть — используйте его id`, code: 'exists' };
+    const s = A.settings(), id = A.uid(), today = A.today();
+    const acc = { id, name, cat: a.category, platform: String(a.platform || '').trim().slice(0, 40) };
+    const changes = [], lines = [], warn = [];
+    const date = a.opening_date ? String(a.opening_date) : today;
+    if (!FC.validDate(date)) return { error: `неверная дата «${date}»` };
+    if (date > today) return { error: `дата ${date} в будущем — счёт с остатком заводят на дату, когда деньги уже лежат (не позже ${today})`, code: 'future_date' };
+    if (a.category === 'loan') {
+      acc.ccy = 'KZT';
+      const r = parse(a.loan_rate), p = parse(a.loan_payment), d = parse(a.loan_debt);
+      if (r == null || !(r >= 0 && r <= 200)) return { error: 'кредит: нужна ставка loan_rate от 0 до 200' };
+      if (p == null || p < 0) return { error: 'кредит: нужен платёж в месяц loan_payment' };
+      acc.rate = r; acc.payment = p;
+      changes.push({ kind: 'acc', id, before: null, after: acc });
+      if (d > 0) { const o = { id: A.uid(), ts: Date.now(), date, type: 'open', acc: id, amt: d, note: 'Долг на начало учёта' }; changes.push({ kind: 'ops', id: o.id, before: null, after: o }); lines.push(`долг ${M(d)}`); }
+    } else {
+      acc.ccy = String(a.currency || 'KZT').toUpperCase();
+      if (!/^[A-Z]{3}$/.test(acc.ccy)) return { error: 'валюта — три латинские буквы' };
+      if (acc.ccy !== 'KZT' && !isNum(FC.rateAt(s.rates, acc.ccy, today))) {
+        const known = FC.currencies(s.rates);
+        return { error: known.includes(acc.ccy) ? `нет курса ${acc.ccy} на сегодня в настройках` : `${acc.ccy} — не валюта из настроек (${['KZT', ...known].join(', ')}). Для крипты и акций: currency KZT, opening_balance — сколько заплатил в ₸, opening_quantity — число монет или бумаг`, code: 'currency' };
+      }
+      const purpose = a.purpose || ((CATS[a.category] || {}).goal ? 'goal' : 'none');
+      acc.reserve = purpose === 'reserve'; acc.goal = purpose === 'goal';
+      const r = parse(a.rate); if (r != null) { if (!(r >= -50 && r <= 100)) return { error: 'ставка от −50 до 100' }; acc.ret = r; }
+      changes.push({ kind: 'acc', id, before: null, after: acc });
+      if (acc.ret != null) lines.push(`ставка ${FC.grp(acc.ret, 2).replace(/,?0+$/, '')}%`);
+      const v = parse(a.opening_balance);
+      if (v != null && !(v >= 0)) return { error: 'opening_balance: нужно число не меньше нуля' };
+      if (v > 0) {
+        const srcs = Store.data.accounts.filter(x => !FC.isLiab(x) && !x.archived && x.cat !== 'prop' && ccyOf(x) === acc.ccy);
+        const srcRef = a.source == null ? '' : String(a.source).trim();
+        if (!srcRef && srcs.length) return { error: 'откуда деньги? source: income (из дохода), existing (лежали до учёта) или id счёта, с которого перевёл', code: 'need_source', candidates: srcs.map(x => ({ id: x.id, name: x.name })) };
+        const qn = parse(a.opening_quantity);
+        if (srcRef === 'income') {
+          const o = { id: A.uid(), ts: Date.now(), date, type: 'in', acc: id, amt: v, note: 'Отложил на новый счёт' }; if (qn > 0) o.qty = qn;
+          if (acc.ccy !== 'KZT') { const fx = FC.rateAt(s.rates, acc.ccy, date); if (isNum(fx)) o.fx = fx; }
+          changes.push({ kind: 'ops', id: o.id, before: null, after: o }); lines.push(`отложил ${M(v, acc.ccy)} из дохода`);
+        } else if (!srcRef || srcRef === 'existing') {
+          const o = { id: A.uid(), ts: Date.now(), date, type: 'open', acc: id, amt: v, note: 'Остаток на начало учёта' }; if (qn > 0) o.qty = qn;
+          if (acc.ccy !== 'KZT') { const fx = FC.rateAt(s.rates, acc.ccy, date); if (isNum(fx)) o.fx = fx; }
+          changes.push({ kind: 'ops', id: o.id, before: null, after: o }); lines.push(`начальный остаток ${M(v, acc.ccy)}`);
+        } else {
+          const rs = resolveAcc(srcRef, 'asset'); if (rs.error) return { ...rs, error: 'source: ' + rs.error };
+          const S0 = rs.acc;
+          if (ccyOf(S0) !== acc.ccy) return { error: `«${S0.name}» в другой валюте — перевод между валютами сделайте операцией xfer` };
+          const so = A.comp().accs[S0.id] || {}, have = num(FC.unitsOn(S0) ? so.cash : so.value);
+          if (v > have + 0.5) {
+            const empty = !Store.data.ops.some(y => y.acc === S0.id || y.acc2 === S0.id);
+            if (!a.force) return { error: `на «${S0.name}» по учёту только ${M(have, S0.ccy)}. ${empty ? `На «${S0.name}» нет ни одной записи: если платил из дохода (карта не в учёте), укажи source=income.` : 'force=true — только если пользователь подтвердил сумму.'}`, code: 'not_enough' };
+            warn.push(`на «${S0.name}» по учёту станет ${M(have - v, S0.ccy)} — меньше нуля`);
+          }
+          const o = { id: A.uid(), ts: Date.now(), date, type: 'xfer', acc: S0.id, acc2: id, amt: v, note: 'Переложил на новый счёт' }; if (qn > 0) o.qty2 = qn;
+          changes.push({ kind: 'ops', id: o.id, before: null, after: o }); lines.push(`перевёл ${M(v, acc.ccy)} с «${S0.name}»`);
+        }
+      }
+    }
+    return { changes, title: `Завёл счёт «${name}»`, ask: `Завести счёт «${name}»?`, lines: [`${CATS[acc.cat].name}${acc.platform ? ', ' + acc.platform : ''}`, ...lines], warn,
+      result: () => ({ ok: true, account_id: id, name, ...(acc.ret == null && !FC.isLiab(acc) ? { rate_note: `ставка не указана — в прогнозе ${FC.retOf(acc, A.settings())}% по умолчанию для вида` } : {}), ...(warn.length ? { warning: warn.join('; ') } : {}) }) };
+  },
+  update_account(a) {
+    const ra = resolveAcc(a.account, 'any'); if (ra.error) return ra;
+    const prev = ra.acc, next = { ...prev }, lines = [];
+    if (a.name != null && String(a.name).trim()) { next.name = String(a.name).trim().slice(0, 60); lines.push(`название: ${next.name}`); }
+    if (a.platform != null) { next.platform = String(a.platform).trim().slice(0, 40); lines.push(`банк: ${next.platform || '—'}`); }
+    if (FC.isLiab(prev)) {
+      const r = parse(a.loan_rate ?? a.rate), p = parse(a.loan_payment);
+      if (r != null) { if (!(r >= 0 && r <= 200)) return { error: 'ставка кредита от 0 до 200' }; next.rate = r; lines.push(`ставка ${r}%`); }
+      if (p != null) { if (!(p >= 0)) return { error: 'платёж не меньше нуля' }; next.payment = p; lines.push(`платёж ${M(p)}`); }
+    } else {
+      const r = parse(a.rate);
+      if (r != null) { if (!(r >= -50 && r <= 100)) return { error: 'ставка от −50 до 100' }; next.ret = r; lines.push(`ставка ${r}%`); }
+      if (a.purpose) { if (!['goal', 'reserve', 'none'].includes(a.purpose)) return { error: 'purpose: goal, reserve или none' }; next.reserve = a.purpose === 'reserve'; next.goal = a.purpose === 'goal'; lines.push({ goal: 'на взнос', reserve: 'резерв', none: 'не в цель' }[a.purpose]); }
+    }
+    if (a.archived != null) { next.archived = !!a.archived; lines.push(next.archived ? 'счёт закрыт' : 'счёт открыт'); }
+    if (!lines.length) return { error: 'нечего менять' };
+    return { changes: [{ kind: 'acc', id: prev.id, before: prev, after: next }], title: `Изменил «${prev.name}»`, ask: `Изменить «${prev.name}»?`, lines, result: () => ({ ok: true, account_id: prev.id }) };
+  },
+  set_month(a) {
+    const mk = String(a.month || '');
+    if (!FC.validMk(mk)) return { error: 'month — ГГГГ-ММ' };
+    const curMk = A.comp().curMk;
+    if (mk > curMk && !a.planned && (a.incomes || a.expenses_total != null || a.expenses_by_category)) return { error: `${FC.mkLong(mk)} ещё не наступил. Доход и расходы записывают в месяц, когда деньги пришли или потрачены (сейчас ${curMk}); «за ${FC.mkLong(mk).split(' ')[0]}» — в заметку. Если пользователь прямо говорит о будущем — повтори с planned=true`, code: 'future_month' };
+    const prev = Store.data.months[mk] || null, rec = JSON.parse(JSON.stringify(prev || {})), lines = [];
+    if (a.incomes && typeof a.incomes === 'object') {
+      rec.inc = { ...(rec.inc || {}) };
+      for (const [k, v] of Object.entries(a.incomes)) {
+        const src = resolveSource(k); if (!src) return { error: `нет источника дохода «${k}»: ${(A.settings().sources || []).map(x => `${x.id} (${x.name})`).join(', ')}` };
+        const n = parse(v); if (!isNum(n) || n < 0) return { error: `доход ${k}: нужно число не меньше нуля` };
+        rec.inc[src.id] = a.add_incomes ? num(rec.inc[src.id]) + n : n; lines.push(`${src.name}: ${M(rec.inc[src.id])}`);
+      }
+    }
+    if (a.expenses_total != null) { const n = parse(a.expenses_total); if (!isNum(n) || n < 0) return { error: 'expenses_total: число не меньше нуля' }; rec.exp = a.add_expenses ? num(rec.exp) + n : n; lines.push(`расходы всего: ${M(rec.exp)}`); }
+    if (a.expenses_by_category && typeof a.expenses_by_category === 'object') {
+      rec.expBy = { ...(rec.expBy || {}) };
+      for (const [k, v] of Object.entries(a.expenses_by_category)) {
+        const cat = A.EXP_CATS.find(([key, nm]) => key === k || nm.toLowerCase().startsWith(String(k).toLowerCase())); if (!cat) return { error: `нет статьи «${k}»: ${A.EXP_CATS.map(x => x[0]).join(', ')}` };
+        const n = parse(v); if (!isNum(n) || n < 0) return { error: `статья ${k}: число не меньше нуля` };
+        rec.expBy[cat[0]] = a.add_expenses ? num(rec.expBy[cat[0]]) + n : n; lines.push(`${cat[1]}: ${M(rec.expBy[cat[0]])}`);
+      }
+    }
+    if (a.plan_save !== undefined) { if (a.plan_save === null || a.plan_save === '') { delete rec.planSave; lines.push('свой план снят — по плану модели'); } else { const n = parse(a.plan_save); if (!isNum(n)) return { error: 'plan_save: число' }; rec.planSave = n; lines.push(`свой план отложить: ${M(n)}`); } }
+    if (a.note != null) { const t = String(a.note).trim(); rec.note = (a.append_note && rec.note ? rec.note + '\n' + t : t).slice(0, 500); if (!rec.note) delete rec.note; lines.push('заметка'); }
+    if (!lines.length) return { error: 'нечего записывать' };
+    // статьи и «всего» разошлись — скорее всего, расходы задвоены (экран показывает большее из двух)
+    const warn = [], byT = rec.expBy ? FC.sumVals(rec.expBy) : null;
+    if ((a.expenses_total != null || a.expenses_by_category) && byT != null && isNum(rec.exp) && Math.abs(byT - rec.exp) > 0.5) warn.push(`статьи в сумме ${M(byT)}, а всего ${M(rec.exp)} — проверьте, не задвоены ли расходы`);
+    return { changes: [{ kind: 'mon', id: mk, before: prev, after: rec }], title: `Записал ${FC.mkLong(mk)}`, ask: `Записать ${FC.mkLong(mk)}?`, lines, warn,
+      result: () => { const { r, ri, donePct } = monthFacts(mk); return { ok: true, month: mk, income: r.incomeTotal, expenses: r.expenses, expenses_before: prev && isNum(prev.exp) ? prev.exp : null, loans: r.loan, free: r.free, plan_save: r.plan, saved: r.saved, ...(ri ? { reserve_interest: Math.round(ri) } : {}), done_pct: donePct, ...(warn.length ? { warning: warn.join('; ') } : {}) }; } };
+  },
+  mark_plan_step(a) {
+    const mk = String(a.month || ''); const P0 = A.pathData(); const stp = P0.steps.find(x => x.mk === mk);
+    if (!stp) return { error: `в плане нет месяца ${mk}` };
+    const q = String(a.item ?? '').trim(), n = /^\d+$/.test(q) ? +q : null;
+    const it = stp.items.find(x => x.key === q) || (n ? stp.items[n - 1] : null) || stp.items.find(x => x.text.toLowerCase().includes(q.toLowerCase()));
+    if (!it || !q) return { error: `не нашёл пункт «${q}»`, items: stp.items.map((x, i) => ({ n: i + 1, key: x.key, text: x.text })) };
+    // «Отложить» и «Внести доходы и расходы» сверяются с записями: ручная галочка спорила бы с цифрами
+    if (it.auto && a.status === 'done') {
+      const { r, savedPlan } = monthFacts(mk);
+      return { error: it.auto === 'save' ? `пункт «${it.text}» отмечается сам по записям: сейчас отложено ${M(savedPlan)} из ${M(num(r.plan))}` : 'пункт отмечается сам, когда записаны доходы или расходы месяца (set_month)', code: 'auto_item' };
+    }
+    const prev = Store.data.story[mk] || null, m = { ...((prev || {}).m || {}) };
+    if (a.status === 'clear') delete m[it.key]; else m[it.key] = a.status === 'skip' ? 's' : 'd';
+    return { changes: [{ kind: 'sty', id: mk, before: prev, after: Object.keys(m).length ? { m } : null }], title: a.status === 'skip' ? 'Отметил: не сделано' : a.status === 'clear' ? 'Снял отметку' : 'Отметил шаг плана ✓',
+      ask: a.status === 'skip' ? 'Отметить: не сделано?' : a.status === 'clear' ? 'Снять отметку?' : 'Отметить пункт сделанным?', lines: [it.text],
+      result: () => { const s2 = A.pathData().steps.find(x => x.mk === mk); return { ok: true, step: s2.n, done: s2.nDone, skipped: s2.nSkip, total: s2.nItems, step_closed: s2.complete }; } };
+  },
+  update_goal(a) {
+    const prev = Store.data.settings, s = JSON.parse(JSON.stringify(A.settings())), g = s.goal, lines = [];
+    const n = k => parse(a[k]);
+    if (a.price != null) { const v = n('price'); if (!(v > 0)) return { error: 'цена больше нуля' }; g.price = v; lines.push(`цена ${M(v)}`); }
+    if (a.down_payment_pct != null) { const v = n('down_payment_pct'); if (!(v > 0 && v <= 100)) return { error: 'взнос от 0 до 100%' }; g.dpPct = v; lines.push(`взнос ${v}%`); }
+    if (a.extra_costs != null) { const v = n('extra_costs'); if (!(v >= 0)) return { error: 'оформление не меньше нуля' }; g.costs = v; lines.push(`оформление ${M(v)}`); }
+    if (a.target_month != null) { if (!FC.validMk(String(a.target_month))) return { error: 'target_month — ГГГГ-ММ' }; g.targetMk = String(a.target_month); lines.push(`срок ${FC.mkLong(g.targetMk)}`); }
+    if (!lines.length) return { error: 'нечего менять' };
+    return { changes: [{ kind: 'cfg', id: 'main', before: prev, after: s }], title: 'Изменил цель', ask: 'Изменить цель?', lines, result: () => { const G = FC.goalInfo(A.settings()); return { ok: true, target: G.target, target_month: G.targetMk }; } };
+  },
+};
+// Чтение и навигация — сразу, без записи
+const R = {
+  list_operations(a) {
+    const range = (v, end) => (!v ? null : /^\d{4}-\d{2}$/.test(v) ? (end ? FC.monthEnd(v) : v + '-01') : String(v));
+    const from = range(a.from), to = range(a.to, true);
+    let acc = null; if (a.account) { const ra = resolveAcc(a.account, 'any'); if (ra.error) return ra; acc = ra.acc.id; }
+    const qq = String(a.search || '').toLowerCase();
+    const list = Store.data.ops.filter(o => (!from || o.date >= from) && (!to || o.date <= to) && (!acc || o.acc === acc || o.acc2 === acc) && (!a.type || o.type === a.type) && (!qq || String(o.note || '').toLowerCase().includes(qq)))
+      .sort((x, y) => (x.date < y.date ? 1 : x.date > y.date ? -1 : num(y.ts) - num(x.ts)));
+    const lim = Math.max(1, Math.min(200, num(+a.limit) || 40));
+    return { result: { total: list.length, shown: Math.min(lim, list.length), operations: list.slice(0, lim).map(o => ({ id: o.id, date: o.date, type: o.type, account: o.acc, ...(o.acc2 ? { to_account: o.acc2 } : {}), amount: o.amt, ...(isNum(o.value) ? { value: o.value } : {}), ...(o.kind ? { kind: o.kind } : {}), ...(o.purpose ? { purpose: o.purpose } : {}), ...(o.qty ? { quantity: o.qty } : {}), ...(o.note ? { note: o.note } : {}), text: opText(o) })) },
+      title: `Посмотрел операции: ${list.length}` };
+  },
+  get_month(a) {
+    const mk = String(a.month || ''); if (!FC.validMk(mk)) return { error: 'month — ГГГГ-ММ' };
+    const S = A.st(), { r, ri, donePct } = monthFacts(mk), pm = FC.planMonth(S.settings, mk), stp = A.pathData().steps.find(x => x.mk === mk);
+    const ops = Store.data.ops.filter(o => FC.mkOf(o.date) === mk).sort((x, y) => (x.date < y.date ? -1 : 1));
+    return { result: { month: mk, record: Store.data.months[mk] || null, income: r.incomeTotal, incomes: r.incomes, expenses: r.expenses, loans: r.loan, free: r.free, plan_save: r.plan, saved: r.saved, reserve_interest: Math.round(ri), saved_with_reserve_interest: Math.round(r.saved + ri), done_pct: donePct,
+      investment_income: r.invInc, value_end: r.value, avail_end: r.avail, plan: pm, path_step: stp ? { n: stp.n, chapter: stp.chTitle, items: stp.items.map(x => ({ key: x.key, text: x.text, status: x.done ? 'done' : x.skip ? 'skip' : 'open' })) } : null,
+      operations: ops.slice(0, 80).map(o => ({ id: o.id, text: opText(o) })) }, title: `Посмотрел ${FC.mkLong(mk)}` };
+  },
+  analyze(a) {
+    const S = A.st(), comp = A.comp(), s = S.settings, cm = comp.curMk;
+    const all = [...new Set([...comp.snaps.map(x => x.mk), ...Object.keys(Store.data.months), cm])].filter(FC.validMk).sort();
+    const from = FC.validMk(a.from) ? a.from : all[0] || cm, to = FC.validMk(a.to) ? a.to : cm;
+    const mks = []; for (let m = from; m <= to && mks.length < 120; m = FC.addMonths(m, 1)) mks.push(m);
+    const rep = a.report, rows = [];
+    if (rep === 'months') for (const mk of mks) { const { r, ri, donePct } = monthFacts(mk); rows.push({ month: mk, income: r.incomeTotal, expenses: r.expenses, loans: r.loan, free: r.free, plan_save: r.plan, saved: Math.round(r.saved), reserve_interest: Math.round(ri), done_pct: donePct, investment_income: Math.round(r.invInc), avail_end: Math.round(r.avail) }); }
+    else if (rep === 'accounts') for (const acc of Store.data.accounts) { const o = comp.accs[acc.id] || {}, noRate = !FC.isLiab(acc) && (acc.ret == null || acc.ret === ''); rows.push({ id: acc.id, name: acc.name, cat: acc.cat, ccy: ccyOf(acc), value: o.value, own_in: o.netIn, income: o.income, result: o.resultC != null ? Math.round(o.resultC * 100) / 100 : null, result_pct: o.retSimple != null ? Math.round(o.retSimple * 1000) / 10 : null, debt: o.debt, rate: FC.isLiab(acc) ? acc.rate ?? null : noRate ? null : acc.ret, ...(noRate ? { rate_assumed: FC.retOf(acc, s) } : {}), archived: !!acc.archived }); }
+    else if (rep === 'expenses_by_category') for (const mk of mks) { const rec = Store.data.months[mk]; if (rec && (rec.expBy || isNum(rec.exp))) rows.push({ month: mk, total: FC.monthRow(S, comp, mk).expenses, ...(rec.expBy || {}) }); }
+    else if (rep === 'incomes') for (const mk of mks) { const rec = Store.data.months[mk]; if (rec && rec.inc) rows.push({ month: mk, ...rec.inc, total: FC.sumVals(rec.inc) }); }
+    else if (rep === 'investment_income') {
+      const g = {};
+      for (const o of Store.data.ops) if (o.type === 'inc' && FC.mkOf(o.date) >= from && FC.mkOf(o.date) <= to) { const k = `${FC.mkOf(o.date)}|${o.acc}|${o.kind || 'int'}`; g[k] = num(g[k]) + num(o.amt) - num(o.tax) - num(o.fee); }
+      for (const [k, v] of Object.entries(g).sort()) { const [mk, acc, kind] = k.split('|'); rows.push({ month: mk, account: (A.accById(acc) || {}).name || acc, kind: INC_KINDS[kind] || kind, net: Math.round(v * 100) / 100 }); }
+    } else if (rep === 'plan_vs_fact') for (const mk of mks) { const pm = FC.planMonth(s, mk), sn = comp.months[mk]; if (pm) { const { r, ri } = monthFacts(mk); rows.push({ month: mk, plan_save: pm.save, saved: Math.round(r.saved), reserve_interest: Math.round(ri), plan_accumulated: pm.acc, fact_avail: sn ? Math.round(sn.avail) : null }); } }
+    else return { error: 'неизвестный отчёт' };
+    return { result: { report: rep, from, to, rows, totals: rep === 'months' ? { saved: rows.reduce((x, r) => x + num(r.saved), 0), income: rows.reduce((x, r) => x + num(r.income), 0), expenses: rows.reduce((x, r) => x + num(r.expenses), 0) } : undefined }, title: `Посчитал: ${{ months: 'по месяцам', accounts: 'по счетам', expenses_by_category: 'расходы по статьям', incomes: 'доходы', investment_income: 'доход вложений', plan_vs_fact: 'план и факт' }[rep]}` };
+  },
+  forecast(a) {
+    const S = A.st(), comp = A.comp(), G = FC.goalInfo(S.settings), t = comp.tot;
+    const rate = parse(a.annual_rate), save = parse(a.monthly_save);
+    const base = A.forecastsFor(S);
+    const opt = { mode: save != null ? 'custom' : undefined, rate: rate != null ? rate : base.rate };
+    const S2 = save != null ? { ...S, settings: { ...S.settings, fcCustom: save } } : S;
+    const f = FC.forecast(S2, comp, opt);
+    const tMk = G.targetMk || FC.addMonths(comp.curMk, 30), n = FC.monthDiff(comp.curMk, tMk);
+    const req = n > 0 ? FC.requiredSave(t.avail, G.target, opt.rate, n, []) : null;
+    const sc = FC.scenarios(S, comp, { rate: opt.rate }).map(x => ({ name: x.name, reach: x.reach, months: x.months, at_target_month: Math.round(x.atTarget) }));
+    const assumed = Store.data.accounts.filter(x => !x.archived && FC.goalOn(x) && (x.ret == null || x.ret === '') && num((comp.accs[x.id] || {}).value) > 0).map(x => `${x.name} — ${FC.retOf(x, S.settings)}% по умолчанию`);
+    return { result: { target: G.target, target_month: tMk, collected: Math.round(t.avail), rate_used: opt.rate, ...(rate == null && assumed.length ? { rate_assumed_for: assumed } : {}), monthly_save: save, reach: f.reach, months: f.months, base_reach: base.base.reach, worse_reach: base.pess.reach, better_reach: base.opt.reach, required_monthly_to_target: req != null ? Math.round(req) : null, scenarios: sc }, title: 'Посчитал прогноз' };
+  },
+  get_plan(a) {
+    const s = A.settings(), all = s.plan.months || [], list = all.filter(m => (!a.from || m.m >= a.from) && (!a.to || m.m <= a.to)).slice(0, 24);
+    const range = all.length ? { first: all[0].m, last: all[all.length - 1].m } : null;
+    return { result: { months: list, ...(!list.length ? { plan_range: range, hint: range ? 'в этих месяцах плана нет — план идёт с first по last' : 'план по месяцам не загружен' } : {}) }, title: `Посмотрел план${list.length ? `: ${list.length} мес.` : ''}` };
+  },
+  async open_screen(a) {
+    const sc = String(a.screen || '');
+    const tabs = { obzor: 'Обзор', put: 'Путь', mesyacy: 'Месяцы', scheta: 'Счета', operacii: 'Операции', prognoz: 'Прогноз', nastroiki: 'Настройки' };
+    if (!tabs[sc] && sc !== 'excel' && !sc.startsWith('share_')) return { error: 'неизвестный раздел' };
+    await phoneHide();
+    if (tabs[sc]) { A.setTab(sc); return { result: { ok: true }, title: `Открыл «${tabs[sc]}»` }; }
+    if (sc === 'excel') {
+      const r = (await A.openExcel(a.sheet || null)) || {};
+      if (!r.loaded) return { error: 'Excel-модель не загружена — её приносит файл moi-finansy-vse.json (Настройки → Загрузить из файла)' };
+      if (a.sheet && !r.sheetFound) return { result: { ok: true, sheet_found: false, sheets: r.sheets }, title: `Открыл Excel — листа «${a.sheet}» нет` };
+      return { result: { ok: true }, title: `Открыл Excel${a.sheet ? ` — «${a.sheet}»` : ''}` };
+    }
+    A.shareFlow(sc.slice(6)); return { result: { ok: true }, title: 'Открыл «Поделиться»' };
+  },
+};
+const chatVisible = () => AI.view === 'chat' && !AI.archive;
+const repaint = () => { if (chatVisible()) paint(); };
+async function runTool(name, args, act) {
+  if (name === 'undo_last') return toolUndo(args, act);
+  if (R[name]) { const r = await R[name](args || {}); act.title = r.title || TOOL_TITLE[name]; act.read = true; if (r.error) { act.status = 'err'; act.detail = r.error; return { ok: false, error: r.error, ...(r.candidates ? { candidates: r.candidates } : {}) }; } act.status = 'ok'; return r.result; }
+  if (!W[name]) { act.status = 'err'; act.title = `Неизвестное действие ${name}`; return { ok: false, error: `нет инструмента ${name}` }; }
+  let p;
+  try { p = W[name](args || {}); } catch (e) { console.error(e); p = { error: 'внутренняя ошибка: ' + e.message }; }
+  const failed = () => `Не записал: ${TOOL_WHAT[name]}`;
+  if (p.error) {
+    act.status = 'err'; act.title = failed(); act.detail = p.error;
+    if (p.details) act.lines = p.details.map(d => `№${d.index + 1}: ${d.error}`);
+    return { ok: false, error: p.error, ...(p.code ? { code: p.code } : {}), ...(p.candidates ? { candidates: p.candidates } : {}), ...(p.details ? { details: p.details } : {}), ...(p.items ? { items: p.items } : {}) };
+  }
+  act.title = p.title; act.lines = p.lines;
+  if ((AI.cfg || {}).confirm) {   // режим подтверждения: показываем, что будет записано, и ждём ответа человека; «Стоп» — это «нет»
+    act.status = 'wait'; act.ask = p.ask;
+    setStatus('Жду вашего ответа', ''); repaint();
+    const sig = AI.ctrl && AI.ctrl.signal;
+    const yes = await new Promise(res => { act._resolve = res; AI.waits.add(res); if (sig) sig.addEventListener('abort', () => res(false), { once: true }); });
+    AI.waits.delete(act._resolve); delete act._resolve; delete act.ask;
+    if (sig && sig.aborted) { act.status = 'declined'; act.title = failed(); throw new DOMException('Остановлено', 'AbortError'); }
+    if (!yes) { act.status = 'declined'; act.title = failed(); return { ok: false, declined: true, error: 'пользователь отказался — не записано' }; }
+    setStatus(`${TOOL_TITLE[name]}…`, 'run');
+  }
+  // пока человек думал, запись могли поменять вручную — не затираем её старым снимком
+  if (p.changes.some(c => !same(cur(c.kind, c.id), c.before))) { act.status = 'err'; act.title = failed(); act.detail = 'данные изменились, пока вы решали — не записал'; return { ok: false, code: 'stale', error: 'данные изменились после подготовки — вызови инструмент заново' }; }
+  act.status = 'run'; repaint();
+  try { await apply(p.changes); } catch (e) { act.status = 'err'; act.title = failed(); act.detail = A.failText(e); return { ok: false, error: 'не сохранилось: ' + A.failText(e) }; }
+  act.status = 'ok'; act.changes = p.changes;
+  if (p.warn && p.warn.length) act.detail = p.warn.join('; ');
+  return typeof p.result === 'function' ? p.result() : p.result;
+}
+// «Отмени последнее» — то, что записано в ответ на прошлое сообщение человека; если там ничего не записано — не тянемся к более старому
+async function toolUndo(a, act) {
+  act.read = false;
+  const acts = AI.chat.msgs.flatMap(m => (m.parts || []).filter(p => p.t === 'act').map(p => ({ x: p.a, m }))).filter(({ x }) => x.changes && x.status === 'ok');
+  const fail = (detail, res) => { act.status = 'err'; act.title = 'Нечего отменить'; act.detail = detail; return { ok: false, ...res }; };
+  if (!acts.length) return fail('в этом визите изменений нет', { error: 'нечего отменять: изменения из прошлых визитов отменяются вручную (update_operation / delete_operation)' });
+  const desc = x => x.title + (x.lines && x.lines.length ? ': ' + x.lines.join('; ') : '');
+  const last = acts[acts.length - 1];
+  let pick;
+  if (a.scope === 'last_action') pick = [last];
+  else {
+    const bots = AI.chat.msgs.filter(m => m.role === 'assistant'), prevBot = bots[bots.length - 2];
+    pick = acts.filter(({ m }) => m === prevBot);
+    if (!pick.length) return fail('в прошлом ответе ничего не записано', { code: 'nothing_in_last_message', error: 'в прошлом ответе ничего не записано — спроси пользователя, отменить ли последнее изменение', latest_change: desc(last.x) });
+  }
+  let undone = 0; const conflicts = [], blocked = [], lines = [];
+  for (const { x } of [...pick].reverse()) {
+    const r = await undoChanges(x.changes); undone += r.undone; conflicts.push(...r.conflicts);
+    if (r.blocked) blocked.push(r.blocked);
+    if (r.undone) { x.status = 'undone'; lines.push(desc(x)); }
+  }
+  act.status = undone ? 'ok' : 'err'; act.title = undone ? 'Отменил' : 'Не получилось отменить'; act.lines = lines;
+  const why = [...blocked, ...(conflicts.length ? ['часть записей с тех пор меняли — их не трогал'] : [])];
+  if (why.length) act.detail = why.join('; ');
+  return { ok: undone > 0, undone_actions: lines, ...(why.length ? { not_undone: why } : {}) };
+}
+
+// ================= DeepSeek: потоковый ответ =================
+function httpErr(status, msg) {
+  const t = status === 401 ? 'Ключ DeepSeek не подходит — проверьте его в настройках ассистента.'
+    : status === 402 ? 'На балансе DeepSeek закончились деньги — пополните на platform.deepseek.com.'
+    : status === 429 ? 'Слишком много запросов подряд — подождите минуту.'
+    : status >= 500 ? 'DeepSeek сейчас перегружен — повторите чуть позже.'
+    : `DeepSeek не принял запрос (${status})${msg ? ': ' + msg : ''}.`;
+  return Object.assign(new Error(t), { status });
+}
+async function callModel(messages, signal, onText) {
+  const body = { model: AI.cfg.model || 'deepseek-flash', messages, tools: TOOLS, tool_choice: 'auto', thinking: { type: 'disabled' }, temperature: 0.3, max_tokens: 3000, stream: true, stream_options: { include_usage: true } };
+  let r;
+  try { r = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + AI.cfg.key }, body: JSON.stringify(body), signal }); }
+  catch (e) { if (e.name === 'AbortError') throw e; throw new Error(navigator.onLine === false ? 'Нет интернета — ассистенту нужна связь.' : 'Нет связи с DeepSeek. Проверьте интернет и повторите.'); }
+  if (!r.ok) { let m = ''; try { const j = await r.json(); m = (j.error && j.error.message) || ''; } catch (e) { /* тело без JSON */ } throw httpErr(r.status, m); }
+  const out = { content: '', tool_calls: [], finish: null, usage: null };
+  const rd = r.body.getReader(), dec = new TextDecoder();
+  let buf = '';
+  for (;;) {
+    const { value, done } = await rd.read();
+    if (done) break;
+    buf += dec.decode(value, { stream: true });
+    let i;
+    while ((i = buf.indexOf('\n')) >= 0) {
+      const line = buf.slice(0, i).trim(); buf = buf.slice(i + 1);
+      if (!line.startsWith('data:')) continue;   // «: keep-alive» и пустые строки
+      const data = line.slice(5).trim(); if (data === '[DONE]') continue;
+      let j; try { j = JSON.parse(data); } catch (e) { continue; }
+      if (j.usage) out.usage = j.usage;
+      const ch = j.choices && j.choices[0]; if (!ch) continue;
+      const d = ch.delta || {};
+      if (d.content) { out.content += d.content; onText(out.content); }
+      for (const tc of d.tool_calls || []) {
+        const k = tc.index ?? out.tool_calls.length;
+        const t = out.tool_calls[k] || (out.tool_calls[k] = { id: '', type: 'function', function: { name: '', arguments: '' } });
+        if (tc.id) t.id = tc.id;
+        if (tc.function) { if (tc.function.name) t.function.name += tc.function.name; if (tc.function.arguments) t.function.arguments += tc.function.arguments; }
+      }
+      if (ch.finish_reason) out.finish = ch.finish_reason;
+    }
+  }
+  out.tool_calls = out.tool_calls.filter(Boolean).map((t, k) => ({ ...t, id: t.id || `call_${Date.now()}_${k}` }));
+  return out;
+}
+// Окно переписки для модели: с сообщения человека и никогда не позже текущего — даже если сам ход длиннее окна
+function apiWindow() {
+  const api = wholeApi(AI.chat.api);
+  const lastU = api.map(m => m.role).lastIndexOf('user');
+  let i = Math.min(Math.max(0, api.length - API_WINDOW), Math.max(lastU, 0));
+  while (i < lastU && api[i].role !== 'user') i++;
+  return api.slice(i);
+}
+// что уже записано в этом ответе — словами, для модели, если ответ оборвался
+function doneNote(msg) {
+  const done = (msg.parts || []).filter(p => p.t === 'act' && !p.a.read && p.a.status === 'ok').map(p => p.a.title + (p.a.lines ? ': ' + p.a.lines.join('; ') : ''));
+  return done.length ? ` Успел сделать: ${done.join(' | ')}` : '';
+}
+const wrote = msg => (msg.parts || []).some(p => p.t === 'act' && !p.a.read && ['ok', 'undone'].includes(p.a.status));
+
+// ================= ход разговора =================
+const OWNER_ONLY = 'Ассистент доступен только владельцу страницы.';
+async function send(text) {
+  text = String(text || '').trim().slice(0, MAX_TEXT);
+  if (!text || AI.busy) return false;
+  if (!Store.canWrite) { setStatus(OWNER_ONLY, 'err'); return false; }
+  await loadCfg(); await loadChat();
+  if (!AI.chat) { setStatus(AI.chatErr || 'Переписка не загрузилась — повторите.', 'err'); return false; }
+  if (!AI.cfg.key) { AI.view = 'setup'; paint(); return false; }
+  if (!A.ready()) { setStatus('Данные ещё загружаются — подождите пару секунд.', 'err'); return false; }
+  AI.busy = true; AI.sentAt = Date.now(); AI.ctrl = new AbortController();
+  const chat = AI.chat;
+  chat.msgs.push({ id: A.uid(), role: 'user', text, at: Date.now() });
+  const msg = { id: A.uid(), role: 'assistant', parts: [], at: Date.now(), usage: { in: 0, out: 0 } };
+  chat.msgs.push(msg);
+  const mark = chat.api.length;
+  chat.api.push({ role: 'user', content: text });
+  setStatus('Думаю…', 'run'); repaint();
+  saveChat();   // перезагрузка посреди ответа не должна терять сообщение человека
+  let ok = true;
+  try {
+    for (let step = 0; step < MAX_STEPS; step++) {
+      const part = { t: 'text', v: '' }; msg.parts.push(part);
+      const r = await callModel([{ role: 'system', content: systemPrompt() }, ...apiWindow()], AI.ctrl.signal, v => { part.v = v; paintMsg(msg); });
+      if (r.usage) { msg.usage.in += num(r.usage.prompt_tokens); msg.usage.out += num(r.usage.completion_tokens); chat.usage = { in: num((chat.usage || {}).in) + num(r.usage.prompt_tokens), out: num((chat.usage || {}).out) + num(r.usage.completion_tokens) }; }
+      part.v = r.content || ''; if (!part.v) msg.parts.pop();
+      const am = { role: 'assistant', content: r.content || '' };
+      if (r.tool_calls.length) am.tool_calls = r.tool_calls;
+      chat.api.push(am);
+      if (!r.tool_calls.length) break;
+      for (const tc of r.tool_calls) {
+        if (AI.ctrl.signal.aborted) throw new DOMException('Остановлено', 'AbortError');   // «Стоп» между действиями — дальше не пишем
+        const act = { id: tc.id, tool: tc.function.name, status: 'run', title: TOOL_TITLE[tc.function.name] || tc.function.name };
+        msg.parts.push({ t: 'act', a: act }); setStatus(`${act.title}…`, 'run'); paintMsg(msg);
+        let args = {}, res;
+        try { args = JSON.parse(tc.function.arguments || '{}'); } catch (e) { args = null; }
+        if (args === null) { act.status = 'err'; act.detail = 'аргументы — не JSON'; res = { ok: false, error: 'arguments — неверный JSON, повторите вызов' }; }
+        else { try { res = await runTool(tc.function.name, args, act); } catch (e) { if (e && e.name === 'AbortError') throw e; console.error(e); act.status = 'err'; act.detail = e.message; res = { ok: false, error: e.message }; } }
+        chat.api.push({ role: 'tool', tool_call_id: tc.id, content: JSON.stringify(res ?? { ok: true }).slice(0, 12000) });
+        paintMsg(msg);
+      }
+      saveChat();   // шаг закончен целиком: карточки и ответы инструментов переживут перезагрузку
+      setStatus('Думаю…', 'run');
+      if (step === MAX_STEPS - 1) msg.parts.push({ t: 'text', v: '_Остановился: слишком много шагов подряд. Напишите, что продолжить._' });
+    }
+  } catch (e) {
+    ok = false;
+    const aborted = e && e.name === 'AbortError';
+    msg.err = aborted ? 'Остановлено.' : e.message || String(e);
+    // переписка для модели должна остаться целой: убираем незавершённый хвост, а сделанное описываем словами
+    const tail = chat.api.slice(mark + 1);
+    let keep = 0;
+    for (let i = 0; i < tail.length; i++) { const m = tail[i]; if (m.role === 'assistant' && m.tool_calls) { const ids = m.tool_calls.map(x => x.id); const got = tail.slice(i + 1).filter(x => x.role === 'tool' && ids.includes(x.tool_call_id)).length; if (got < ids.length) break; keep = i + 1 + got; i += got; } else keep = i + 1; }
+    chat.api.length = mark + 1 + keep;
+    // модель должна знать, что это сообщение осталось без ответа и что из него уже сделано
+    if (chat.api[chat.api.length - 1].role !== 'assistant') chat.api.push({ role: 'assistant', content: `(${keep ? 'Ответ прервался' : 'Ответа не было'}: ${msg.err}${doneNote(msg)})` });
+  } finally {
+    for (const res of AI.waits) res(false);
+    AI.waits.clear(); AI.busy = false; AI.ctrl = null;
+    setStatus(ok ? '' : msg.err, ok ? '' : 'err');
+    repaint(); await saveChat();
+  }
+  return true;
+}
+
+// ================= разметка ответов =================
+// Маленький markdown: абзацы, списки, таблицы, **жирный**, *курсив*, `код` — всё через esc, без вставки чужого HTML
+function md(src) {
+  // «100 000 ₸» не разрываем по строкам: пробелы между разрядами и перед ₸ — неразрывные
+  const inline = s => esc(s).replace(/(\d) (?=\d{3}(?!\d))/g, '$1 ').replace(/ ₸/g, ' ₸').replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/(^|[^*])\*(?!\s)(.+?)\*(?!\*)/g, '$1<i>$2</i>').replace(/_(.+?)_/g, '<i>$1</i>').replace(/`([^`]+)`/g, '<code>$1</code>');
+  const lines = String(src || '').replace(/\r/g, '').split('\n'), out = [];
+  for (let i = 0; i < lines.length;) {
+    const l = lines[i];
+    if (/^\s*\|.*\|\s*$/.test(l)) {
+      const rows = []; while (i < lines.length && /^\s*\|.*\|\s*$/.test(lines[i])) rows.push(lines[i++]);
+      const cells = r => r.trim().replace(/^\||\|$/g, '').split('|').map(c => c.trim());
+      const body = rows.filter(r => !/^\s*\|[\s:|-]+\|\s*$/.test(r));
+      out.push(`<div class="ai-tbl"><table>${body.map((r, k) => `<tr>${cells(r).map(c => (k === 0 && rows.length > 1 && /^\s*\|[\s:|-]+\|\s*$/.test(rows[1]) ? `<th>${inline(c)}</th>` : `<td>${inline(c)}</td>`)).join('')}</tr>`).join('')}</table></div>`);
+      continue;
+    }
+    if (/^\s*([-*•]|\d+[.)])\s+/.test(l)) {
+      const ordered = /^\s*\d/.test(l), items = [];
+      while (i < lines.length && /^\s*([-*•]|\d+[.)])\s+/.test(lines[i])) items.push(lines[i++].replace(/^\s*([-*•]|\d+[.)])\s+/, ''));
+      out.push(`<${ordered ? 'ol' : 'ul'}>${items.map(x => `<li>${inline(x)}</li>`).join('')}</${ordered ? 'ol' : 'ul'}>`);
+      continue;
+    }
+    if (/^#{1,4}\s+/.test(l)) { out.push(`<p><b>${inline(l.replace(/^#{1,4}\s+/, ''))}</b></p>`); i++; continue; }
+    if (!l.trim()) { i++; continue; }
+    // первая строка абзаца берётся всегда: недописанная в потоке строка таблицы («| Месяц | Отл») не должна зациклить разбор
+    const para = [lines[i++]];
+    while (i < lines.length && lines[i].trim() && !/^\s*(\|.*\|\s*$|[-*•]\s|\d+[.)]\s|#{1,4}\s)/.test(lines[i])) para.push(lines[i++]);
+    out.push(`<p>${para.map(inline).join('<br>')}</p>`);
+  }
+  return out.join('');
+}
+
+// ================= панель =================
+function panel() {
+  let el = $('#ai');
+  if (el) return el;
+  el = document.createElement('div');
+  el.id = 'ai'; el.className = 'ai'; el.hidden = true; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', 'ИИ-ассистент');
+  el.innerHTML = `<div class="ai-top">
+      <button class="icon-btn" data-ai="close" aria-label="Закрыть ассистента">${IC.back}</button>
+      <div class="ai-title"><b>${IC.spark} Ассистент</b><span id="ai-sub"></span></div>
+      <span class="spacer"></span>
+      <button class="icon-btn" data-ai="history" aria-label="Прошлые разговоры" title="Прошлые разговоры">${IC.hist}</button>
+      <button class="btn sm ai-new" data-ai="new" aria-label="Новый разговор" title="Новый разговор"><span aria-hidden="true">+</span><span class="ai-new-t">Новый разговор</span></button>
+      <button class="icon-btn" data-ai="settings" aria-label="Настройки ассистента" title="Настройки">${IC.gear}</button>
+    </div>
+    <div class="ai-list" id="ai-list"></div>
+    <div class="ai-status" id="ai-status" hidden role="status" aria-live="polite"></div>
+    <form class="ai-input" id="ai-form" autocomplete="off">
+      <textarea id="ai-text" rows="1" placeholder="Что произошло с деньгами?" aria-label="Сообщение ассистенту: что произошло с деньгами или вопрос"></textarea>
+      <button type="button" class="icon-btn ai-mic" data-ai="mic" id="ai-mic" hidden aria-label="Сказать голосом" title="Сказать голосом">${IC.mic}</button>
+      <button type="submit" class="ai-send" id="ai-send" aria-label="Отправить">${IC.send}</button>
+    </form>`;
+  document.body.appendChild(el);
+  // Пока идёт ответ, кнопка — «Стоп». Второе быстрое нажатие (двойной тап) ответ не обрывает, Enter — тоже
+  $('#ai-send').addEventListener('click', e => { if (!AI.busy) return; e.preventDefault(); if (Date.now() - AI.sentAt > 700 && AI.ctrl) AI.ctrl.abort(); });
+  $('#ai-form').addEventListener('submit', async e => {
+    e.preventDefault(); if (AI.busy) return;
+    const t = $('#ai-text'), v = t.value; if (!v.trim()) return;
+    t.value = ''; grow();
+    if (!(await send(v)) && !t.value) { t.value = v; grow(); }   // не отправилось — текст возвращаем
+  });
+  $('#ai-text').addEventListener('input', grow);
+  $('#ai-text').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey && !matchMedia('(pointer: coarse)').matches) { e.preventDefault(); if (!AI.busy) $('#ai-form').requestSubmit(); } });
+  if (SR) $('#ai-mic').hidden = false;
+  return el;
+}
+function grow() { const t = $('#ai-text'); if (!t) return; t.style.height = 'auto'; t.style.height = Math.min(160, t.scrollHeight) + 'px'; }
+const phone = () => matchMedia('(max-width: 760px)').matches;
+// На компьютере панель стоит под шапкой сайта: «Запись», Excel и вкладки остаются под рукой
+function placePanel() { const h = $('header.top'), el = $('#ai'); if (el && h) el.style.setProperty('--ai-top', h.getBoundingClientRect().bottom + 'px'); }
+addEventListener('resize', () => { if (AI.open) placePanel(); });
+async function openPanel(prefill) {
+  if (!Store.loaded) { A.toast('Данные ещё загружаются'); return; }
+  if (!Store.canWrite) { A.toast(OWNER_ONLY); return; }   // ключ и переписка — только владельца
+  const el = panel();
+  if (!AI.open) {
+    AI.open = true; el.hidden = false; document.body.classList.add('ai-on'); placePanel();
+    if (phone()) { document.body.style.overflow = 'hidden'; for (const x of [$('header.top'), $('#view'), $('#fab')]) if (x) x.inert = true; }
+    try { history.pushState({ ai: 1 }, ''); AI.hist = true; } catch (e) { AI.hist = false; }
+  }
+  AI.archive = null;
+  if (!AI.busy) { AI.view = 'chat'; $('#ai-list').innerHTML = '<div class="ai-empty"><p class="muted">Загружаю…</p></div>'; }
+  await loadCfg(); await loadChat();
+  if (!AI.cfg.key) AI.view = 'setup';
+  else AI.view = 'chat';
+  paint();
+  if (AI.chatErr && !AI.chat) setStatus(AI.chatErr, 'err');
+  if (prefill && !AI.busy) { const t = $('#ai-text'); t.value = prefill; }
+  if (AI.view === 'chat') { grow(); setTimeout(() => { const t = $('#ai-text'); if (t && !phone()) t.focus(); }, 50); }
+}
+function closePanel(fromPop) {
+  const el = $('#ai'); if (!el || el.hidden) return false;
+  el.hidden = true; AI.open = false; document.body.classList.remove('ai-on'); document.body.style.overflow = '';
+  for (const x of [$('header.top'), $('#view'), $('#fab')]) if (x) x.inert = false;
+  if (rec) try { rec.stop(); } catch (e) { /* уже остановлен */ }
+  // своя запись в истории уходит «назад» — обработчик сайта не должен принять это за закрытие Excel или окна
+  if (!fromPop && AI.hist) { AI.hist = false; A.skipPop(); try { history.back(); } catch (e) { A.skipPop(false); } }
+  AI.hist = false;
+  return true;
+}
+// Навигация по сайту из разговора: на телефоне панель закрывает экран — прячем её и ждём, пока браузер уберёт её запись из истории.
+// Иначе запоздалый «назад» вернёт прежний раздел или закроет только что открытый Excel
+async function phoneHide() {
+  if (!(AI.open && phone())) return;
+  const popped = AI.hist ? new Promise(r => { addEventListener('popstate', () => r(), { once: true }); setTimeout(r, 600); }) : null;
+  closePanel();
+  if (popped) await popped;
+}
+A.hooks.pop.push(() => (AI.open ? (AI.hist = false, closePanel(true)) : false));
+A.hooks.esc.push(() => closePanel());
+
+function setStatus(text, cls) {
+  const el = $('#ai-status'); if (!el) return;
+  el.hidden = !text; el.className = 'ai-status ' + (cls || '');
+  el.innerHTML = text ? `${cls === 'run' ? '<span class="ai-dots" aria-hidden="true"><i></i><i></i><i></i></span>' : ''}<span>${esc(text)}</span>` : '';
+  const send = $('#ai-send'); if (send) { send.innerHTML = AI.busy ? IC.stop : IC.send; send.setAttribute('aria-label', AI.busy ? 'Остановить' : 'Отправить'); send.classList.toggle('stop', AI.busy); }
+}
+const EXAMPLES = [
+  'Получил зарплату 220 000 за октябрь, 70 000 отложил на вклад',
+  'Что мне сделать в этом месяце по плану?',
+  'Открыл вклад в Freedom под 18% и перевёл туда 385 000 со сбережений',
+  'Пришли проценты по вкладу 4 500 ₸',
+  'Сколько я отложил с начала и успеваю ли к цели?',
+];
+function paint() {
+  const list = $('#ai-list'); if (!list) return;
+  const c = AI.cfg || {};
+  $('#ai-sub').textContent = c.key ? `DeepSeek · ${c.model === 'deepseek-v4-pro' ? 'Pro' : 'Flash'}${c.confirm ? ' · с подтверждением' : ''}` : 'не подключён';
+  $('#ai-form').hidden = AI.view !== 'chat' || !!AI.archive;
+  if (AI.view === 'setup') { list.innerHTML = setupHtml(); bindSetup(); return; }
+  if (AI.view === 'history') { list.innerHTML = historyHtml(); return; }
+  if (!AI.archive && !AI.chat) {
+    $('#ai-form').hidden = true;
+    list.innerHTML = `<div class="ai-empty"><h3>Переписка не загрузилась</h3><p class="muted">${esc(AI.chatErr || 'Проверьте связь.')}</p><button class="btn" data-ai="reload-chat">Повторить</button></div>`;
+    return;
+  }
+  const chat = AI.archive || AI.chat;
+  if (!chat || !chat.msgs.length) {
+    list.innerHTML = `<div class="ai-empty">
+      <div class="ai-hello">${IC.spark}</div>
+      <h3>Расскажите, что произошло с деньгами</h3>
+      <p class="muted">Я сам запишу операции, доходы и расходы, разложу по счетам, отмечу шаги плана и посчитаю, как вы идёте к цели. Всё можно отменить.</p>
+      <div class="ai-ex">${EXAMPLES.map(x => `<button class="chip" data-ai="ex" data-t="${esc(x)}">${esc(x)}</button>`).join('')}</div>
+    </div>`;
+    return;
+  }
+  list.innerHTML = (AI.archive ? `<div class="note small">Прошлый разговор от ${esc(new Date(chat.at).toLocaleString('ru-RU'))} — только чтение. <button class="link" data-ai="back-chat">Вернуться к текущему</button></div>` : '')
+    + chat.msgs.map(msgHtml).join('');
+  list.scrollTop = list.scrollHeight;
+}
+// Пока открыты настройки или история, поток ответа их не перерисовывает — иначе стёр бы то, что человек вводит
+function paintMsg(m) {
+  if (!chatVisible()) return;
+  const el = document.getElementById('m-' + m.id);
+  if (!el) { paint(); return; }
+  const nearEnd = $('#ai-list').scrollHeight - $('#ai-list').scrollTop - $('#ai-list').clientHeight < 140;
+  el.outerHTML = msgHtml(m);
+  if (nearEnd) $('#ai-list').scrollTop = $('#ai-list').scrollHeight;
+}
+const ACT_ICON = { run: '<span class="ai-spin" aria-hidden="true"></span>', ok: '✓', err: '!', wait: '?', declined: '–', undone: '↶' };
+function actHtml(m, a) {
+  if (a.read) return `<div class="ai-read ${a.status}">${a.status === 'run' ? ACT_ICON.run : a.status === 'err' ? '!' : '·'} ${esc(a.title)}${a.detail ? ` — ${esc(a.detail)}` : ''}</div>`;
+  const live = !AI.archive, idle = live && !AI.busy;   // отмена — только между ответами: посреди хода она ломала бы переписку
+  return `<div class="ai-act ${a.status}" data-m="${m.id}" data-a="${esc(a.id)}">
+    <span class="ai-ico">${ACT_ICON[a.status] || '·'}</span>
+    <div class="ai-act-b"><b>${esc(a.status === 'wait' && a.ask ? a.ask : a.title)}</b>${a.status === 'wait' ? ' <span class="pill warn">ждёт вашего ответа</span>' : a.status === 'undone' ? ' <span class="pill">отменено</span>' : a.status === 'declined' ? ' <span class="pill">не записано</span>' : ''}
+      ${a.lines && a.lines.length ? `<ul>${a.lines.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}
+      ${a.detail ? `<div class="${a.status === 'err' ? 'err' : 'hint'}">${esc(a.detail)}</div>` : ''}
+      ${live && a.status === 'wait' ? '<div class="row"><button class="btn pri sm" data-ai="yes">Записать</button><button class="btn sm" data-ai="no">Не надо</button></div>' : ''}
+    </div>
+    ${idle && a.status === 'ok' && a.changes ? '<button class="btn sm ghost" data-ai="undo">Отменить</button>' : ''}
+  </div>`;
+}
+function msgHtml(m) {
+  if (m.role === 'user') return `<div class="ai-msg user" id="m-${m.id}"><div class="ai-bub">${esc(m.text).replace(/\n/g, '<br>')}</div></div>`;
+  const parts = (m.parts || []).map(p => (p.t === 'text' ? (p.v ? `<div class="ai-txt">${md(p.v)}</div>` : '') : actHtml(m, p.a))).join('');
+  const writes = (m.parts || []).filter(p => p.t === 'act' && p.a.status === 'ok' && p.a.changes);
+  const isLast = !AI.archive && AI.chat && m === AI.chat.msgs[AI.chat.msgs.length - 1], idle = !AI.archive && !AI.busy;
+  const thinking = AI.busy && isLast && !(m.parts || []).some(p => p.t === 'text' && p.v);
+  return `<div class="ai-msg bot" id="m-${m.id}">
+    ${parts || (thinking ? '<div class="ai-txt muted"><span class="ai-dots"><i></i><i></i><i></i></span></div>' : '')}
+    ${m.err ? `<div class="ai-err">${esc(m.err)}${idle && isLast ? ` <button class="link" data-ai="retry">${wrote(m) ? 'Продолжить' : 'Повторить'}</button>` : ''}</div>` : ''}
+    ${(writes.length > 1 && idle) || m.usage && (m.usage.in || m.usage.out) ? `<div class="ai-meta">${writes.length > 1 && idle ? `<button class="link" data-ai="undo-all" data-m="${m.id}">Отменить все ${writes.length} ${A.plural(writes.length, 'изменение', 'изменения', 'изменений')}</button>` : ''}${m.usage && (m.usage.in || m.usage.out) ? `<span title="Токены: отправлено / получено">${tok(m.usage.in)} → ${tok(m.usage.out)} ток.</span>` : ''}</div>` : ''}
+  </div>`;
+}
+const tok = n => (n >= 1000 ? `${FC.grp(n / 1000, 1).replace(/,0$/, '')}k` : String(n || 0));
+function findAct(mid, aid) { const m = (AI.chat.msgs || []).find(x => x.id === mid); const p = m && (m.parts || []).find(x => x.t === 'act' && x.a.id === aid); return p ? { m, a: p.a } : null; }
+
+// ================= подключение DeepSeek =================
+function setupHtml() {
+  const c = AI.cfg || {};
+  return `<div class="ai-setup">
+    <h3>${c.key ? 'Настройки ассистента' : 'Подключите DeepSeek'}</h3>
+    ${c.key ? '' : `<p>Ассистент работает на DeepSeek — нужен ваш ключ API. Один раз:</p>
+    <ol class="small">
+      <li>Откройте <b>platform.deepseek.com</b> и войдите (можно через Google).</li>
+      <li><b>Top up</b> — пополните баланс: пары долларов хватит надолго — одно сообщение стоит доли цента.</li>
+      <li><b>API keys → Create new API key</b>, скопируйте ключ (начинается с <code>sk-</code>).</li>
+      <li>Вставьте его ниже.</li>
+    </ol>`}
+    <label class="f"><span>Ключ API DeepSeek</span><input class="in" id="ai-key" type="password" autocomplete="off" spellcheck="false" placeholder="${c.key ? 'сохранён — вставьте новый, чтобы заменить' : 'sk-…'}"></label>
+    <label class="f"><span>Модель</span><select class="in" id="ai-model">${MODELS.map(([v, n]) => `<option value="${v}" ${(c.model || 'deepseek-flash') === v ? 'selected' : ''}>${n}</option>`).join('')}</select></label>
+    <label class="check"><input type="checkbox" id="ai-confirm" ${c.confirm ? 'checked' : ''}> Спрашивать перед каждой записью (иначе ассистент записывает сам, а любое изменение можно отменить)</label>
+    <p class="note small">Когда вы пишете ассистенту, ваш вопрос и снимок данных — счета, суммы, план — уходят в DeepSeek, чтобы он мог ответить. ${KEY_LOCAL ? 'Ключ хранится только в этом браузере: на другом устройстве его нужно вставить заново.' : 'Ключ хранится в вашей базе Firebase, доступ к ней — только у вашего аккаунта.'} В резервную копию ключ не попадает.</p>
+    <div class="row"><button class="btn pri" id="ai-save">${c.key ? 'Сохранить' : 'Проверить и подключить'}</button>${c.key ? '<button class="btn" data-ai="back-chat">К разговору</button>' : ''}</div>
+    <div id="ai-setup-out" class="hint"></div>
+    ${c.key ? `<hr><div class="row"><span class="small muted">Потрачено в текущем разговоре: ${tok((AI.chat && AI.chat.usage || {}).in)} → ${tok((AI.chat && AI.chat.usage || {}).out)} токенов.</span></div>
+      <div class="row"><button class="btn sm danger" data-ai="clear-hist">Удалить всю переписку</button><button class="btn sm danger" data-ai="forget-key">Отключить ключ</button></div>` : ''}
+  </div>`;
+}
+function bindSetup() {
+  const btn = $('#ai-save'); if (!btn) return;
+  btn.onclick = async () => {
+    const out = $('#ai-setup-out'), keyIn = $('#ai-key').value.trim();
+    const next = { ...(AI.cfg || {}), model: $('#ai-model').value, confirm: $('#ai-confirm').checked };
+    if (keyIn) next.key = keyIn;
+    if (!next.key) { out.className = 'err'; out.textContent = 'Вставьте ключ API.'; return; }
+    btn.disabled = true; out.className = 'hint'; out.textContent = 'Проверяю ключ…';
+    if (keyIn) {   // короткий запрос: ключ рабочий и на балансе есть деньги
+      try {
+        const r = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + keyIn }, body: JSON.stringify({ model: next.model, messages: [{ role: 'user', content: 'Ответь одним словом: ок' }], max_tokens: 5, thinking: { type: 'disabled' } }) });
+        if (!r.ok) { let m = ''; try { m = ((await r.json()).error || {}).message || ''; } catch (e) { /* без тела */ } throw httpErr(r.status, m); }
+      } catch (e) { btn.disabled = false; out.className = 'err'; out.textContent = e.message || 'Не удалось проверить ключ.'; return; }
+    }
+    try { await cfgPut(next); } catch (e) { btn.disabled = false; out.className = 'err'; out.textContent = A.failText(e); return; }
+    AI.cfg = next; AI.view = 'chat'; paint(); grow(); A.toast('Ассистент подключён');
+  };
+}
+function historyHtml() {
+  const idx = AI.idx || [];
+  return `<div class="ai-setup"><h3>Прошлые разговоры</h3>
+    ${idx.length ? `<div class="ai-hist">${idx.slice().reverse().map(x => `<button class="ai-hist-i" data-ai="open-arch" data-id="${esc(x.id)}"><b>${esc(x.title || 'Разговор')}</b><span class="muted small">${esc(new Date(x.at).toLocaleString('ru-RU'))} · ${x.n} ${A.plural(x.n, 'сообщение', 'сообщения', 'сообщений')}</span></button>`).join('')}</div>` : '<p class="muted">Пока пусто: здесь появятся разговоры после «Новый разговор».</p>'}
+    <div class="row"><button class="btn" data-ai="back-chat">К текущему разговору</button></div></div>`;
+}
+// Ошибку чтения не выдаём за пустой список: иначе архив перезаписался бы одним новым разговором, а старые потерялись
+async function loadIdx() { AI.idx = ((await Store.getDoc('chat/index')) || {}).list || []; }
+async function archiveChat() {
+  if (!AI.chat || !AI.chat.msgs.length) return;
+  const id = 'a' + Date.now().toString(36);
+  const first = AI.chat.msgs.find(m => m.role === 'user');
+  await loadIdx();
+  await Store.putDoc('chat/' + id, packChat(AI.chat));
+  AI.idx = [...AI.idx, { id, at: AI.chat.at, title: first ? first.text.slice(0, 60) : 'Разговор', n: AI.chat.msgs.length }].slice(-50);
+  await Store.putDoc('chat/index', { list: AI.idx });
+}
+
+// ================= голос =================
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let rec = null;
+function toggleMic() {
+  if (!SR) return;
+  if (rec) { try { rec.stop(); } catch (e) { /* уже остановлен */ } return; }
+  const t = $('#ai-text'), base = t.value ? t.value.replace(/\s*$/, ' ') : '';
+  rec = new SR(); rec.lang = 'ru-RU'; rec.interimResults = true; rec.continuous = false;
+  rec.onresult = e => { let s = ''; for (let i = 0; i < e.results.length; i++) s += e.results[i][0].transcript; t.value = base + s; grow(); };
+  rec.onerror = e => { setStatus(e.error === 'not-allowed' ? 'Нет доступа к микрофону — разрешите его в настройках браузера.' : 'Голос не распознался — попробуйте ещё раз.', 'err'); };
+  rec.onend = () => { rec = null; $('#ai-mic').classList.remove('on'); if (!AI.busy) setStatus('', ''); };
+  try { rec.start(); $('#ai-mic').classList.add('on'); setStatus('Слушаю… говорите', 'run'); } catch (e) { rec = null; }
+}
+
+// ================= нажатия =================
+document.addEventListener('click', async e => {
+  const op = e.target.closest('[data-act="ai-open"]');
+  if (op) { e.preventDefault(); openPanel(op.dataset.t || ''); return; }
+  const el = e.target.closest('[data-ai]'); if (!el || el.disabled) return;
+  const k = el.dataset.ai;
+  if (k === 'close') { closePanel(); return; }
+  if (k === 'settings') { await loadCfg(); AI.view = 'setup'; AI.archive = null; paint(); return; }
+  if (k === 'back-chat') { AI.view = AI.cfg && AI.cfg.key ? 'chat' : 'setup'; AI.archive = null; paint(); return; }
+  if (k === 'history') { try { await loadIdx(); } catch (err) { A.toast('Список разговоров не загрузился: ' + A.failText(err)); return; } AI.view = 'history'; AI.archive = null; paint(); return; }
+  if (k === 'open-arch') { try { const c = await Store.getDoc('chat/' + el.dataset.id); if (c) { AI.archive = c; AI.view = 'chat'; paint(); } } catch (err) { A.toast(A.failText(err)); } return; }
+  if (k === 'reload-chat') { AI.chatErr = ''; await loadChat(); paint(); if (AI.chat) setStatus('', ''); return; }
+  const BUSY = 'Дождитесь ответа ассистента или остановите его';
+  if (k === 'new') {
+    if (AI.busy) { A.toast(BUSY); return; }
+    if (!AI.chat) { A.toast(AI.chatErr || 'Переписка не загрузилась'); return; }
+    try { await archiveChat(); } catch (err) { A.toast(A.failText(err)); return; }
+    AI.chat = newChat(); AI.view = AI.cfg && AI.cfg.key ? 'chat' : 'setup'; AI.archive = null; paint(); setStatus('', ''); await saveChat(); return;
+  }
+  if (k === 'ex') { const t = $('#ai-text'); t.value = el.dataset.t; grow(); t.focus(); return; }
+  if (k === 'mic') { toggleMic(); return; }
+  if (k === 'retry') {
+    if (AI.busy || !AI.chat) return;
+    const msgs = AI.chat.msgs, m = msgs[msgs.length - 1];
+    if (!m || m.role !== 'assistant' || !m.err) return;
+    // часть уже записана — повтор того же текста записал бы её второй раз: просим продолжить с места обрыва
+    if (wrote(m)) { delete m.err; send('Продолжи с того места, где ответ прервался. Уже сделанное не повторяй.'); return; }
+    const u = msgs[msgs.length - 2];
+    if (!u || u.role !== 'user') return;
+    msgs.splice(msgs.length - 2);
+    const ai = AI.chat.api.map(x => x.role).lastIndexOf('user');
+    if (ai >= 0 && AI.chat.api[ai].content === u.text) AI.chat.api.splice(ai);
+    send(u.text);
+    return;
+  }
+  const box = el.closest('.ai-act'); const f = box ? findAct(box.dataset.m, box.dataset.a) : null;
+  if ((k === 'yes' || k === 'no') && f && f.a._resolve) { f.a._resolve(k === 'yes'); return; }
+  if (k === 'undo' && f && f.a.changes) {
+    if (AI.busy) { A.toast(BUSY); return; }
+    el.disabled = true;
+    try {
+      const r = await undoChanges(f.a.changes); if (r.undone) f.a.status = 'undone';
+      A.toast(r.blocked ? cap(r.blocked) : r.conflicts.length ? 'Часть записей с тех пор меняли — их не трогал' : 'Отменено'); noteUndo([f.a]);
+    } catch (err) { A.toast(A.failText(err)); }
+    paint(); saveChat(); return;
+  }
+  if (k === 'undo-all') {
+    if (AI.busy) { A.toast(BUSY); return; }
+    const m = AI.chat.msgs.find(x => x.id === el.dataset.m); if (!m) return;
+    el.disabled = true;
+    const acts = (m.parts || []).filter(p => p.t === 'act' && p.a.status === 'ok' && p.a.changes).map(p => p.a);
+    let conflicts = 0, blocked = '';
+    try {
+      for (const a of [...acts].reverse()) { const r = await undoChanges(a.changes); if (r.undone) a.status = 'undone'; conflicts += r.conflicts.length; blocked = blocked || r.blocked || ''; }
+      A.toast(blocked ? cap(blocked) : conflicts ? 'Отменено, кроме записей, которые с тех пор меняли' : 'Все изменения отменены'); noteUndo(acts);
+    } catch (err) { A.toast(A.failText(err)); }
+    paint(); saveChat(); return;
+  }
+  if (k === 'clear-hist') {
+    if (AI.busy) { A.toast(BUSY); return; }
+    if (!confirm('Удалить всю переписку с ассистентом? Записи в учёте останутся.')) return;
+    try { await loadIdx(); for (const x of AI.idx) await Store.putDoc('chat/' + x.id, null); await Store.putDoc('chat/index', null); await Store.putDoc('chat/main', null); AI.chat = newChat(); AI.chatErr = ''; AI.idx = []; A.toast('Переписка удалена'); paint(); }
+    catch (err) { A.toast(A.failText(err)); }
+    return;
+  }
+  if (k === 'forget-key') {
+    if (AI.busy) { A.toast(BUSY); return; }
+    if (!confirm('Отключить ассистента и удалить сохранённый ключ?')) return;
+    try { const c = { ...(AI.cfg || {}) }; delete c.key; await cfgPut(c); AI.cfg = c; AI.view = 'setup'; paint(); A.toast('Ключ удалён'); } catch (err) { A.toast(A.failText(err)); }
+  }
+});
+// Отмена кнопкой — модель узнает об этом из переписки, чтобы не опираться на отменённое
+function noteUndo(acts) {
+  const t = acts.filter(a => a.status === 'undone').map(a => a.title + (a.lines ? ': ' + a.lines.join('; ') : ''));
+  if (!t.length) return;
+  AI.chat.api.push({ role: 'user', content: `[Служебно: пользователь отменил кнопкой — ${t.join(' | ')}. Эти изменения больше не действуют.]` });
+  AI.chat.api.push({ role: 'assistant', content: 'Понял, учту.' });
+}
+
+// для проверок: собрать запрос и выполнить инструмент без сети
+window.FinAI = { open: openPanel, close: closePanel, send, get state() { return AI; }, _debug: { systemPrompt, snapshot, TOOLS, runTool: (n, a) => runTool(n, a, { id: 'dbg' }), resolveAcc, md, wholeApi, packChat } };
 })();
 
 </script><script type="module" src="cloud.js"></script><script>if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(function () {});</script></body></html>
